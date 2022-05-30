@@ -1,0 +1,3 @@
+requests
+wheel
+scrapy>=2.6.1
