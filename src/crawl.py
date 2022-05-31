@@ -4,15 +4,11 @@ from scrapy.crawler import CrawlerProcess
 
 
 def lambda_handler(event, context):
-    body = event['body']
+    print(event['body'])
+    body = json.loads(event['body'])
     process = CrawlerProcess(settings={
-        # "FEEDS": {
-        #     "items.json": {"format": "json"},
-        # },
         "CHAR": body['char']
     })
-    print(body)
-    process = CrawlerProcess()
     process.crawl(WarmaneSpider)
     process.start() # the script will block here until the crawling is finished
     return {

@@ -4,9 +4,10 @@ from warmane_spider.spiders.spider import WarmaneSpider
 import json
 
 process = CrawlerProcess(settings={
-    "FEEDS": {
-        "items.json": {"format": "json"},
-    },
+    # "FEEDS": {
+    #     "items.json": {"format": "json"},
+    # },
+    "CHAR": "Dumpster"
 })
 
 process.crawl(WarmaneSpider)

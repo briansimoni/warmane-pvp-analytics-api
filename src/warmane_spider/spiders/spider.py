@@ -3,17 +3,21 @@ import json
 
 class WarmaneSpider(scrapy.Spider):
     name = "warmane"
-    character_name = 'Dumpster'
+    # character_name = 'Dumpster'
     match_history = {}
+
+    # def __init__(self):
+    #     self.character_name = self.settings['CHAR']
 
     def start_requests(self):
         urls = [
-            'https://armory.warmane.com/character/Dumpster/Blackrock/match-history',
+            'https://armory.warmane.com/character/{0}/Blackrock/match-history'.format(self.settings['CHAR']),
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
+        print(f"Existing settings: {self.settings.attributes.keys()}")
         matches = response.css('tr')
         response.css('tr')[1].css('td')[2].css('::text').get()
         matches = matches[1:] # removes the table header row
@@ -32,7 +36,7 @@ class WarmaneSpider(scrapy.Spider):
             }
             self.match_history[id] = data
 
-            url = 'https://armory.warmane.com/character/{0}/Blackrock/match-history'.format(self.character_name)
+            url = 'https://armory.warmane.com/character/{0}/Blackrock/match-history'.format(self.settings['CHAR'])
             body = {'matchinfo': data['id']}
             yield scrapy.FormRequest(method='POST', url=url, callback=self.parse_details, formdata=body)
 
