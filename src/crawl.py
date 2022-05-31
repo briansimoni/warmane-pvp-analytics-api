@@ -4,7 +4,7 @@ from scrapy.crawler import CrawlerProcess
 
 
 def lambda_handler(event, context):
-    body = json.loads(event['body'])
+    body = event['body']
     process = CrawlerProcess(settings={
         # "FEEDS": {
         #     "items.json": {"format": "json"},
