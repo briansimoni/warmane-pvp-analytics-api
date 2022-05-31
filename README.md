@@ -1,5 +1,8 @@
 # warmane-pvp-analytics-api
 
+## notes
+the local start-api thing isn't working becuase of dependency issues. Trying to resolve them between Windows, Python, Pip, SAM, and VSCode seems to be quite painful. What does warok is `sam build --use-container` and using `sam local invoke CrawlerFunction` for testing. This kind of sucks. I may switch tools to something with more predictable build outcomes like Go or Node.js
+
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
 
 - hello_world - Code for the application's Lambda function.

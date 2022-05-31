@@ -19,12 +19,35 @@ Resources:
       Runtime: python3.9
       Architectures: 
         - x86_64
+      Timeout: 3
       Events:
         HelloWorld:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /hello 
             Method: get
+
+  CrawlerTriggerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: crawl_trigger.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          TARGET_FUNCTION: !GetAtt CrawlerFunction.Arn
+      Timeout: 60 # reduce this later
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !GetAtt CrawlerFunction.Arn
+      Events:
+        CrawlerTrigger:
+          Type: Api
+          Properties:
+            Path: /crawl
+            Method: post
 
   CrawlerFunction:
     Type: AWS::Serverless::Function
@@ -34,12 +57,8 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /crawl
-            Method: post
+      Timeout: 60
+
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
