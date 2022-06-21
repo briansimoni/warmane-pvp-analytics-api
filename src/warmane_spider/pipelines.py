@@ -10,4 +10,6 @@ from itemadapter import ItemAdapter
 
 class WarmaneSpiderPipeline:
     def process_item(self, item, spider):
+        print('WTF IS THIS PROCESSING? PLEASE WTF')
+        # print(item)
         return item

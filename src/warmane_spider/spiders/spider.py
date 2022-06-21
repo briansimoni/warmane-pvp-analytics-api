@@ -1,5 +1,6 @@
 import scrapy
 import json
+from scrapy.loader import ItemLoader
 
 class WarmaneSpider(scrapy.Spider):
     name = "warmane"
@@ -17,14 +18,14 @@ class WarmaneSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        print(f"Existing settings: {self.settings.attributes.keys()}")
+        # print(f"Existing settings: {self.settings.attributes.keys()}")
         matches = response.css('tr')
         response.css('tr')[1].css('td')[2].css('::text').get()
         matches = matches[1:] # removes the table header row
         
         for match in matches:
             id = match.css('td')[0].css('::text').get()
-            self.logger.info(id)
+            # self.logger.info(id)
             data = {
                 'id': id,
                 'outcome': match.css('td')[1].css('::text').get(),
@@ -51,5 +52,6 @@ class WarmaneSpider(scrapy.Spider):
         id = response.request.body.decode().split('=')[1]
         json_resposne = json.loads(response.text)
         self.match_history[id]['character_details'] = json_resposne
-        self.logger.info(self.match_history[id])
+        # self.logger.info(self.match_history[id])
+        print(type(self.match_history[id]))
         yield self.match_history[id]

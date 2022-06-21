@@ -59,6 +59,9 @@ Resources:
         - x86_64
       Timeout: 60
 
+  MatchesTable:
+    Type: AWS::Serverless::SimpleTable
+
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function

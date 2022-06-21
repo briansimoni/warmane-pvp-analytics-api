@@ -1,14 +1,21 @@
 import scrapy
 from scrapy.crawler import CrawlerProcess
 from warmane_spider.spiders.spider import WarmaneSpider
+from scrapy.utils.project import get_project_settings
 import json
 
-process = CrawlerProcess(settings={
-    # "FEEDS": {
-    #     "items.json": {"format": "json"},
-    # },
-    "CHAR": "Dumpster"
-})
+settings = get_project_settings()
+settings.set('CHAR', 'Marvinx')
+settings.set('LOG_ENABLED', False)
+
+# process = CrawlerProcess(settings={
+#     # "FEEDS": {
+#     #     "items.json": {"format": "json"},
+#     # },
+#     "CHAR": "Dumpster"
+# })
+
+process = CrawlerProcess(settings=settings)
 
 process.crawl(WarmaneSpider)
 process.start() # the script will block here until the crawling is finished

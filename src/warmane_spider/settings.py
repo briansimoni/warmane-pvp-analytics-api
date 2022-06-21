@@ -12,6 +12,19 @@ BOT_NAME = 'warmane_spider'
 SPIDER_MODULES = ['warmane_spider.spiders']
 NEWSPIDER_MODULE = 'warmane_spider.spiders'
 
+DEFAULT_LOGGING = {
+    # 'version': 1,
+    # 'disable_existing_loggers': False,
+    'loggers': {
+        'scrapy': {
+            'level': 'ERROR',
+        },
+        'twisted': {
+            'level': 'ERROR',
+        },
+    }
+}
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'warmane_spider (+http://www.yourdomain.com)'
@@ -62,9 +75,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'warmane_spider.pipelines.WarmaneSpiderPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'warmane_spider.pipelines.WarmaneSpiderPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
