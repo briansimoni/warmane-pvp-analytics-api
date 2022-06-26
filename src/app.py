@@ -5,7 +5,7 @@ from scrapy.utils.project import get_project_settings
 import json
 
 settings = get_project_settings()
-settings.set('CHAR', 'Marvinx')
+settings.set('CHAR', 'Dumpster')
 settings.set('LOG_ENABLED', False)
 
 # process = CrawlerProcess(settings={

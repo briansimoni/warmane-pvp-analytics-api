@@ -7,8 +7,11 @@ from scrapy.utils.project import get_project_settings
 def lambda_handler(event, context):
     print(event['body'])
     body = event['body']
+    
     settings = get_project_settings()
     settings.set('LOG_ENABLED', False)
+    print('very strange that it appears to not be using project settings and spitting out a million logs')
+
     settings.set('CHAR', body['char'])
     process = CrawlerProcess(settings=settings)
     process.crawl(WarmaneSpider)
