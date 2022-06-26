@@ -25,7 +25,8 @@ Resources:
       Timeout: 60 # reduce this later
       Policies:
         - LambdaInvokePolicy:
-            FunctionName: !GetAtt CrawlerFunction.Arn
+            # FunctionName: !GetAtt CrawlerFunction.Arn
+            FunctionName: "*"
       Events:
         CrawlerTrigger:
           Type: Api
