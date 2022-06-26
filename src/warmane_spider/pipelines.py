@@ -6,6 +6,15 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
+import boto3
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+dynamodb = boto3.resource('dynamodb')
+table_name = os.getenv('TABLE_NAME')
+table = dynamodb.Table('table_name')
 
 
 class WarmaneSpiderPipeline:

@@ -11,22 +11,6 @@ Globals:
     Timeout: 3
 
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: src/
-      Handler: hello.lambda_handler
-      Runtime: python3.9
-      Architectures: 
-        - x86_64
-      Timeout: 3
-      Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /hello 
-            Method: get
-
   CrawlerTriggerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -58,6 +42,15 @@ Resources:
       Architectures:
         - x86_64
       Timeout: 60
+      Environment:
+        Variables:
+          TABLE_NAME: !Select [1, !Split ['/', !GetAtt MatchesTable.Arn]] 
+      Policies:
+        - Statement:
+          Effect: Allow
+          Action: "*"
+          Resource: !GetAtt MatchesTable.Arn
+
 
   MatchesTable:
     Type: AWS::Serverless::SimpleTable
