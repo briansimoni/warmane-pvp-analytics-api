@@ -19,7 +19,6 @@ table = dynamodb.Table(table_name)
 
 class WarmaneSpiderPipeline:
     def process_item(self, item, spider):
-        # print(item)
         try:
             Item = {
                     'id': item['id'],
@@ -33,7 +32,6 @@ class WarmaneSpiderPipeline:
             result = table.put_item(
                 Item=Item
             )
-            print(result)
             return item
         except Exception as err:
             print(err)

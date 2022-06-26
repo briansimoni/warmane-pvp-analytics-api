@@ -21,6 +21,20 @@
         "payload": {},
         "environmentVariables": {}
       }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "warmane-pvp-analytics-api:CrawlerFunction",
+      "invokeTarget": {
+        "target": "template",
+        "templatePath": "${workspaceFolder}/template.yaml",
+        "logicalId": "CrawlerFunction"
+      },
+      "lambda": {
+        "payload": {},
+        "environmentVariables": {}
+      }
     }
   ]
 }
