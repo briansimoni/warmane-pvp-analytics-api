@@ -53,5 +53,4 @@ class WarmaneSpider(scrapy.Spider):
         json_resposne = json.loads(response.text)
         self.match_history[id]['character_details'] = json_resposne
         # self.logger.info(self.match_history[id])
-        print(type(self.match_history[id]))
         yield self.match_history[id]

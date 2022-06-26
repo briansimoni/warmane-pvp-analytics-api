@@ -14,11 +14,26 @@ load_dotenv()
 
 dynamodb = boto3.resource('dynamodb')
 table_name = os.getenv('TABLE_NAME')
-table = dynamodb.Table('table_name')
+table = dynamodb.Table(table_name)
 
 
 class WarmaneSpiderPipeline:
     def process_item(self, item, spider):
-        print('WTF IS THIS PROCESSING? PLEASE WTF')
         # print(item)
-        return item
+        try:
+            Item = {
+                    'id': item['id'],
+                    'outcome': item['outcome'],
+                    'points_change': item['points_change'],
+                    'start_time': item['start_time'],
+                    'duration': item['duration'],
+                    'map': item['map'],
+                    'character_details': item['character_details']
+                }
+            result = table.put_item(
+                Item=Item
+            )
+            print(result)
+            return item
+        except Exception as err:
+            print(err)

@@ -47,9 +47,10 @@ Resources:
           TABLE_NAME: !Select [1, !Split ['/', !GetAtt MatchesTable.Arn]] 
       Policies:
         - Statement:
-          Effect: Allow
-          Action: "*"
-          Resource: !GetAtt MatchesTable.Arn
+          - Sid: DynamoWritePolicy
+            Effect: Allow
+            Action: "*"
+            Resource: !GetAtt MatchesTable.Arn
 
 
   MatchesTable:
