@@ -8,6 +8,18 @@ architecture = "x86_64"
 handler = "app.crawl"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["HelloWorldFunction", "CrawlerTriggerFunction", "CrawlerFunction"]
+functions = ["CrawlerTriggerFunction"]
+
+[function_build_definitions.4ed8e6fc-b9d1-48ec-8044-2e42f49a6c51]
+codeuri = "C:\\Users\\Brian\\warmane-pvp-analytics-api\\src"
+runtime = "python3.9"
+architecture = "x86_64"
+handler = "crawl.lambda_handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["CrawlerFunction"]
+
+[function_build_definitions.4ed8e6fc-b9d1-48ec-8044-2e42f49a6c51.env_vars]
+TABLE_NAME = "warmane-analytics-api-dev-MatchesTable-16ULLEX8EVUES"
 
 [layer_build_definitions]

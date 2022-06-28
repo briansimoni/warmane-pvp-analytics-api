@@ -1,19 +1,20 @@
-import json
-from warmane_spider.spiders.spider import WarmaneSpider
 from scrapy.crawler import CrawlerProcess
+from warmane_spider.spiders.spider import WarmaneSpider
 from scrapy.utils.project import get_project_settings
+import json
 
 
 def lambda_handler(event, context):
-    print(event['body'])
     body = event['body']
-    
-    settings = get_project_settings()
-    settings.set('LOG_ENABLED', False)
-    print('very strange that it appears to not be using project settings and spitting out a million logs')
 
-    settings.set('CHAR', body['char'])
-    process = CrawlerProcess(settings=settings)
+    WarmaneSpider.custom_settings={'LOG_ENABLED': False, 'CHAR': body['char'], 'ITEM_PIPELINES': {
+        'warmane_spider.pipelines.WarmaneSpiderPipeline': 300
+    }}
+    # settings = get_project_settings()
+    # settings.set('CHAR', body['char'])
+    # settings.set('LOG_ENABLED', False)
+    process = CrawlerProcess()
+
     process.crawl(WarmaneSpider)
     process.start() # the script will block here until the crawling is finished
     return {
