@@ -22,9 +22,10 @@ class WarmaneSpiderPipeline:
         try:
             Item = {
                     'id': item['id'],
+                    'date': item['start_time'],
                     'outcome': item['outcome'],
                     'points_change': item['points_change'],
-                    'start_time': item['start_time'],
+                    # 'start_time': item['start_time'],
                     'duration': item['duration'],
                     'map': item['map'],
                     'character_details': item['character_details']

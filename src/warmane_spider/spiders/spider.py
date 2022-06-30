@@ -4,11 +4,7 @@ from scrapy.loader import ItemLoader
 
 class WarmaneSpider(scrapy.Spider):
     name = "warmane"
-    # character_name = 'Dumpster'
     match_history = {}
-
-    # def __init__(self):
-    #     self.character_name = self.settings['CHAR']
 
     def start_requests(self):
         urls = [
