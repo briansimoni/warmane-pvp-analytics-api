@@ -71,6 +71,7 @@ Resources:
         -
           AttributeName: "date"
           KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
 
 
 
