@@ -13,7 +13,9 @@ def lambda_handler(event, context):
     # settings = get_project_settings()
     # settings.set('CHAR', body['char'])
     # settings.set('LOG_ENABLED', False)
-    process = CrawlerProcess()
+    process = CrawlerProcess(settings={
+        'LOG_ENABLED': False
+    })
 
     process.crawl(WarmaneSpider)
     process.start() # the script will block here until the crawling is finished
