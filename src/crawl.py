@@ -6,7 +6,7 @@ import json
 
 def lambda_handler(event, context):
     try:
-        print(body)
+        print(event)
         body = event['body']
 
         WarmaneSpider.custom_settings={'LOG_ENABLED': False, 'CHAR': body['char'], 'ITEM_PIPELINES': {
