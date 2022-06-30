@@ -6,10 +6,11 @@ import json
 
 def lambda_handler(event, context):
     try:
-        print(event)
-        body = event['body']
+        # print(event)
+        # body = event['body']
+        char = event['char']
 
-        WarmaneSpider.custom_settings={'LOG_ENABLED': False, 'CHAR': body['char'], 'ITEM_PIPELINES': {
+        WarmaneSpider.custom_settings={'LOG_ENABLED': False, 'CHAR': char, 'ITEM_PIPELINES': {
             'warmane_spider.pipelines.WarmaneSpiderPipeline': 300
         }}
         # settings = get_project_settings()
@@ -25,7 +26,7 @@ def lambda_handler(event, context):
             "statusCode": 200,
             "body": json.dumps(
                 {
-                    "message": "Crawl started for someone " + body['char'],
+                    "message": "Crawl started for someone " + char,
                 }
             ),
         }
