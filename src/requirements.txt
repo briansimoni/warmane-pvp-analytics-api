@@ -1,5 +1,5 @@
 requests
-wheel
-scrapy>=2.6.1
 boto3
 python-dotenv
+beautifulsoup4
+aiohttp

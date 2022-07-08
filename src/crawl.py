@@ -1,32 +1,35 @@
-from scrapy.crawler import CrawlerProcess
-from warmane_spider.spiders.spider import WarmaneSpider
-from scrapy.utils.project import get_project_settings
 import json
+import asyncio
+from warmane_spider.dynamo import instantiate_table
+from warmane_spider.arenas_collector import ArenasCollector
 
+table = instantiate_table()
 
 def lambda_handler(event, context):
     try:
-        # print(event)
-        # body = event['body']
         char = event['char']
+        realm = event['realm']
+        id = "{0}@{1}".format(char, realm)
 
-        WarmaneSpider.custom_settings={'LOG_ENABLED': False, 'CHAR': char, 'ITEM_PIPELINES': {
-            'warmane_spider.pipelines.WarmaneSpiderPipeline': 300
-        }}
-        # settings = get_project_settings()
-        # settings.set('CHAR', body['char'])
-        # settings.set('LOG_ENABLED', False)
-        process = CrawlerProcess(settings={
-            'LOG_ENABLED': False
-        })
+        recent_crawl = table.check_recently_crawled(id)
+        if recent_crawl:
+            raise Exception(id + " has already been crawled in the last 24 hours")
 
-        process.crawl(WarmaneSpider)
-        process.start() # the script will block here until the crawling is finished
+        collector = ArenasCollector(character=char, realm=realm)
+        asyncio.get_event_loop().run_until_complete(collector.run())
+        # asyncio.run(collector.run())
+
+        for match in collector.matches:
+            table.put_characther_match(collector.matches[match])
+
+        match_keys = collector.get_dynamo_key_list()
+        table.put_charachter_matches(id, match_keys)
+
         return {
             "statusCode": 200,
             "body": json.dumps(
                 {
-                    "message": "Crawl started for someone " + char,
+                    "message": "Crawl completed for " + char,
                 }
             ),
         }

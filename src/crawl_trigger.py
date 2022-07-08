@@ -1,10 +1,6 @@
 import json
-from multiprocessing import Event
-from warmane_spider.spiders.spider import WarmaneSpider
 import os
 import boto3
-# from scrapy.crawler import CrawlerProcess
-
 
 def lambda_handler(event, context):
     client = boto3.client('lambda')
