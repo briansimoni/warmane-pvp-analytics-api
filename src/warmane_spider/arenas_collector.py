@@ -12,7 +12,7 @@ class ArenasCollector():
     def parse_matches(self, html: str):
         soup = BeautifulSoup(html, 'html.parser')
         rows = soup.find_all('tr')
-        rows = rows[1:]
+        rows = rows[1:] # remove the first element
         for row in rows:
             table_data = row.find_all('td')
             id = table_data[0].text

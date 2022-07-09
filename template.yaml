@@ -50,9 +50,36 @@ Resources:
         - Statement:
           - Sid: DynamoWritePolicy
             Effect: Allow
-            Action: "*"
+            Action: "*" # TODO: not use *
             Resource: !GetAtt MatchesTable.Arn
 
+  GetMatchesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: get_matches.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Timeout: 60
+      Environment:
+        Variables:
+          TABLE_NAME: !Select [1, !Split ['/', !GetAtt MatchesTable.Arn]] 
+      Policies:
+        - Statement:
+          - Sid: DynamoReadPolicy
+            Effect: Allow
+            Action: "*" # TODO: not use *
+            Resource: !GetAtt MatchesTable.Arn
+      Events:
+        GatewayTrigger:
+          Type: Api
+          Properties:
+            Path: /matches/{id}
+            Method: get
+            RequestParameters:
+              method.request.path.id:
+                Required: true
 
   MatchesTable:
     Type: AWS::DynamoDB::Table

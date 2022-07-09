@@ -1,0 +1,62 @@
+{
+    "body": null,
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+      "Host": "localhost:3000",
+      "Postman-Token": "75d5754b-7096-47ba-b375-bd265aa7abc6",
+      "User-Agent": "PostmanRuntime/7.29.0",
+      "X-Forwarded-Port": "3000",
+      "X-Forwarded-Proto": "http"
+    },
+    "httpMethod": "GET",
+    "isBase64Encoded": false,
+    "multiValueHeaders": {
+      "Accept": ["*/*"],
+      "Accept-Encoding": ["gzip, deflate, br"],
+      "Cache-Control": ["no-cache"],
+      "Connection": ["keep-alive"],
+      "Host": ["localhost:3000"],
+      "Postman-Token": ["75d5754b-7096-47ba-b375-bd265aa7abc6"],
+      "User-Agent": ["PostmanRuntime/7.29.0"],
+      "X-Forwarded-Port": ["3000"],
+      "X-Forwarded-Proto": ["http"]
+    },
+    "multiValueQueryStringParameters": null,
+    "path": "/matches/Dumpster@Blackrock",
+    "pathParameters": { "id": "Dumpster@Blackrock" },
+    "queryStringParameters": null,
+    "requestContext": {
+      "accountId": "123456789012",
+      "apiId": "1234567890",
+      "domainName": "localhost:3000",
+      "extendedRequestId": null,
+      "httpMethod": "GET",
+      "identity": {
+        "accountId": null,
+        "apiKey": null,
+        "caller": null,
+        "cognitoAuthenticationProvider": null,
+        "cognitoAuthenticationType": null,
+        "cognitoIdentityPoolId": null,
+        "sourceIp": "127.0.0.1",
+        "user": null,
+        "userAgent": "Custom User Agent String",
+        "userArn": null
+      },
+      "path": "/matches/{id}",
+      "protocol": "HTTP/1.1",
+      "requestId": "948e3125-18b5-4270-a5d9-f59b91718b31",
+      "requestTime": "09/Jul/2022:12:57:12 +0000",
+      "requestTimeEpoch": 1657371432,
+      "resourceId": "123456",
+      "resourcePath": "/matches/{id}",
+      "stage": "Prod"
+    },
+    "resource": "/matches/{id}",
+    "stageVariables": null,
+    "version": "1.0"
+  }
+  

@@ -1,15 +1,17 @@
 import os
-from xmlrpc.client import Boolean
 import boto3
 import time
 import json
 
 
+class KeyNotFoundError(Exception):
+    pass
+
 class MatchesTable:
     def __init__(self, table):
         self.table = table
 
-    def get_charachter_matches(self, id):
+    def get_charachter_matches(self, id) -> list[dict]:
         """
         pass the id for a character in e.g. Dumpster@Blackrock
         and get back a list of match IDs
@@ -18,7 +20,11 @@ class MatchesTable:
             'id': id,
             'date': 'null'
         }, ConsistentRead=True)
-        return response['Item']['matches']
+
+        if 'Item' in response:
+            return response['Item']['matches']
+        else:
+            raise KeyNotFoundError()
 
     def put_charachter_matches(self, id, matches):
         """
@@ -52,7 +58,7 @@ class MatchesTable:
             'date': 'null'
         })
 
-    def get_sets_of_100(matches):
+    def get_sets_of_100(self, matches):
         """
         given a list of matches, it will return a 2-dimensional list
         with each element a list of max 100 elements
@@ -80,8 +86,16 @@ class MatchesTable:
         results = []
         paginated_matches = self.get_sets_of_100(matches)
         for set in paginated_matches:
-            result = self.table.batch_get_item(Keys=set)
+            dynamodb = boto3.resource('dynamodb')
+            result = dynamodb.batch_get_item(
+                RequestItems={
+                    os.getenv('TABLE_NAME'): {
+                        'Keys': set
+                    }
+                }
+            )
             results.append(result)
+        return results
 
     def check_recently_crawled(self, id: str) -> bool:
         """
@@ -100,16 +114,8 @@ class MatchesTable:
             return False
 
 def instantiate_table() -> MatchesTable:
-    if os.getenv('TABLE_NAME') == None:
-        with open('.env.json') as f:
-            env = json.load(f)
-            table_name = env['CrawlerFunction']['TABLE_NAME']
-            dynamodb = boto3.resource('dynamodb')
-            table = dynamodb.Table(table_name)
-            return MatchesTable(table)
-    else:
-        table_name = os.getenv('TABLE_NAME')
-        dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table(table_name)
-        return MatchesTable(table)
+    table_name = os.getenv('TABLE_NAME')
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(table_name)
+    return MatchesTable(table)
     
