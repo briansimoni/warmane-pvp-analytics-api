@@ -6,6 +6,7 @@ from warmane_spider.arenas_collector import ArenasCollector
 table = instantiate_table()
 
 def lambda_handler(event, context):
+    print(event)
     try:
         char = event['char']
         realm = event['realm']
