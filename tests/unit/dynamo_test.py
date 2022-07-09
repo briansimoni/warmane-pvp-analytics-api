@@ -28,11 +28,11 @@ class TestTable(unittest.TestCase):
         self.assertEquals(result['ResponseMetadata']['HTTPStatusCode'], 200)
 
         result = matches.get_charachter_matches('TestPerson@NowhereServer')
-        print(result)
 
     def test_get_sets_of_100(self):
         x = ["test"] * 120
-        result = dynamo.MatchesTable.get_sets_of_100(x)
+        table = dynamo.MatchesTable(None)
+        result = table.get_sets_of_100(x)
         self.assertEquals(len(result), 2)
         self.assertEquals(len(result[0]), 100)
         self.assertEquals(len(result[1]), 20) 

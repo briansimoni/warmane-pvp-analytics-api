@@ -4,10 +4,12 @@ from warmane_spider.dynamo import instantiate_table
 
 table = instantiate_table()
 
+# there is a known issue where some people have played so many games
+# we hit the 10mb limit when sending the JSON blob back (compressorx for example)
+# need to implement pagination to fix this
 def lambda_handler(event, context):
     try:
         id = event['pathParameters']['id']
-        print(id)
 
         full_matches = table.get_full_matches(id)
 

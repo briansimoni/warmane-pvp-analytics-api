@@ -1,7 +1,6 @@
 import os
 import boto3
 import time
-import json
 
 
 class KeyNotFoundError(Exception):
@@ -94,7 +93,7 @@ class MatchesTable:
                     }
                 }
             )
-            results.append(result)
+            results.append(result['Responses'][os.getenv('TABLE_NAME')])
         return results
 
     def check_recently_crawled(self, id: str) -> bool:
@@ -107,6 +106,8 @@ class MatchesTable:
             'id': id,
             'date': 'null'
         })
+        if 'Item' not in result:
+            return False
         one_day = 1000 * 60 * 60 * 24
         if float(result['Item']['crawl_last_completed']) - time.time() < one_day:
             return True
