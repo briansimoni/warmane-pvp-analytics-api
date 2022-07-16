@@ -26,6 +26,9 @@ def lambda_handler(event, context):
         table.put_charachter_matches(id, match_keys)
 
         return {
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
             "statusCode": 200,
             "body": json.dumps(
                 {
@@ -36,6 +39,9 @@ def lambda_handler(event, context):
     except Exception as err:
         print(err)
         return {
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
             "statusCode": 500,
             "body": json.dumps({'message': str(err)})
         }

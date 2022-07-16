@@ -116,6 +116,7 @@ class MatchesTable:
 
 def instantiate_table() -> MatchesTable:
     table_name = os.getenv('TABLE_NAME')
+    print("this is the table name", table_name)
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(table_name)
     return MatchesTable(table)

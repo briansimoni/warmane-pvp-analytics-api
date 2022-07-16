@@ -11,6 +11,12 @@ Globals:
     Timeout: 3
 
 Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors: "'localhost:4000'"
+
   CrawlerTriggerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -33,6 +39,8 @@ Resources:
           Properties:
             Path: /crawl
             Method: post
+            RestApiId:
+              Ref: ApiGatewayApi
 
   CrawlerFunction:
     Type: AWS::Serverless::Function
@@ -77,6 +85,8 @@ Resources:
           Properties:
             Path: /matches/{id}
             Method: get
+            RestApiId:
+              Ref: ApiGatewayApi
             RequestParameters:
               method.request.path.id:
                 Required: true

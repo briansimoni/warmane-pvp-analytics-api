@@ -10,6 +10,9 @@ def lambda_handler(event, context):
     try:
         client.invoke(FunctionName=target_lambda, Payload=payload, InvocationType="Event")
         return {
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
             "statusCode": 200,
             "body": json.dumps(
                 {
@@ -19,6 +22,9 @@ def lambda_handler(event, context):
         }
     except Exception as err:
         return {
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
             "statusCode": 500,
             "body": {
                 "message": str(err)
