@@ -44,6 +44,7 @@ class ArenasCollector():
         if 'teamnamerich' in details:
             if "</span>" in details['teamnamerich']:
                 details['teamnamerich'] = re.findall("<span.*?>(.+)?<\/span>", details['teamnamerich'])[0]
+        return details
 
 
     async def get_match_ids(self):

@@ -9,6 +9,7 @@ class TestCollector(IsolatedAsyncioTestCase):
         collector = ArenasCollector('HorseMeat', 'Blackrock')
         result = await collector.run()
         self.assertGreater(len(result), 7)
+        self.assertEquals(len(result['19706695']['character_details']), 4)
 
 class TestParser(unittest.TestCase):
     def test_parser(self):
