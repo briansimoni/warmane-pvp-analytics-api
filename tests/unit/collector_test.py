@@ -1,3 +1,4 @@
+import json
 import unittest
 from src.warmane_spider.arenas_collector import ArenasCollector
 from unittest import IsolatedAsyncioTestCase
@@ -31,3 +32,14 @@ class TestParser(unittest.TestCase):
             keys = collector.get_dynamo_key_list()
             print(keys)
             self.assertEquals(len(keys), 8)
+
+    def test_parse_character_details(self):
+
+        details = {
+            "personal_change": '0 (<span class=\"history-loss\">0</span>)',
+            "matchmaking_change": '1479 (<span class=\"history-loss\">-10</span>)'
+        }
+        collector = ArenasCollector('HorseMeat', 'Blackrock')
+        collector.parse_character_details(details)
+        self.assertEquals(details['personal_change'], "0")
+        self.assertEquals(details['matchmaking_change'], "-10")
