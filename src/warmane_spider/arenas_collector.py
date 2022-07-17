@@ -17,7 +17,7 @@ class ArenasCollector():
             table_data = row.find_all('td')
             id = table_data[0].text
             team = table_data[1].find('a').text
-            bracket = re.findall("\(.*\)", team)[0].strip()
+            bracket = re.findall("\(.*\)", team)[0].strip().replace("(", "").replace(")", "")
             team_name = re.findall("\w+", team)[0].strip()
 
             self.matches[id] = {
@@ -41,8 +41,9 @@ class ArenasCollector():
         details['personal_change'] = re.findall("<span.*?>(.+)?<\/span>", details['personal_change'])[0]
 
         # sometimes the json doesn't have a bunch of spans in this attribute
-        if "</span>" in details['teamnamerich']:
-            details['teamnamerich'] = re.findall("<span.*?>(.+)?<\/span>", details['teamnamerich'])[0]
+        if 'teamnamerich' in details:
+            if "</span>" in details['teamnamerich']:
+                details['teamnamerich'] = re.findall("<span.*?>(.+)?<\/span>", details['teamnamerich'])[0]
 
 
     async def get_match_ids(self):

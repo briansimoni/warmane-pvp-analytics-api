@@ -20,7 +20,7 @@ class TestParser(unittest.TestCase):
             collector.parse_matches(html)
             self.assertEquals(collector.matches['19706695']['arena'], "Blade's Edge Arena")
             self.assertEquals(collector.matches['19706695']['team_name'], 'WendysResturant')
-            self.assertEquals(collector.matches['19706695']['bracket'], '(2v2)')
+            self.assertEquals(collector.matches['19706695']['bracket'], '2v2')
             self.assertEquals(collector.matches['19706695']['id'], '19706695')
 
     def test_get_dynamo_key_list(self):
@@ -30,7 +30,6 @@ class TestParser(unittest.TestCase):
             html = file.read()
             collector.parse_matches(html)
             keys = collector.get_dynamo_key_list()
-            print(keys)
             self.assertEquals(len(keys), 8)
 
     def test_parse_character_details(self):
@@ -40,6 +39,6 @@ class TestParser(unittest.TestCase):
             "matchmaking_change": '1479 (<span class=\"history-loss\">-10</span>)'
         }
         collector = ArenasCollector('HorseMeat', 'Blackrock')
-        collector.parse_character_details(details)
+        ArenasCollector.parse_character_details(details)
         self.assertEquals(details['personal_change'], "0")
         self.assertEquals(details['matchmaking_change'], "-10")
