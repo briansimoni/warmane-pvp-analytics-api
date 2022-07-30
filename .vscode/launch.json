@@ -20,7 +20,9 @@
         "logicalId": "CrawlerTriggerFunction"
       },
       "lambda": {
-        "payload": {},
+        "payload": {
+          "path": "events/event.json"
+        },
         "environmentVariables": {}
       }
     },

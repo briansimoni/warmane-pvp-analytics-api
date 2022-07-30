@@ -1,5 +1,5 @@
 {
-  "body": "{\"char\": \"Dumpster\"}",
+  "body": "{\"char\": \"Dumpster\", \"realm\": \"Blackrock\"}",
   "resource": "/{proxy+}",
   "path": "/path/to/resource",
   "httpMethod": "POST",

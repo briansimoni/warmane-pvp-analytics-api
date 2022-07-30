@@ -56,7 +56,7 @@ class ArenasCollector():
 
     async def get_match_data(self, session: aiohttp.ClientSession, match_id: str):
         # the python user agent is blocked on warmane
-        # TODO: use a library dynamically selects a user agent
+        # TODO: use a library that dynamically selects a user agent
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36'

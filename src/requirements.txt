@@ -3,3 +3,4 @@ boto3
 python-dotenv
 beautifulsoup4
 aiohttp
+random_user_agent
