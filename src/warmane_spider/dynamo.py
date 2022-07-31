@@ -93,7 +93,7 @@ class MatchesTable:
                     }
                 }
             )
-            results.append(result['Responses'][os.getenv('TABLE_NAME')])
+            results = results + result['Responses'][os.getenv('TABLE_NAME')]
         return results
 
     def check_recently_crawled(self, id: str) -> bool:
