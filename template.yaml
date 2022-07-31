@@ -15,7 +15,7 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
-      Cors: "'localhost:3000,warmane.dog'"
+      Cors: "'localhost:3000'"
 
   CrawlerTriggerFunction:
     Type: AWS::Serverless::Function
