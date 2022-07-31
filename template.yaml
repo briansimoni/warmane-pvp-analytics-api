@@ -15,7 +15,13 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
-      Cors: "'http://localhost:3000'"
+      # Cors: "'http://localhost:3000'"
+      Cors:
+        AllowMethods: "'POST, GET'"
+        AllowHeaders: "'X-Forwarded-For,Content-Type'"
+        AllowOrigin: "'http://localhost:3000'"
+        MaxAge: "'600'"
+        AllowCredentials: true
 
   CrawlerTriggerFunction:
     Type: AWS::Serverless::Function
