@@ -15,19 +15,12 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
-      # Cors: "'http://localhost:3000'"
-      Cors:
-        AllowMethods: "'POST, GET'"
-        AllowHeaders: "'X-Forwarded-For,Content-Type'"
-        AllowOrigin: "'http://localhost:3000'"
-        MaxAge: "'600'"
-        AllowCredentials: true
 
-  CrawlerTriggerFunction:
+  WarmaneApiFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: crawl_trigger.lambda_handler
+      Handler: api_handler.lambda_handler
       Runtime: python3.9
       Architectures:
         - x86_64
@@ -43,8 +36,8 @@ Resources:
         CrawlerTrigger:
           Type: Api
           Properties:
-            Path: /crawl
-            Method: post
+            Path: /{proxy+}
+            Method: ANY
             RestApiId:
               Ref: ApiGatewayApi
 
@@ -67,35 +60,6 @@ Resources:
             Action: "*" # TODO: not use *
             Resource: !GetAtt MatchesTable.Arn
 
-  GetMatchesFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/
-      Handler: get_matches.lambda_handler
-      Runtime: python3.9
-      Architectures:
-        - x86_64
-      Timeout: 60
-      Environment:
-        Variables:
-          TABLE_NAME: !Select [1, !Split ['/', !GetAtt MatchesTable.Arn]] 
-      Policies:
-        - Statement:
-          - Sid: DynamoReadPolicy
-            Effect: Allow
-            Action: "*" # TODO: not use *
-            Resource: !GetAtt MatchesTable.Arn
-      Events:
-        GatewayTrigger:
-          Type: Api
-          Properties:
-            Path: /matches/{id}
-            Method: get
-            RestApiId:
-              Ref: ApiGatewayApi
-            RequestParameters:
-              method.request.path.id:
-                Required: true
 
   MatchesTable:
     Type: AWS::DynamoDB::Table
@@ -115,8 +79,6 @@ Resources:
           AttributeName: "date"
           KeyType: "RANGE"
       BillingMode: PAY_PER_REQUEST
-
-
 
 
 Outputs:

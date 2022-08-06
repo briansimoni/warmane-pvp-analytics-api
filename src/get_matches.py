@@ -7,7 +7,7 @@ table = instantiate_table()
 # there is a known issue where some people have played so many games
 # we hit the 10mb limit when sending the JSON blob back (compressorx for example)
 # need to implement pagination to fix this
-def lambda_handler(event, context):
+def get_matches(event, context):
     try:
         id = event['pathParameters']['id']
 
