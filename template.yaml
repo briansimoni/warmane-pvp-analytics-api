@@ -33,6 +33,11 @@ Resources:
         - LambdaInvokePolicy:
             # FunctionName: !GetAtt CrawlerFunction.Arn
             FunctionName: "*"
+        - Statement:
+          - Sid: DynamoReadPolicy
+            Effect: Allow
+            Action: "*" # TODO: not use *
+            Resource: !GetAtt MatchesTable.Arn
       Events:
         CrawlerTrigger:
           Type: Api
