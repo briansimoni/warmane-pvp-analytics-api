@@ -15,7 +15,7 @@ class TestRouter(unittest.TestCase):
 
     def test_path_params(self):
         router = Router()
-        router.get("/person/:id", lambda event, context: { 'body': event['path_params']['id']})
+        router.get("/person/:id", lambda event, context: { 'body': event['pathParameters']['id']})
         result = router.serve({
             'httpMethod': 'GET',
             'path': '/person/bob'

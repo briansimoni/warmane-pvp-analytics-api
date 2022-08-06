@@ -78,7 +78,7 @@ class Router:
             registered_path_match = self.__check_path_registered(method, path)
             if registered_path_match:
                 path_params = self.__get_path_params(registered_path_match, path)
-                event['path_params'] = path_params
+                event['pathParameters'] = path_params
                 return self.routes[method][registered_path_match](event, context)
             else:
                 return NotFoundResponse()
