@@ -17,6 +17,12 @@ Need to create a .env file and put the tablename that you're using in there. It 
 }
 ```
 
+### for the unit tests to work you need to create a .env file like this:
+```
+PYTHONPATH=src
+```
+... would be nice if this could be added to .vscode or something
+
 to start-api run: `sam local start-api --env-vars .env.json`
 
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
@@ -103,7 +109,7 @@ The SAM CLI reads the application template to determine the API's routes and the
           Properties:
             Path: /hello
             Method: get
-```
+``` 
 
 ## Add a resource to your application
 The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
@@ -115,7 +121,7 @@ To simplify troubleshooting, SAM CLI has a command called `sam logs`. `sam logs`
 `NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
 
 ```bash
-warmane-pvp-analytics$ sam logs -n HelloWorldFunction --stack-name warmane-pvp-analytics --tail
+warmane-pvp-analytics$ sam logs -n WarmaneApiFunction --stack-name warmane-pvp-analytics --tail
 ```
 
 You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).

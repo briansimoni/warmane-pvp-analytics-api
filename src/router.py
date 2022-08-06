@@ -1,7 +1,7 @@
 
 import re
 
-from src.responses import CorsHeadersResponse, InternalServerError, MethodNotAllowed, NotFoundResponse
+from responses import CorsHeadersResponse, InternalServerError, MethodNotAllowed, NotFoundResponse
 
 
 class Router:
