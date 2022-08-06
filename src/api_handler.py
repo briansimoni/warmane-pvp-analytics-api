@@ -38,7 +38,7 @@ def trigger(event, context):
     }
 
 router = Router()
-router.get('/crawl', trigger)
+router.post('/crawl', trigger)
 router.get('/matches/:id', get_matches)
 
 def lambda_handler(event, context):
