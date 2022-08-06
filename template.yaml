@@ -27,6 +27,7 @@ Resources:
       Environment:
         Variables:
           TARGET_FUNCTION: !GetAtt CrawlerFunction.Arn
+          TABLE_NAME: !Select [1, !Split ['/', !GetAtt MatchesTable.Arn]] 
       Timeout: 60 # reduce this later
       Policies:
         - LambdaInvokePolicy:
