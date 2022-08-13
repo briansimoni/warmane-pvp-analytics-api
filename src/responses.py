@@ -6,6 +6,7 @@ class NotFoundResponse(dict):
             "message": message
         }
 
+
 class MethodNotAllowed(dict):
     def __init__(self, message="method not allowed", *args, **kwargs):
         super(MethodNotAllowed, self).__init__(*args, **kwargs)
@@ -13,6 +14,7 @@ class MethodNotAllowed(dict):
         self["body"] = {
             "message": message
         }
+
 
 class InternalServerError(dict):
     def __init__(self, message="internal server error", *args, **kwargs):
@@ -22,6 +24,7 @@ class InternalServerError(dict):
             "message": message
         }
 
+
 class NoContent(dict):
     def __init__(self, message="no content", *args, **kwargs):
         super(NoContent, self).__init__(*args, **kwargs)
@@ -30,11 +33,13 @@ class NoContent(dict):
             "message": message
         }
 
+
 class JsonResponse(dict):
     def __init__(self, body={}, *args, **kwargs):
         super(JsonResponse, self).__init__(*args, **kwargs)
         self["statusCode"] = 200
         self["body"] = body
+
 
 class CorsHeadersResponse(dict):
     def __init__(self, origin: str, *args, **kwargs):
@@ -50,3 +55,6 @@ class CorsHeadersResponse(dict):
                 "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
             }
         self["statusCode"] = 200
+        self["body"] = {
+            "message": "cors response"
+        }
