@@ -1,3 +1,6 @@
+import json
+
+
 class NotFoundResponse(dict):
     def __init__(self, message="resource not found", *args, **kwargs):
         super(NotFoundResponse, self).__init__(*args, **kwargs)
@@ -55,6 +58,4 @@ class CorsHeadersResponse(dict):
                 "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
             }
         self["statusCode"] = 200
-        self["body"] = {
-            "message": "cors response"
-        }
+        self["body"] = json.dumps({'message': "cors resposne"})
