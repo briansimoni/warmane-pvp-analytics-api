@@ -69,6 +69,7 @@ class Router:
         try:
             method = event['httpMethod']
             path = event['path']
+            print(method, path, "is being served")
 
             if method == 'OPTIONS':
                 origin = ""
