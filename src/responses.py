@@ -57,6 +57,6 @@ class CorsHeadersResponse(dict):
             self["headers"] = {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
-                "Access-Control-Request-Headers": "Content-Type"
+                "Access-Control-Allow-Headers": "Content-Type,content-type"
             }
         self["statusCode"] = 200
