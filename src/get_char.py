@@ -14,6 +14,9 @@ def get_char(event, context):
             "headers": {
                 "Content-Type": "application/json",
             },
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+            },
             "statusCode": 200,
             "body": json.dumps(metadata),
         }
