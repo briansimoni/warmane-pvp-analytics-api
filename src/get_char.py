@@ -11,7 +11,6 @@ def get_char(event, context):
         id = event['pathParameters']['id']
         print("got the id:", id)
         metadata = table.get_charachter_metadata(id)
-        print("got the metadata", metadata)
         return {
             "headers": {
                 "Access-Control-Allow-Origin": "*",
