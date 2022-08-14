@@ -52,6 +52,7 @@ class CorsHeadersResponse(dict):
             "http://localhost:4000",
             "https://warmane.dog"
         ]
+        print("generatoring cors response")
         if origin in allowed_origins:
             self["headers"] = {
                 "Access-Control-Allow-Origin": origin,

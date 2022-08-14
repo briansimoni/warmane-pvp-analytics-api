@@ -74,6 +74,8 @@ class Router:
                 origin = ""
                 if "origin" in event['headers']:
                     origin = event['headers']['origin']
+                if "Origin" in event['headers']:
+                    origin = event['headers']['Origin']
                 return CorsHeadersResponse(origin=origin)
 
             if method not in self.routes:
