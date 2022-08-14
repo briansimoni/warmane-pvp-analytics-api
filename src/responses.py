@@ -59,6 +59,3 @@ class CorsHeadersResponse(dict):
                 "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
             }
         self["statusCode"] = 200
-        self["body"] = {
-            "message": "cors response"
-        }
