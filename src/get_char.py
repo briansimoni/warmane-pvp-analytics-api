@@ -14,7 +14,6 @@ def get_char(event, context):
         print("got the metadata", metadata)
         return {
             "headers": {
-                "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
             },
             "statusCode": 200,
