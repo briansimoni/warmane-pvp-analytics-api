@@ -1,7 +1,27 @@
 
 import re
 
-from responses import CorsHeadersResponse, InternalServerError, MethodNotAllowed, NotFoundResponse
+from responses import InternalServerError, MethodNotAllowed, NotFoundResponse
+
+
+class CorsHeadersResponse(dict):
+    def __init__(self, origin: str, *args, **kwargs):
+        super(CorsHeadersResponse, self).__init__(*args, **kwargs)
+        allowed_origins = [
+            "http://localhost:3000",
+            "http://localhost:4000",
+            "https://warmane.dog"
+        ]
+        print("generatoring cors response")
+        if origin in allowed_origins:
+            self["headers"] = {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+            }
+        self["statusCode"] = 200
+        self["body"] = {
+            "message": "cors response"
+        }
 
 
 class Router:

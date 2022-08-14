@@ -1,4 +1,3 @@
-from cmath import exp
 import json
 from warmane_spider.dynamo import get_table
 
