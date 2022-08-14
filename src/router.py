@@ -21,7 +21,7 @@ class Router:
 
     def put(self, path: str, func):
         self.routes["PUT"][path] = func
-    
+
     def delete(self, path: str, func):
         self.routes["DELETE"][path] = func
 
@@ -33,7 +33,8 @@ class Router:
             # checking for a thing like /person/:id
             match = re.search(':([a-zA-Z0-9]+)', registered_path_split[i])
             if match:
-                keys[i] = match.groups()[0] # this will probably break if multiple path params
+                # this will probably break if multiple path params
+                keys[i] = match.groups()[0]
 
         path_split = path.split('/')
         for i in range(len(path_split)):
@@ -51,7 +52,8 @@ class Router:
                 l = min(len(registered_path_split), len(path_split))
                 match = True
                 for i in range(l):
-                    path_param = re.search(':([a-zA-Z0-9]+)', registered_path_split[i])
+                    path_param = re.search(
+                        ':([a-zA-Z0-9]+)', registered_path_split[i])
                     if path_param or registered_path_split[i] == path_split[i]:
                         continue
                     elif registered_path_split[i] != path_split[i]:
@@ -63,21 +65,24 @@ class Router:
             print("there was something wrong while path matching", e)
             return ""
 
-
     def serve(self, event, context):
         try:
             method = event['httpMethod']
             path = event['path']
 
             if method == 'OPTIONS':
-                return CorsHeadersResponse(origin=event['headers']['origin'])
+                origin = ""
+                if "origin" in event['headers']:
+                    origin = event['headers']['origin']
+                return CorsHeadersResponse(origin=origin)
 
             if method not in self.routes:
                 return MethodNotAllowed()
-            
+
             registered_path_match = self.__check_path_registered(method, path)
             if registered_path_match:
-                path_params = self.__get_path_params(registered_path_match, path)
+                path_params = self.__get_path_params(
+                    registered_path_match, path)
                 event['pathParameters'] = path_params
                 return self.routes[method][registered_path_match](event, context)
             else:
@@ -85,4 +90,3 @@ class Router:
         except Exception as e:
             print(e)
             return InternalServerError
-

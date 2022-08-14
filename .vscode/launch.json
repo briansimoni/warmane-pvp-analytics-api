@@ -36,7 +36,7 @@
       },
       "lambda": {
         "payload": {
-          "path": "events/get_matches.json"
+          "path": "events/cors.json"
         }
       },
       "sam": {
