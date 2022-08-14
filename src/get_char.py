@@ -12,8 +12,6 @@ def get_char(event, context):
         return {
             "headers": {
                 "Content-Type": "application/json",
-            },
-            "headers": {
                 "Access-Control-Allow-Origin": "*",
             },
             "statusCode": 200,
