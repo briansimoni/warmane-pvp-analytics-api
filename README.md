@@ -11,9 +11,10 @@ Need to create a .env file and put the tablename that you're using in there. It 
   "CrawlerFunction": {
     "TABLE_NAME": "warmane-analytics-api-dev-MatchesTable-asdf"
   },
-  "GetMatchesFunction": {
-    "TABLE_NAME": "warmane-analytics-api-dev-MatchesTable-asdf"
-  }
+  {
+    "WarmaneApiFunction": {
+      "TABLE_NAME": "warmane-analytics-api-dev-MatchesTable-asdf"
+    }
 }
 ```
 

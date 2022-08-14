@@ -1,7 +1,6 @@
 {
   "version": "0.2.0",
   "configurations": [
-
     {
       "name": "Python: Current File",
       "type": "python",
@@ -29,16 +28,16 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "warmane-pvp-analytics-api:GetMatchesFunction",
+      "name": "Debug Get Matches",
       "invokeTarget": {
         "target": "template",
         "templatePath": "${workspaceFolder}/template.yaml",
-        "logicalId": "GetMatchesFunction"
+        "logicalId": "WarmaneApiFunction"
       },
       "lambda": {
         "payload": {
           "path": "events/get_matches.json"
-        },
+        }
       },
       "sam": {
         "containerBuild": true,
@@ -46,15 +45,13 @@
         //   "--parallel",
         //   "--cached"
         // ],
-        "localArguments": [
-          "-n${workspaceFolder}${pathSeparator}.env.json"
-        ]
+        "localArguments": ["-n${workspaceFolder}${pathSeparator}.env.json"]
       }
     },
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "warmane-pvp-analytics-api:CrawlerFunction",
+      "name": "Debug Crawler Function",
       "invokeTarget": {
         "target": "template",
         "templatePath": "${workspaceFolder}/template.yaml",
@@ -63,20 +60,15 @@
       "lambda": {
         "payload": {
           "path": "events/crawl.json"
-        },
+        }
         // "environmentVariables": {
         //   "TABLE_NAME": "${env:TABLE_NAME}"
         // }
       },
       "sam": {
         "containerBuild": true,
-        "buildArguments": [
-          "--parallel",
-          "--cached"
-        ],
-        "localArguments": [
-          "-n${workspaceFolder}${pathSeparator}.env.json"
-        ]
+        "buildArguments": ["--parallel", "--cached"],
+        "localArguments": ["-n${workspaceFolder}${pathSeparator}.env.json"]
       }
     }
   ]

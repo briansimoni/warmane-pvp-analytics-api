@@ -1,12 +1,14 @@
 import json
 from warmane_spider.dynamo import KeyNotFoundError
-from warmane_spider.dynamo import instantiate_table
+from warmane_spider.dynamo import get_table
 
-table = instantiate_table()
+table = get_table()
 
 # there is a known issue where some people have played so many games
 # we hit the 10mb limit when sending the JSON blob back (compressorx for example)
 # need to implement pagination to fix this
+
+
 def get_matches(event, context):
     try:
         id = event['pathParameters']['id']

@@ -8,6 +8,6 @@ architecture = "x86_64"
 handler = "app.crawl"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["CrawlerTriggerFunction", "CrawlerFunction", "GetMatchesFunction"]
+functions = ["WarmaneApiFunction", "CrawlerFunction"]
 
 [layer_build_definitions]

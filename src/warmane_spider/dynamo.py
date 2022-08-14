@@ -6,6 +6,7 @@ import time
 class KeyNotFoundError(Exception):
     pass
 
+
 class MatchesTable:
     def __init__(self, table):
         self.table = table
@@ -36,6 +37,20 @@ class MatchesTable:
                 'date': 'null',
                 'crawl_last_completed': str(time.time()),
                 'matches': matches
+            }
+        )
+        return response
+
+    def put_crawl_started(self, id):
+        """
+        This function stores something like Dumpster@Blackrock for the primary key
+        and then stores a giant list of keys with it for later retrieval
+        """
+        response = self.table.put_item(
+            Item={
+                'id': id,
+                'date': 'null',
+                'crawl_last_started': str(time.time()),
             }
         )
         return response
@@ -114,10 +129,19 @@ class MatchesTable:
         else:
             return False
 
-def instantiate_table() -> MatchesTable:
+    def get_charachter_metadata(self, id: str) -> dict:
+        result = self.table.get_item(Key={
+            'id': id,
+            'date': 'null'
+        })
+        if 'Item' not in result:
+            return None
+        return result['Item']
+
+
+def get_table() -> MatchesTable:
     table_name = os.getenv('TABLE_NAME')
     print("this is the table name", table_name)
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(table_name)
     return MatchesTable(table)
-    

@@ -1,9 +1,10 @@
 import json
 import asyncio
-from warmane_spider.dynamo import instantiate_table
+from warmane_spider.dynamo import get_table
 from warmane_spider.arenas_collector import ArenasCollector
 
-table = instantiate_table()
+table = get_table()
+
 
 def lambda_handler(event, context):
     try:
@@ -13,11 +14,13 @@ def lambda_handler(event, context):
 
         recent_crawl = table.check_recently_crawled(id)
         if recent_crawl:
-            raise Exception(id + " has already been crawled in the last 24 hours")
+            raise Exception(
+                id + " has already been crawled in the last 24 hours")
+
+        table.put_crawl_started(id)
 
         collector = ArenasCollector(character=char, realm=realm)
         asyncio.get_event_loop().run_until_complete(collector.run())
-        # asyncio.run(collector.run())
 
         for match in collector.matches:
             table.put_characther_match(collector.matches[match])
