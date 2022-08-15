@@ -32,9 +32,9 @@ def trigger(event, context):
     client.invoke(FunctionName=target_lambda,
                   Payload=payload, InvocationType="Event")
     return {
-        "headers": {
-            "Access-Control-Allow-Origin": "*"
-        },
+        # "headers": {
+        #     "Access-Control-Allow-Origin": "*"
+        # },
         "statusCode": 200,
         "body": json.dumps(
             {

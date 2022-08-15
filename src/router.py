@@ -65,6 +65,24 @@ class Router:
             print("there was something wrong while path matching", e)
             return ""
 
+    def corsResponses(serve):
+        def inside(self, event, context):
+            response = serve(self, event, context)
+
+            origin = ""
+            if "origin" in event['headers']:
+                origin = event['headers']['origin']
+            if "Origin" in event['headers']:
+                origin = event['headers']['Origin']
+            response['headers'] = {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+                "Access-Control-Allow-Headers": "Content-Type,content-type"
+            }
+            return response
+        return inside
+
+    @corsResponses
     def serve(self, event, context):
         try:
             method = event['httpMethod']
@@ -72,12 +90,7 @@ class Router:
             print(method, path, "is being served")
 
             if method == 'OPTIONS':
-                origin = ""
-                if "origin" in event['headers']:
-                    origin = event['headers']['origin']
-                if "Origin" in event['headers']:
-                    origin = event['headers']['Origin']
-                return CorsHeadersResponse(origin=origin)
+                return {}
 
             if method not in self.routes:
                 return MethodNotAllowed()

@@ -16,9 +16,9 @@ def get_matches(event, context):
         full_matches = table.get_full_matches(id)
 
         return {
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-            },
+            # "headers": {
+            #     "Access-Control-Allow-Origin": "*",
+            # },
             "statusCode": 200,
             "body": json.dumps(full_matches),
         }
