@@ -31,6 +31,7 @@ def trigger(event, context):
     payload = json.dumps(body).encode()
     client.invoke(FunctionName=target_lambda,
                   Payload=payload, InvocationType="Event")
+    message = "crawling for " + body['char']
     return {
         # "headers": {
         #     "Access-Control-Allow-Origin": "*"
@@ -38,7 +39,7 @@ def trigger(event, context):
         "statusCode": 200,
         "body": json.dumps(
             {
-                "message": "crawling for " + body['char'],
+                "message": message,
             }
         ),
     }
