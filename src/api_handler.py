@@ -22,15 +22,22 @@ def check_player_exists(realm: str, charachter: str):
 
 
 def trigger(event, context):
+    print('oh my life')
     client = boto3.client('lambda')
     target_lambda = os.environ['TARGET_FUNCTION']
+    print('loading the body')
     body = json.loads(event['body'])
+    print('the body is loaded', body)
     char = body['char']
     realm = body['realm']
+    print('found the things', char, realm)
     check_player_exists(realm, char)
+    print('the player exists')
     payload = json.dumps(body).encode()
+    print('the paylod to trigger is not broke', payload)
     client.invoke(FunctionName=target_lambda,
                   Payload=payload, InvocationType="Event")
+    print('triggered')
     message = "crawling for " + body['char']
     b = json.dumps(
         {
