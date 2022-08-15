@@ -68,17 +68,17 @@ class Router:
     def corsResponses(serve):
         def inside(self, event, context):
             response = serve(self, event, context)
-
-            origin = ""
-            if "origin" in event['headers']:
-                origin = event['headers']['origin']
-            if "Origin" in event['headers']:
-                origin = event['headers']['Origin']
-            response['headers'] = {
-                "Access-Control-Allow-Origin": origin,
-                "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
-                "Access-Control-Allow-Headers": "Content-Type,content-type"
-            }
+            if type(response) == dict:
+                origin = ""
+                if "origin" in event['headers']:
+                    origin = event['headers']['origin']
+                if "Origin" in event['headers']:
+                    origin = event['headers']['Origin']
+                response['headers'] = {
+                    "Access-Control-Allow-Origin": origin,
+                    "Access-Control-Allow-Methods": "DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT",
+                    "Access-Control-Allow-Headers": "Content-Type,content-type"
+                }
             return response
         return inside
 

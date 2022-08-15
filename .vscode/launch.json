@@ -12,11 +12,11 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "warmane-pvp-analytics-api:CrawlerTriggerFunction",
+      "name": "Debug Crawl Trigger",
       "invokeTarget": {
         "target": "template",
         "templatePath": "${workspaceFolder}/template.yaml",
-        "logicalId": "CrawlerTriggerFunction"
+        "logicalId": "WarmaneApiFunction"
       },
       "lambda": {
         "payload": {

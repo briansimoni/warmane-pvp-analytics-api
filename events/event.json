@@ -1,15 +1,9 @@
 {
   "body": "{\"char\": \"Dumpster\", \"realm\": \"Blackrock\"}",
   "resource": "/{proxy+}",
-  "path": "/path/to/resource",
+  "path": "/crawl",
   "httpMethod": "POST",
   "isBase64Encoded": false,
-  "queryStringParameters": {
-    "foo": "bar"
-  },
-  "pathParameters": {
-    "proxy": "/path/to/resource"
-  },
   "stageVariables": {
     "baz": "qux"
   },
