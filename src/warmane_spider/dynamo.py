@@ -43,14 +43,13 @@ class MatchesTable:
 
     def put_crawl_started(self, id):
         """
-        This function stores something like Dumpster@Blackrock for the primary key
-        and then stores a giant list of keys with it for later retrieval
+        This function stores a boolean in Dynamo to indicate a crawl in progress
         """
         response = self.table.put_item(
             Item={
                 'id': id,
                 'date': 'null',
-                'crawl_last_started': str(time.time()),
+                'crawl_in_progress': True,
             }
         )
         return response

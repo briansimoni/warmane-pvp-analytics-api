@@ -12,9 +12,6 @@ def get_char(event, context):
         print("got the id:", id)
         metadata = table.get_charachter_metadata(id)
         return {
-            # "headers": {
-            #     "Access-Control-Allow-Origin": "*",
-            # },
             "statusCode": 200,
             "body": json.dumps(metadata),
         }
