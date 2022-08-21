@@ -30,12 +30,15 @@ class MatchesTable:
         """
         This function stores something like Dumpster@Blackrock for the primary key
         and then stores a giant list of keys with it for later retrieval
+        This document being stored can be thought of as a lookup table
+        for documents that contain match details
         """
         response = self.table.put_item(
             Item={
                 'id': id,
                 'date': 'null',
                 'crawl_last_completed': str(time.time()),
+                'crawl_in_progress': False,
                 'matches': matches
             }
         )

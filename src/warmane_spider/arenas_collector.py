@@ -3,21 +3,25 @@ import asyncio
 import json
 from bs4 import BeautifulSoup
 import re
+from user_agents import user_agent_rotator
+
 
 class ArenasCollector():
     def __init__(self, character: str, realm: str) -> None:
-        self.url = 'https://armory.warmane.com/character/{0}/{1}/match-history'.format(character, realm)
+        self.url = 'https://armory.warmane.com/character/{0}/{1}/match-history'.format(
+            character, realm)
         self.matches = {}
 
     def parse_matches(self, html: str):
         soup = BeautifulSoup(html, 'html.parser')
         rows = soup.find_all('tr')
-        rows = rows[1:] # remove the first element
+        rows = rows[1:]  # remove the first element
         for row in rows:
             table_data = row.find_all('td')
             id = table_data[0].text
             team = table_data[1].find('a').text
-            bracket = re.findall("\(.*\)", team)[0].strip().replace("(", "").replace(")", "")
+            bracket = re.findall(
+                "\(.*\)", team)[0].strip().replace("(", "").replace(")", "")
             team_name = re.findall("\w+", team)[0].strip()
 
             self.matches[id] = {
@@ -30,36 +34,38 @@ class ArenasCollector():
                 'duration': table_data[5].text,
                 'arena': table_data[6].text
             }
-    
+
     def parse_character_details(details: dict):
         """
         given a dict of character_details from warmane,
         this function will mutate a dict that has been cleansed
         of the random html and extra data that was returned
         """
-        details['matchmaking_change'] = re.findall("<span.*?>(.+)?<\/span>", details['matchmaking_change'])[0]
-        details['personal_change'] = re.findall("<span.*?>(.+)?<\/span>", details['personal_change'])[0]
+        details['matchmaking_change'] = re.findall(
+            "<span.*?>(.+)?<\/span>", details['matchmaking_change'])[0]
+
+        details['personal_change'] = re.findall(
+            "<span.*?>(.+)?<\/span>", details['personal_change'])[0]
 
         # sometimes the json doesn't have a bunch of spans in this attribute
         if 'teamnamerich' in details:
             if "</span>" in details['teamnamerich']:
-                details['teamnamerich'] = re.findall("<span.*?>(.+)?<\/span>", details['teamnamerich'])[0]
+                details['teamnamerich'] = re.findall(
+                    "<span.*?>(.+)?<\/span>", details['teamnamerich'])[0]
         return details
-
 
     async def get_match_ids(self):
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url) as response:
                 html = await response.text()
                 self.parse_matches(html)
-                    
 
     async def get_match_data(self, session: aiohttp.ClientSession, match_id: str):
         # the python user agent is blocked on warmane
-        # TODO: use a library that dynamically selects a user agent
+        user_agent = user_agent_rotator.get_random_user_agent()
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36'
+            'User-Agent': user_agent
         }
         data = {
             'matchinfo': match_id
@@ -67,7 +73,7 @@ class ArenasCollector():
         async with session.post(url=self.url, headers=headers, data=data) as response:
             # warmane incorrectly sends text/html as the mime type. The content is really JSON
             # an exception will be encountered if you try to "await response.json()"
-            text =  await response.text()
+            text = await response.text()
             j = json.loads(text)
             j = list(map(ArenasCollector.parse_character_details, j))
             self.matches[match_id]['character_details'] = j
