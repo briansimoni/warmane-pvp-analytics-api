@@ -9,6 +9,7 @@ class TestRouter(unittest.TestCase):
         router = Router()
         router.get("/person", lambda event, context: {'body': 'hello world'})
         result = router.serve({
+            'headers': {},
             'httpMethod': 'GET',
             'path': '/person'
         }, None)

@@ -62,7 +62,9 @@ class ArenasCollector():
 
     async def get_match_data(self, session: aiohttp.ClientSession, match_id: str):
         # the python user agent is blocked on warmane
-        user_agent = user_agent_rotator.get_random_user_agent()
+        # random user agent giving me issues for some reason
+        # user_agent = user_agent_rotator.get_random_user_agent()
+        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36'
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'User-Agent': user_agent
@@ -78,12 +80,24 @@ class ArenasCollector():
             j = list(map(ArenasCollector.parse_character_details, j))
             self.matches[match_id]['character_details'] = j
 
+    async def checkProgress(self, tasks: dict):
+        done = False
+        while not done:
+            doneTasks = filter(lambda task: task.done(), tasks)
+            print("progress", len(doneTasks), "out of", len(tasks))
+            if len(doneTasks) == tasks:
+                done = True
+
     async def get_all_matches(self, session: aiohttp.ClientSession) -> list[dict]:
         tasks = []
         for match in self.matches.keys():
             task = asyncio.create_task(self.get_match_data(session, match))
             tasks.append(task)
         results = await asyncio.gather(*tasks)
+        # asyncTasks = asyncio.gather(*tasks)
+        # self.checkProgress(tasks)
+        # await asyncTasks
+
         return self.matches
 
     def get_dynamo_key_list(self) -> list[dict]:
