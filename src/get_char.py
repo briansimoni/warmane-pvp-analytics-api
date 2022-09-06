@@ -1,4 +1,5 @@
 import json
+from util import capitalize_id
 from warmane_spider.dynamo import get_table
 
 
@@ -8,7 +9,7 @@ table = get_table()
 def get_char(event, context):
     print('getting char')
     try:
-        id = event['pathParameters']['id'].lower()
+        id = capitalize_id(event['pathParameters']['id'])
         print("got the id:", id)
         metadata = table.get_charachter_metadata(id)
         return {
