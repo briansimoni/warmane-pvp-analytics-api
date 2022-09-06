@@ -11,7 +11,7 @@ table = get_table()
 
 def get_matches(event, context):
     try:
-        id = event['pathParameters']['id']
+        id = event['pathParameters']['id'].lower()
 
         full_matches = table.get_full_matches(id)
 

@@ -8,8 +8,8 @@ table = get_table()
 
 def lambda_handler(event, context):
     try:
-        char = event['char']
-        realm = event['realm']
+        char = event['char'].lower()
+        realm = event['realm'].lower()
         id = "{0}@{1}".format(char, realm)
 
         recent_crawl = table.check_recently_crawled(id)

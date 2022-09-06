@@ -8,7 +8,7 @@ table = get_table()
 def get_char(event, context):
     print('getting char')
     try:
-        id = event['pathParameters']['id']
+        id = event['pathParameters']['id'].lower()
         print("got the id:", id)
         metadata = table.get_charachter_metadata(id)
         return {
