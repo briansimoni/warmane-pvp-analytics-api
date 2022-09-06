@@ -1,4 +1,5 @@
 import json
+from util import capitalize_id
 from warmane_spider.dynamo import KeyNotFoundError
 from warmane_spider.dynamo import get_table
 
