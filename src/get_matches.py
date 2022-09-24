@@ -13,6 +13,7 @@ table = get_table()
 def get_matches(event, context):
     try:
         id = capitalize_id(event['pathParameters']['id'])
+        print("[INFO] id " + id)
 
         full_matches = table.get_full_matches(id)
 
