@@ -3,6 +3,7 @@ import os
 import boto3
 import requests
 from get_char import get_char
+from get_char_global_stats import get_global_char_stats
 from router import Router
 from get_matches import get_matches
 from user_agents import user_agent_rotator
@@ -47,6 +48,7 @@ router = Router()
 router.post('/crawl', trigger)
 router.get('/charachter/:id', get_char)
 router.get('/matches/:id', get_matches)
+router.get("/stats/:id", get_global_char_stats)
 
 
 def lambda_handler(event, context):
