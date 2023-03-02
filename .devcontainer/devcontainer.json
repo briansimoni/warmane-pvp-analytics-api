@@ -8,8 +8,17 @@
 		"ghcr.io/devcontainers-contrib/features/terraform-asdf:2": {
 			"version": "latest"
 		}
-	}
+	},
 
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"orta.vscode-jest",
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode"
+			]
+		}
+	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
