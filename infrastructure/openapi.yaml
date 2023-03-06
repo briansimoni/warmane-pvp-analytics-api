@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: Example API
+  description: This is an example API
+  version: 1.0.0
+paths:
+  /hello:
+    get:
+      summary: Get a greeting
+      responses:
+        "200":
+          description: A greeting message
+          content:
+            text/plain:
+              schema:
+                type: string
