@@ -6,11 +6,8 @@ info:
 paths:
   /hello:
     get:
-      summary: Get a greeting
-      responses:
-        "200":
-          description: A greeting message
-          content:
-            text/plain:
-              schema:
-                type: string
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        payloadFormatVersion: "1.0"
+        type: HTTP_PROXY
+        uri: "https://ip-ranges.amazonaws.com/ip-ranges.json"

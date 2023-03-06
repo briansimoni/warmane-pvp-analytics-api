@@ -14,8 +14,13 @@ terraform {
     }
 }
 
+provider "aws" {
+  region = "us-east-1"
+}
+
+
 locals {
-    openapi_spec = yamldecode("./openapi.yaml")
+    openapi_spec = yamldecode(file("./openapi.yaml"))
 }
 
 
