@@ -1,17 +1,17 @@
 terraform {
-    cloud {
-        organization = "simoni-enterprises"
-        workspaces {
-            name = "warmane-pvp-analytics-api"
-        }
+  cloud {
+    organization = "simoni-enterprises"
+    workspaces {
+      name = "warmane-pvp-analytics-api"
     }
+  }
 
-    required_providers {
-        aws = {
-            source = "hashicorp/aws"
-            version = "~> 4.57"
-        }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.57"
     }
+  }
 }
 
 provider "aws" {
@@ -20,7 +20,7 @@ provider "aws" {
 
 
 locals {
-    openapi_spec = yamldecode(file("./openapi.yaml"))
+  openapi_spec = yamldecode(file("./openapi.yaml"))
 }
 
 
