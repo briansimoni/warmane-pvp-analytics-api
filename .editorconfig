@@ -9,5 +9,5 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 [(*.js,*.ts)]
-max_line_length = 120
+max_line_length = 180
 trim_trailing_whitespace = false

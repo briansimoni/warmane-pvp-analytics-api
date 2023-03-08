@@ -1,9 +1,13 @@
-type Lol = {
-  asdf: string;
-};
+import { APIGatewayEvent, Context, APIGatewayProxyResult } from "aws-lambda";
 
-const x: Lol = {
-  asdf: "hello world",
+export const handler = async (
+  event: APIGatewayEvent,
+  context: Context
+): Promise<APIGatewayProxyResult> => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: "Hello World",
+    }),
+  };
 };
-
-console.log(x);
