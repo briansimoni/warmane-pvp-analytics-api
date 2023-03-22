@@ -1,7 +1,7 @@
 name: Continuous Deployment
 on: [push]
 jobs:
-  test_and_build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -9,7 +9,7 @@ jobs:
         with:
           node-version: 18
       - run: npm install
-      # - run: npm run format:check
+      - run: npm run prettier
       - run: npm test
 
   terraform:
