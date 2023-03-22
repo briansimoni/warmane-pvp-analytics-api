@@ -10,7 +10,8 @@ export class WarmaneCrawler implements Crawler {
     character: string;
     realm: string;
   }): Promise<string[]> {
-    throw new Error("Method not implemented.");
+    // throw new Error("Method not implemented.");
+    return ["1", "2", "3"];
   }
 
   async getMatchDetails(params: { matchIds: string[] }): Promise<any[]> {

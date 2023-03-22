@@ -18,5 +18,8 @@ describe("crawler tests", () => {
       realm: "Blackrock",
     });
     expect(matchIds.length).toBe(453);
+    expect(matchIds).toEqual(
+      expect.arrayContaining(["25309337", "25309969", "25314478"])
+    );
   });
 });
