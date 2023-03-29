@@ -1,26 +1,31 @@
 name: Continuous Deployment
 on: [push]
 jobs:
-  test:
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
+
         with:
           node-version: 18
-      - run: npm install
-      - run: npm run prettier
-      - run: npm test
+      - name: test
+        run: npm install
 
-  terraform:
-    needs: test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./infrastructure
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - name: prettier
+        run: npm run prettier
+
+      - name: test
+        run: npm test
+
+      - name: build
+        run: npm build
+
+      - name: cache build output
+        uses: actions/cache@v2
+        env:
+          path: ./build
+          cache-name: build-output-cache
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
