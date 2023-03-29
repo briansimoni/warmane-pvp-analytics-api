@@ -15,6 +15,9 @@ jobs:
   terraform:
     needs: test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infrastructure
     steps:
       - name: checkout
         uses: actions/checkout@v3
