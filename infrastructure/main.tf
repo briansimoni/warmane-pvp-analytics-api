@@ -35,11 +35,3 @@ data "template_file" "openapi_template" {
   }
 
 }
-
-
-resource "aws_api_gateway_rest_api" "rest_api" {
-  name = "warmane_pvp_analytics_v2_api"
-  #body = yamlencode(local.openapi_spec)
-  body = data.template_file.openapi_template.rendered
-
-}
