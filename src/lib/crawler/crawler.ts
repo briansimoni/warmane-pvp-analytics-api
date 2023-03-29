@@ -1,10 +1,39 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 
+export interface MatchDetails {
+  team_name: string;
+  date: string;
+  bracket: string;
+  arena: string;
+  points_change: string;
+  character_details: CharacterDetail[]; // | undefined[]; I don't think it can be undefined
+  id: string;
+  outcome: string;
+  duration: string;
+  team?: string;
+}
+
+export interface CharacterDetail {
+  matchmaking_change?: string;
+  healingDone: string;
+  race?: string;
+  gender?: string;
+  killingBlows: string;
+  teamnamerich: string;
+  realm: string;
+  damageDone: string;
+  charname: string;
+  class?: string;
+  deaths: string;
+  personal_change: string;
+  teamname: string;
+}
+
 // defining Crawler interface
 export interface Crawler {
   getMatchIds(params: { character: string; realm: string }): Promise<string[]>;
-  getMatchDetails(params: { matchIds: string[] }): Promise<any[]>;
+  getMatchDetails(params: { matchIds: string[] }): Promise<MatchDetails[]>;
 }
 
 // implementing the Crawler interface in the WarmaneCrawler class
@@ -31,8 +60,9 @@ export class WarmaneCrawler implements Crawler {
     return matchIds;
   }
 
-  async getMatchDetails(params: { matchIds: string[] }): Promise<any[]> {
+  async getMatchDetails(params: {
+    matchIds: string[];
+  }): Promise<MatchDetails[]> {
     throw new Error("Method not implemented.");
   }
 }
-
