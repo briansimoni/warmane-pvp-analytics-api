@@ -1,7 +1,7 @@
 name: Continuous Deployment
 on: [push]
 jobs:
-  test_and_build:
+  test_build_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,50 +21,40 @@ jobs:
       - name: build
         run: npm run build
 
-      - name: add node_modules
-        run: cp -r node_modules build/
+      - name: copy node_modules
+        run: cp -r node_modules build
 
-      - name: upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build
-          path: build
-          retention-days: 5
-
-
-  terraform:
-    needs: test_and_build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./infrastructure
-    steps:
-      - name: download build output
-        uses: actions/download-artifact@v3
-        with:
-          name: build
-
-      - name: Setup Terraform
+      - name: setup terraform
         uses: hashicorp/setup-terraform@v2
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-      - name: Terraform Format
+      - name: terraform format
         id: fmt
-        run: terraform fmt -check
+        run: |
+          cd infrastructure
+          terraform fmt -check
 
-      - name: Terraform Init
+      - name: terraform init
         id: init
-        run: terraform init
+        run: |
+          cd infrastructure
+          terraform init
 
-      - name: Terraform Validate
+      - name: terraform validate
         id: validate
-        run: terraform validate -no-color
+        run: |
+          cd infrastructure
+          terraform validate -no-color
 
-      - name: Terraform Plan
+      - name: terraform plan
         id: plan
-        run: terraform plan -no-color -input=false
+        run: |
+          cd infrastructure
+          terraform plan -no-color -input=false
 
-      - name: Terraform Apply
+      - name: terraform apply
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        run: |
+          cd infrastructure
+          terraform apply -auto-approve -input=false
