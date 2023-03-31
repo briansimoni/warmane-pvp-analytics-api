@@ -45,15 +45,6 @@ jobs:
         run: |
           terraform -chdir=infrastructure validate -no-color
 
-      # - name: debug
-      #   run: |
-      #     pwd
-      #     ls ../build
-      #     tree
-      #     terraform output module_path
-      #     terraform output module_cwd
-      #     terraform output module_root
-
       - name: terraform plan
         id: plan
         run: |
