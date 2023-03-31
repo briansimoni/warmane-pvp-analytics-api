@@ -35,7 +35,8 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
   runtime = "nodejs18.x"
   handler = "main.handler"
 
-  source_code_hash = data.archive_file.main_lambda_code.output_base64sha256
+  # source_code_hash = data.archive_file.main_lambda_code.output_base64sha256
+  source_code_hash = filemd5("../build.zip")
 
   role = aws_iam_role.lambda_exec.arn
 }
