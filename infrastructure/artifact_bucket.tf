@@ -20,7 +20,7 @@ resource "aws_s3_object" "lambda_code_artifact" {
   key    = "lambda_code.zip"
   source = "${path.module}/lambda_code.zip"
 
-  etag = filemd5(data.archive_file.main_lambda_code.output_path)
+  etag = filemd5("${path.module}/lambda_code.zip")
 }
 
 output "module_path" {
