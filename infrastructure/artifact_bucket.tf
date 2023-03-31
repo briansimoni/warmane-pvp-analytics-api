@@ -7,18 +7,18 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
   acl    = "private"
 }
 
-data "archive_file" "main_lambda_code" {
-  type = "zip"
+# data "archive_file" "main_lambda_code" {
+#   type = "zip"
 
-  source_dir  = "${path.module}./build/"
-  output_path = "${path.module}/lambda_code.zip"
-}
+#   source_dir  = "${path.module}./build/"
+#   output_path = "${path.module}/lambda_code.zip"
+# }
 
 resource "aws_s3_object" "lambda_code_artifact" {
   bucket = aws_s3_bucket.code_artifact_bucket.id
 
   key    = "lambda_code.zip"
-  source = data.archive_file.main_lambda_code.output_path
+  source = "${path.module}/lambda_code.zip"
 
   etag = filemd5(data.archive_file.main_lambda_code.output_path)
 }
