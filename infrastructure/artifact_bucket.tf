@@ -18,19 +18,7 @@ resource "aws_s3_object" "lambda_code_artifact" {
   bucket = aws_s3_bucket.code_artifact_bucket.id
 
   key    = "lambda_code.zip"
-  source = "${path.module}/lambda_code.zip"
+  source = "../build.zip"
 
-  etag = filemd5("${path.module}/lambda_code.zip")
-}
-
-output "module_path" {
-  value = path.module
-}
-
-output "cwd_path" {
-  value = path.cwd
-}
-
-output "root_path" {
-  value = path.root
+  etag = filemd5("../build.zip")
 }
