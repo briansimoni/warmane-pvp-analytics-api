@@ -53,7 +53,9 @@ jobs:
           pwd
           ls ../build
           tree
-          tree ../build
+          terraform output module_path
+          terraform output module_cwd
+          terraform output module_root
 
       - name: terraform plan
         id: plan

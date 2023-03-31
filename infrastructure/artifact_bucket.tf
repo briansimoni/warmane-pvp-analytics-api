@@ -23,3 +23,14 @@ resource "aws_s3_object" "lambda_code_artifact" {
   etag = filemd5(data.archive_file.main_lambda_code.output_path)
 }
 
+output "module_path" {
+  value = path.module
+}
+
+output "cwd_path" {
+  value = path.cwd
+}
+
+output "root_path" {
+  value = path.root
+}
