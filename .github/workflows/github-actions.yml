@@ -24,8 +24,8 @@ jobs:
       - name: copy node_modules
         run: cp -r node_modules infrastructure/build
 
-      - name: zip
-        run: zip -r build.zip build
+      # - name: zip
+      #   run: zip -r build.zip build
 
       - name: setup terraform
         uses: hashicorp/setup-terraform@v2
