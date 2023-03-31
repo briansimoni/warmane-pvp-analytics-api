@@ -35,10 +35,10 @@ jobs:
           cd infrastructure
           terraform fmt -check
 
-      - name: terraform -chdir=infrastructure init
+      - name: terraform
         id: init
         run: |
-          terraform init
+          terraform -chdir=infrastructure init
 
       - name: terraform validate
         id: validate
