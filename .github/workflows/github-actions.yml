@@ -35,21 +35,18 @@ jobs:
           cd infrastructure
           terraform fmt -check
 
-      - name: terraform init
+      - name: terraform init -chdir=infrastructure
         id: init
         run: |
-          cd infrastructure
           terraform init
 
       - name: terraform validate
         id: validate
         run: |
-          cd infrastructure
           terraform validate -no-color
 
       - name: debug
         run: |
-          cd infrastructure
           pwd
           ls ../build
           tree
@@ -60,11 +57,9 @@ jobs:
       - name: terraform plan
         id: plan
         run: |
-          cd infrastructure
           terraform plan -no-color -input=false
 
       - name: terraform apply
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
         run: |
-          cd infrastructure
           terraform apply -auto-approve -input=false
