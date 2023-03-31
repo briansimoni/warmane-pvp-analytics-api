@@ -1,14 +1,14 @@
 name: Continuous Deployment
 on: [push]
 jobs:
-  build_and_deploy:
+  test_and_build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-
         with:
           node-version: 18
+
       - name: test
         run: npm install
 
@@ -19,13 +19,30 @@ jobs:
         run: npm test
 
       - name: build
-        run: npm build
+        run: npm run build
 
-      - name: cache build output
-        uses: actions/cache@v2
-        env:
-          path: ./build
-          cache-name: build-output-cache
+      - name: add node_modules
+        run: cp -r node_modules build/
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build
+          retention-days: 5
+
+
+  terraform:
+    needs: test_and_build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infrastructure
+    steps:
+      - name: download build output
+        uses: actions/download-artifact@v3
+        with:
+          name: build
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -51,20 +68,3 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
-
-  # deploy:
-  #   needs: terraform
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 18
-  #     - run: npm install
-  #     - run: npm run build
-  #     - uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: us-east-1
-  #     - run: aws s3 cp ./build s3://warmane.dog/ --recursive
