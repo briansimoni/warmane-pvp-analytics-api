@@ -47,6 +47,14 @@ jobs:
           cd infrastructure
           terraform validate -no-color
 
+      - name: debug
+        run: |
+          cd infrastructure
+          pwd
+          ls ../build
+          tree
+          tree ../build
+
       - name: terraform plan
         id: plan
         run: |
