@@ -9,7 +9,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: test
+      - name: install dependencies
         run: npm install
 
       - name: prettier
