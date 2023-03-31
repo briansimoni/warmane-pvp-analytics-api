@@ -22,7 +22,7 @@ jobs:
         run: npm run build
 
       - name: copy node_modules
-        run: cp -r node_modules build
+        run: cp -r node_modules infrastructure/build
 
       - name: zip
         run: zip -r build.zip build

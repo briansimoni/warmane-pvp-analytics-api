@@ -10,7 +10,7 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
 data "archive_file" "main_lambda_code" {
   type = "zip"
 
-  source_dir  = "${path.module}./build/"
+  source_dir  = "${path.module}/build/"
   output_path = "lambda_code.zip"
 }
 
