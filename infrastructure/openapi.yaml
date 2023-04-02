@@ -7,7 +7,7 @@ paths:
   /hello:
     get:
       x-amazon-apigateway-integration:
-        httpMethod: GET
+        httpMethod: POST
         payloadFormatVersion: "1.0"
         type: "aws_proxy"
         uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"

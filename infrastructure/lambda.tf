@@ -40,6 +40,8 @@ resource "aws_lambda_permission" "apigw" {
 resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
   function_name = "warmane_analytics_api_v2_main_function"
 
+  architectures = ["arm64"]
+
   s3_bucket = aws_s3_bucket.code_artifact_bucket.id
   s3_key    = aws_s3_object.lambda_code_artifact.key
 
