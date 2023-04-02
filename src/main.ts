@@ -27,7 +27,7 @@ async function getCharacter(
   event: APIGatewayEvent,
   context: Context
 ): Promise<APIGatewayProxyResult> {
-  if (!event.pathParameters) {
+  if (!event.queryStringParameters) {
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -36,8 +36,8 @@ async function getCharacter(
     };
   }
 
-  const character = event.pathParameters["character"];
-  const realm = event.pathParameters["realm"];
+  const character = event.queryStringParameters["character"];
+  const realm = event.queryStringParameters["realm"];
   if (!character || !realm) {
     return {
       statusCode: 400,
