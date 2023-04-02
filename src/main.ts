@@ -13,7 +13,9 @@ export const handler = async (
     event.path.includes("character")
   ) {
     try {
-      return await getCharacter(event, context);
+      const result = await getCharacter(event, context);
+      console.log(result);
+      return result;
     } catch (err) {
       console.log(err);
       throw err;
