@@ -56,6 +56,6 @@ async function getCharacter(
 
   return {
     statusCode: 200,
-    body: response.data,
+    body: JSON.stringify(response.data),
   };
 }
