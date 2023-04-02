@@ -6,14 +6,16 @@ export const handler = async (
   event: APIGatewayEvent,
   context: Context
 ): Promise<APIGatewayProxyResult> => {
-  const app = express();
-  console.log(app);
-
   if (
     event.httpMethod.toLocaleLowerCase() === "get" &&
     event.path.includes("character")
   ) {
-    return await getCharacter(event, context);
+    try {
+      return await getCharacter(event, context);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
   return {
     statusCode: 200,
