@@ -7,10 +7,12 @@ import serverless from "aws-serverless-koa";
 const app = new Koa();
 
 app.use(async (ctx) => {
+  console.log(ctx);
+  console.log(ctx.request.headers);
   ctx.body = "hello world";
 });
 
-export const handler = serverless(app);
+export const handler = serverless("asdf");
 
 // export const handler = async (
 //   event: APIGatewayEvent,
