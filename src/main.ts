@@ -10,7 +10,7 @@ app.use(async (ctx) => {
   ctx.body = "hello world";
 });
 
-export const lambdaHandler = serverless(app);
+export const handler = serverless(app);
 
 // export const handler = async (
 //   event: APIGatewayEvent,
