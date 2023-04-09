@@ -1,5 +1,5 @@
 import { APIGatewayEvent, Context } from "aws-lambda";
-import Koa, { DefaultState, DefaultContext } from "koa";
+import Koa, { DefaultContext } from "koa";
 
 interface MiddlewareOptions {
   reqPropKey?: string;
