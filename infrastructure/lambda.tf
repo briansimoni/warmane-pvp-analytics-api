@@ -46,6 +46,7 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
   s3_key    = aws_s3_object.lambda_code_artifact.key
 
   runtime = "nodejs18.x"
+  timeout = 10
   handler = "main.handler"
 
   source_code_hash = data.archive_file.main_lambda_code.output_base64sha256
