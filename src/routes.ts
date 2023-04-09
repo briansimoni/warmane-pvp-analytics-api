@@ -10,7 +10,7 @@ router.get("/character", async (ctx) => {
   console.log(process.env);
   console.log("query", ctx.query);
   console.log("querystring", ctx.querystring);
-  // const { character, realm } = ctx.query;
+  const { character, realm } = ctx.query;
   // if (!realm || !character) {
   //   throw new Error("missing params");
   // }
@@ -19,5 +19,9 @@ router.get("/character", async (ctx) => {
     character: "Dumpster",
     realm: "Blackrock",
   });
-  ctx.body = ids;
+  ctx.body = {
+    ids,
+    character,
+    realm,
+  };
 });
