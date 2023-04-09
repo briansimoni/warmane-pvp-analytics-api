@@ -1,6 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Node 18",
+
+  "ts-node": {
+    "files": true
+  },
+  "files": ["src/aws-serverless-koa.d.ts"],
+
   "compilerOptions": {
     "outDir": "infrastructure/build",
     "lib": ["es2022"],
