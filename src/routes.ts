@@ -10,9 +10,9 @@ router.get("/character", async (ctx) => {
   console.log(ctx.query);
   console.log(ctx.querystring);
   const { character, realm } = ctx.query;
-  if (!realm || !character) {
-    throw new Error("missing params");
-  }
+  // if (!realm || !character) {
+  //   throw new Error("missing params");
+  // }
   const crawler = new WarmaneCrawler();
   const ids = await crawler.getMatchIds({
     character: character as string,
