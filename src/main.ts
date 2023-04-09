@@ -6,7 +6,6 @@ import {
   errorHandlingMiddleware,
 } from "./middleware";
 import { router } from "./routes";
-import Joi from "joi";
 
 const app = new Koa<Koa.DefaultState, ApiGatewayContext>();
 

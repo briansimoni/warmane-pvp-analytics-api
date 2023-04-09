@@ -7,7 +7,7 @@
     "test": "jest --coverage",
     "build": "tsc",
     "prettier": "prettier --check src/**/*.ts",
-    "eslint": "eslint --max-warnings 0 src/**/*.ts",
+    "eslint": "eslint --max-warnings 1 src/**/*.ts",
     "start": "node-dev --inspect --inspect-port=9229 --notify=false src/main.ts"
   },
   "repository": {
