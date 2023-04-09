@@ -37,6 +37,12 @@ export const AwsMiddleware = (
       ),
     };
 
+    // ctx.query = {
+    //   ...ctx.apiGateway?.event.queryStringParameters,
+    // };
+
+    // ctx.querystring = ctx.apiGateway?.event.
+
     if (deleteHeaders) {
       delete ctx.headers["x-apigateway-event"];
       delete ctx.headers["x-apigateway-context"];

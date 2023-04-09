@@ -6,18 +6,18 @@ import { WarmaneCrawler } from "./lib/crawler/crawler";
 export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 router.get("/character", async (ctx) => {
-  console.log(ctx.apiGateway);
+  console.log(ctx);
   console.log(ctx.query);
   console.log(ctx.querystring);
-  const { character, realm } = ctx.query;
+  // const { character, realm } = ctx.query;
   // if (!realm || !character) {
   //   throw new Error("missing params");
   // }
-  const crawler = new WarmaneCrawler();
-  const ids = await crawler.getMatchIds({
-    character: character as string,
-    realm: realm as string,
-  });
+  // const crawler = new WarmaneCrawler();
+  // const ids = await crawler.getMatchIds({
+  //   character: character as string,
+  //   realm: realm as string,
+  // });
   ctx.body = {
     apiGateway: ctx.apiGateway,
     query: ctx.query,
