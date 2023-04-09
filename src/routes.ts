@@ -3,6 +3,7 @@ import Koa from "koa";
 import { ApiGatewayContext } from "./middleware";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
 import Joi from "joi";
+import createError from "http-errors";
 
 interface GetCharacterRequestParams {
   character: string;
@@ -17,14 +18,9 @@ const schema = Joi.object<GetCharacterRequestParams>({
 export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 router.get("/character", async (ctx) => {
-  // console.log(ctx);
-  console.log(process.env);
-  console.log("query", ctx.query);
-  console.log("querystring", ctx.querystring);
-
   const params = schema.validate(ctx.query);
   if (params.error) {
-    throw params.error;
+    throw createError(400, params.error);
   }
   const { character, realm } = params.value;
 

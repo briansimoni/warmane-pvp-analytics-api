@@ -1,7 +1,7 @@
 import { APIGatewayEvent, Context } from "aws-lambda";
 import Koa, { DefaultContext } from "koa";
 
-interface MiddlewareOptions {
+interface AwsMiddlewareOptions {
   deleteHeaders?: boolean;
 }
 
@@ -14,7 +14,7 @@ export interface ApiGatewayContext extends DefaultContext {
 
 // modified from https://github.com/compwright/aws-serverless-koa/blob/master/middleware.js
 export const AwsMiddleware = (
-  options: MiddlewareOptions
+  options: AwsMiddlewareOptions
 ): Koa.Middleware<Koa.DefaultState, ApiGatewayContext> => {
   return async (ctx, next) => {
     ctx.request;
@@ -44,4 +44,21 @@ export const AwsMiddleware = (
 
     await next();
   };
+};
+
+export const errorHandlingMiddleware: Koa.Middleware = async (ctx, next) => {
+  try {
+    await next();
+  } catch (error) {
+    console.log(typeof error);
+    if (error instanceof Error) {
+      ctx.body = {
+        error: {
+          message: error.message || "Internal Server Error",
+        },
+      };
+    } else {
+      throw error;
+    }
+  }
 };
