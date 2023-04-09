@@ -18,5 +18,9 @@ router.get("/character", async (ctx) => {
     character: character as string,
     realm: realm as string,
   });
-  ctx.body = ids;
+  ctx.body = {
+    apiGateway: ctx.apiGateway,
+    query: ctx.query,
+    querystring: ctx.querystring,
+  };
 });
