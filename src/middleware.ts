@@ -27,7 +27,6 @@ export const AwsMiddleware = (
     ) {
       return await next();
     }
-    var x = "lol";
 
     ctx.apiGateway = {
       event: JSON.parse(
