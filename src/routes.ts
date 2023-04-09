@@ -2,6 +2,17 @@ import Router from "@koa/router";
 import Koa from "koa";
 import { ApiGatewayContext } from "./middleware";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
+import Joi from "joi";
+
+interface GetCharacterRequestParams {
+  character: string;
+  realm: string;
+}
+
+const schema = Joi.object<GetCharacterRequestParams>({
+  character: Joi.string().required(),
+  realm: Joi.string().required(),
+});
 
 export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
@@ -10,13 +21,16 @@ router.get("/character", async (ctx) => {
   console.log(process.env);
   console.log("query", ctx.query);
   console.log("querystring", ctx.querystring);
-  const { character, realm } = ctx.query;
-  // if (!realm || !character) {
-  //   throw new Error("missing params");
-  // }
+
+  const params = schema.validate(ctx.query);
+  if (params.error) {
+    throw params.error;
+  }
+  const { character, realm } = params.value;
+
   const crawler = new WarmaneCrawler();
   const ids = await crawler.getMatchIds({
-    character: "Dumpster",
+    character,
     realm: "Blackrock",
   });
   ctx.body = {
