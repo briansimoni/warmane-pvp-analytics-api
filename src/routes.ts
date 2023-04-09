@@ -6,9 +6,6 @@ import { WarmaneCrawler } from "./lib/crawler/crawler";
 export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 router.get("/character", async (ctx) => {
-  // console.log(ctx.path);
-  // console.log(ctx.query);
-  // console.log(ctx.apiGateway);
   const { character, realm } = ctx.query;
   if (!realm || !character) {
     throw new Error("missing params");
