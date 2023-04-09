@@ -2,14 +2,13 @@ import { APIGatewayEvent, Context } from "aws-lambda";
 import Koa, { DefaultContext } from "koa";
 
 interface MiddlewareOptions {
-  reqPropKey?: string;
   deleteHeaders?: boolean;
 }
 
 export interface ApiGatewayContext extends DefaultContext {
-  apiGateway: {
-    event?: APIGatewayEvent;
-    context?: Context;
+  apiGateway?: {
+    event: APIGatewayEvent;
+    context: Context;
   };
 }
 
@@ -19,7 +18,6 @@ export const AwsMiddleware = (
 ): Koa.Middleware<Koa.DefaultState, ApiGatewayContext> => {
   return async (ctx, next) => {
     ctx.request;
-    const reqPropKey = options.reqPropKey || "apiGateway";
     const deleteHeaders =
       options.deleteHeaders === undefined ? true : options.deleteHeaders;
 
@@ -27,9 +25,7 @@ export const AwsMiddleware = (
       !ctx.headers["x-apigateway-event"] ||
       !ctx.headers["x-apigateway-context"]
     ) {
-      throw new Error(
-        "Missing x-apigateway-event or x-apigateway-context header(s)"
-      );
+      return await next();
     }
 
     ctx.apiGateway = {
