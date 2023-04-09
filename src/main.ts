@@ -3,12 +3,14 @@ import axios from "axios";
 
 import Koa from "koa";
 import serverless from "aws-serverless-koa";
+import { ApiGatewayContext, AwsMiddleware } from "./middleware";
 
-const app = new Koa();
+const app = new Koa<Koa.DefaultState, ApiGatewayContext>();
 
-app.use(async (ctx) => {
-  console.log(ctx);
-  console.log(ctx.request.headers);
+app.use(AwsMiddleware({}));
+
+app.use(async (ctx, next) => {
+  console.log(ctx.apiGateway);
   ctx.body = "hello world";
 });
 
