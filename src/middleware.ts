@@ -27,6 +27,7 @@ export const AwsMiddleware = (
     ) {
       return await next();
     }
+    var x = "lol";
 
     ctx.apiGateway = {
       event: JSON.parse(
@@ -36,12 +37,6 @@ export const AwsMiddleware = (
         decodeURIComponent(ctx.headers["x-apigateway-context"] as string)
       ),
     };
-
-    // ctx.query = {
-    //   ...ctx.apiGateway?.event.queryStringParameters,
-    // };
-
-    // ctx.querystring = ctx.apiGateway?.event.
 
     if (deleteHeaders) {
       delete ctx.headers["x-apigateway-event"];
