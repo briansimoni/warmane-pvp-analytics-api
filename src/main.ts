@@ -12,7 +12,7 @@ app.use(async (ctx) => {
   ctx.body = "hello world";
 });
 
-export const handler = serverless("asdf");
+export const handler = serverless(app);
 
 // export const handler = async (
 //   event: APIGatewayEvent,
