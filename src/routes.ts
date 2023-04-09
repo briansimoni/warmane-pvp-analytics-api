@@ -7,12 +7,12 @@ export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 router.get("/character", async (ctx) => {
   console.log(ctx);
-  console.log(ctx.query);
-  console.log(ctx.querystring);
+  console.log("query", ctx.query);
+  console.log("querystring", ctx.querystring);
   const { character, realm } = ctx.query;
-  if (!realm || !character) {
-    throw new Error("missing params");
-  }
+  // if (!realm || !character) {
+  //   throw new Error("missing params");
+  // }
   const crawler = new WarmaneCrawler();
   const ids = await crawler.getMatchIds({
     character: character as string,
