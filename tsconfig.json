@@ -5,7 +5,6 @@
   "ts-node": {
     "files": true
   },
-  "files": ["src/aws-serverless-koa.d.ts"],
 
   "compilerOptions": {
     "outDir": "infrastructure/build",
