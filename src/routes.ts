@@ -18,9 +18,10 @@ const schema = Joi.object<GetCharacterRequestParams>({
 export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 router.get("/character", async (ctx) => {
+  ctx.log.info("this is an example of logging");
   const params = schema.validate(ctx.query);
   if (params.error) {
-    throw createError(400, params.error);
+    throw createError.BadRequest(params.error.message);
   }
   const { character, realm } = params.value;
 
