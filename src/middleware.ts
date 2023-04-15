@@ -1,4 +1,5 @@
 import { APIGatewayEvent, Context } from "aws-lambda";
+import createError from "http-errors";
 import Koa, { DefaultContext } from "koa";
 
 interface AwsMiddlewareOptions {
@@ -49,11 +50,12 @@ export const AwsMiddleware = (
 export const errorHandlingMiddleware: Koa.Middleware = async (ctx, next) => {
   try {
     await next();
-  } catch (error) {
-    console.log(typeof error);
-    if (error instanceof Error) {
+  } catch (error: unknown) {
+    if (error instanceof createError.HttpError) {
+      ctx.status = error.statusCode;
       ctx.body = {
         error: {
+          status: error.status,
           message: error.message || "Internal Server Error",
         },
       };
