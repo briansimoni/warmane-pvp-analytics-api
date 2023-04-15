@@ -25,7 +25,9 @@ jobs:
         run: npm run build
 
       - name: slim down node_modules
-        run: npm install --production
+        run: |
+          rm -rf node_modules
+          npm install --production
 
       - name: copy node_modules
         run: cp -r node_modules infrastructure/build
