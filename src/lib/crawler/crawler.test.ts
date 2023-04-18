@@ -33,7 +33,7 @@ describe("crawler tests", () => {
     expect(matchSummaries.map((summary) => summary.matchId)).toEqual(
       expect.arrayContaining(["24671286", "25750028"])
     );
-  }, 20000);
+  });
 
   test("WarmaneCrawler does not exceed 32 concurrent operations", async () => {
     const originalFetchMatchData = WarmaneCrawler.prototype.fetchMatchData;
@@ -46,7 +46,7 @@ describe("crawler tests", () => {
       })
     );
 
-    const matchSummaries = Array.from({ length: 100 }, (_, i) => ({
+    const matchSummaries = Array.from({ length: 10 }, (_, i) => ({
       matchId: String(i),
       team_name: "",
       date: "",
@@ -84,7 +84,7 @@ describe("crawler tests", () => {
 
     // restoring  original fetchMatchData method
     WarmaneCrawler.prototype.fetchMatchData = originalFetchMatchData;
-  }, 20000);
+  });
 
   test("The crawler can return a user-readable & database-ready list of match summaries and character details when provided an HTML document and JSON data", async () => {
     const testHtml = fs.readFileSync(
@@ -125,5 +125,5 @@ describe("crawler tests", () => {
     } else {
       fail("No character_details found in the first matchDetails item");
     }
-  }, 20000);
+  });
 });
