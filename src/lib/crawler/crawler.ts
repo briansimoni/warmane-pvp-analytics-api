@@ -1,217 +1,544 @@
-import axios from "axios";
-import * as cheerio from "cheerio";
-import Bottleneck from "bottleneck";
+<!DOCTYPE html>
+<html lang="en" class="active">
 
-export interface MatchSummary {
-  matchId: string;
-  team_name: string;
-  bracket: string;
-  outcome: string;
-  points_change: string;
-  date: string;
-  duration: string;
-  arena: string;
-}
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="csrf-token" content="MWIwMjBmMWIyMmRhZjVkNThjMDVlYzI1ZjY3MzhlYmM=" />
+	<meta name="robots" content="noodp, noydir">
+	<meta name="Description" content="Private Server Community." />
+	<meta name="Keywords"
+		content="Warmane, WoW, World of Warcraft, Warcraft, Private Server, Private WoW Server, WoW Server, Private WoW Server, wow private server, wow server, wotlk server, cataclysm private server, wow cata server, best free private server, largest private server, wotlk private server, blizzlike server, mists of pandaria, mop, cataclysm, cata, anti-cheat, sentinel anti-cheat, warden" />
+	<link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+	<title>Warmane Armory | Character Dumpster @ Blackrock</title>
+	<link rel="stylesheet" href="/themes/warmane/stylesheets/global.css?v=1671575235">
+	<link rel="stylesheet" href="/themes/warmane/stylesheets/ui.css?v=1671575235">
+	<link rel="stylesheet" href="/themes/warmane/stylesheets/armory.css?v=1671575235">
+	<link rel="stylesheet" href="/themes/warmane/stylesheets/font-awesome.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="/themes/warmane/script/ui.js?v=1671575235"></script>
+	<script src="/themes/warmane/script/armory.js?v=1671575235"></script>
+	<script src="//www.warmane.com/script/jquery.wm-listener.js"></script>
+	<script src="//www.warmane.com/script/warmane.js?v=1671575235"></script>
+	<script src="//www.warmane.com/script/jquery.wm.bpopup.js"></script>
+	<script src="//cdn.cavernoftime.com/api/tooltip.js"></script>
+	<script src="//www.warmane.com/script/jquery.wm-contextmenu.js"></script>
+	<script>
+		$.ajaxSetup({cache: true});
+	</script>
+	<link rel="stylesheet" href="/stylesheets/wm-contextmenu.css">
+</head>
 
-export interface CharacterDetail {
-  realm: string;
-  charname: string;
-  class?: string;
-  race?: string;
-  gender?: string;
-  teamname: string;
-  teamnamerich: string;
-  damageDone: string;
-  deaths: string;
-  healingDone: string;
-  killingBlows: string;
-  matchmaking_change?: string;
-  personal_change: string;
-}
+<body>
+	<noscript>
+		<div id="noscript-override">
+			<p>This site makes extensive use of JavaScript.</b><br>Please <a
+					href="https://www.google.com/support/adsense/bin/answer.py?answer=12654" target="_blank">enable
+					JavaScript</a> in your browser.</p>
+		</div>
+	</noscript>
+	<div class="navigation-wrapper">
+		<a href="https://www.warmane.com/" class="navigation-logo"></a>
+		<div class="navigation">
+			<ul class="navbits">
+				<li><a href="https://www.warmane.com/account/create" title="Create Account">CREATE ACCOUNT</a></li>
+				<li><a href="https://www.warmane.com/download" title="Download">DOWNLOAD</a></li>
+				<li><a href="https://forum.warmane.com/" title="Forum">FORUM</a></li>
+				<li><a href="https://www.warmane.com/information" title="Information">INFORMATION</a></li>
+				<li><a href="https://armory.warmane.com/" title="Armory">ARMORY</a></li>
+				<li><a href="https://www.warmane.com/account/login" title="Login">LOG IN</a></li>
+			</ul>
+		</div>
+		<div class="social-buttons">
+			<a href="https://www.facebook.com/warmane" class="social-button facebook" title="Warmane Facebook"
+				target="_blank">
+				<div class="fa fa-facebook"></div>
+			</a>
+			<a href="https://www.youtube.com/c/warmane" class="social-button youtube" s title="Warmane Youtube"
+				target="_blank">
+				<div class="fa fa-youtube-play"></div>
+			</a>
+			<a href="https://www.reddit.com/r/warmane" class="social-button reddit" title="Warmane Reddit"
+				target="_blank">
+				<div class="fa fa-reddit"></div>
+			</a>
+			<a href="http://www.twitch.tv/warmane" class="social-button twitch" s title="Warmane Twitch"
+				target="_blank">
+				<div class="fa fa-twitch"></div>
+			</a>
+			<a href="https://www.reddit.com/r/warmane" class="social-button reddit" title="Warmane Reddit"
+				target="_blank">
+				<div class="fa fa-reddit"></div>
+			</a>
+		</div>
+	</div>
+	<div id="page-frame">
+		<div class="frame-corners tl"></div>
+		<div class="frame-corners tr"></div>
+		<div class="leftmost-frame"></div>
+		<div class="header"></div>
+		<div class="center">
+			<video style="position:relative;z-index:-999;" width="100%" height="100%" autoplay loop>
+				<source src="//www.warmane.com/renders/snow.mp4">
+				<source src="//www.warmane.com/renders/snow.webm">
+			</video>
+		</div>
+		<div id="wm-theme-navigation"></div>
+		<div class="footer"></div>
+		<div class="rightmost-frame"></div>
+		<div class="frame-corners bl"></div>
+		<div class="frame-corners br"></div>
+	</div>
+	<div id="page-content-wrapper">
+		<div id="wm-ui-flash-message"></div>
+		<div class="frame-corners tl"></div>
+		<div class="frame-corners tr"></div>
+		<div class="header"></div>
+		<div class="center">
+			<div id="page-content">
 
-/**
- * MatchDetails is an aggregate of all data that the crawler collects
- * for a given matchId. These objects are intended to be stored
- * long-term in some kind of database for further use and analysis.
- */
-export interface MatchDetails {
-  matchId: string;
-  team_name: string;
-  bracket: string;
-  outcome: string;
-  points_change: string;
-  date: string;
-  duration: string;
-  arena: string;
-  character_details: CharacterDetail[];
-}
 
-export interface Crawler {
-  getMatchSummaries(params: {
-    character: string;
-    realm: string;
-  }): Promise<MatchSummary[]>;
-  getMatchDetails(params: {
-    character: string;
-    realm: string;
-    matchSummaries: MatchSummary[];
-  }): Promise<MatchDetails[]>;
-}
+				<div id="page-navigation" class="wm-ui-generic-frame wm-ui-bottom-border">
+					<ul>
+						<li><a href="/" class="">HOME</a></li>
+						<li><a href="/ladder" class="">PVP LADDER</a></li>
+						<li><a href="/pveladder" class="">PVE LADDER</a></li>
+						<li><a href="/leaderboard" class="">LEADERBOARD</a></li>
+						<li><a href="/prestige" class="">PRESTIGE</a></li>
+						<li><a href="/character" class="active">CHARACTER</a></li>
+					</ul>
+					<ul>
+						<li>
+							<input type="text" name="nav-search-input" id="nav-search-input" class="wm-ui-input-generic wm-ui-generic-frame wm-ui-all-border">
+        </li>
+						<li>
+							<a href="javascript:;" id="nav-search" class="">SEARCH</a>
+						</li>
+					</ul>
+				</div>
 
-export class WarmaneCrawler implements Crawler {
-  // Fetches match history HTML w/ GET request, returns as string
-  async fetchMatchHistoryHTML(params: {
-    character: string;
-    realm: string;
-  }): Promise<string> {
-    const response = await axios.get(
-      `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`
-    );
-    return response.data;
-  }
+				<div id="content-wrapper">
+					<div id="content-inner"
+						class="wm-ui-generic-frame wm-ui-issuebox wm-ui-content-fontstyle wm-ui-top-border">
+						<div id="inpage-navigation">
+							<ul>
+								<li><a href="/character/Dumpster/Blackrock/profile">PROFILE</a></li>
+								<li><a href="/character/Dumpster/Blackrock/match-history" class="active">MATCH
+										HISTORY</a></li>
+								<li><a href="/character/Dumpster/Blackrock/achievements">ACHIEVEMENTS</a></li>
+								<li><a href="/character/Dumpster/Blackrock/talents">TALENTS</a></li>
+								<li><a href="/character/Dumpster/Blackrock/statistics">STATISTICS</a></li>
+								<li><a href="/character/Dumpster/Blackrock/mounts-and-companions">MOUNTS AND
+										COMPANIONS</a></li>
+								<li><a href="/character/Dumpster/Blackrock/reputation">REPUTATION</a></li>
+							</ul>
+						</div>
+						<div id="character-sheet">
+							<div class="information">
+								<div class="information-left">
+									<div class="name">Dumpster
+										<span class="guild-name"><a href="/guild/Dumpster+Gaming/Blackrock/summary/Dumpster">Dumpster Gaming</a></span>
+									</div>
+									<div class="level-race-class">
+										Level 80 Night Elf Druid, Blackrock
+									</div>
+								</div>
+								<div class="information-right">
+									<div class="achievement-points">
+										1110 </div>
+									<div class="title-suffix">Achievement Points</div>
+								</div>
+							</div>
+							<div class="clear"></div>
 
-  // Extracts match summaries from match history HTML
-  extractMatchSummaries(html: string): MatchSummary[] {
-    const $ = cheerio.load(html);
-    const matchSummaries: MatchSummary[] = [];
-
-    $("table#data-table-history tbody tr").each((_index, element) => {
-      const matchId = $(element).find("td:nth-child(1)").text().trim();
-      const outcome = $(element).find("td:nth-child(3)").text().trim();
-      const points_change = $(element).find("td:nth-child(4)").text().trim();
-      const date = $(element).find("td:nth-child(5)").text().trim();
-      const duration = $(element).find("td:nth-child(6)").text().trim();
-      const arena = $(element).find("td:nth-child(7)").text().trim();
-      const teamBracketText = $(element)
-        .find("td:nth-child(2) a")
-        .text()
-        .trim();
-      const teamBracketRegex = /(.*?)\s*\((\d+v\d+)\)/;
-      let team_name = "";
-      let bracket = "";
-
-      if (teamBracketText) {
-        const teamBracketMatch = teamBracketText.match(teamBracketRegex);
-
-        if (teamBracketMatch) {
-          team_name = teamBracketMatch[1];
-          bracket = teamBracketMatch[2];
+							<link href="/themes/warmane/assets/datatables/css/data-table.css" rel="stylesheet" />
+							<h3>Match History</h3>
+							<table id="data-table-history" class="stripe dataTable" width="100%">
+								<thead>
+									<tr>
+										<th>Match ID</th>
+										<th class="dt-left">Team</th>
+										<th>Outcome</th>
+										<th>Personal Rating</th>
+										<th>Start Time</th>
+										<th>Duration</th>
+										<th>Map</th>
+										<th>Details</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>24671286</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">a new team</span>
+												(2v2)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">192 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1676153009">February 11 10:03pm</td>
+										<td class="dt-center">56 seconds</td>
+										<td class="dt-center">Ruins of Lordaeron</td>
+										<td class="dt-center viewdetails" data-gameid="24671286"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>25750028</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">48 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1680212313">March 30 9:38pm</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Dalaran Sewers</td>
+										<td class="dt-center viewdetails" data-gameid="25750028"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>25991079</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">96 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681175776">April 11 1:16am</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Dalaran Sewers</td>
+										<td class="dt-center viewdetails" data-gameid="25991079"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>25991102</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">144 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681175996">April 11 1:19am</td>
+										<td class="dt-center">2 minutes</td>
+										<td class="dt-center">Blade's Edge Arena</td>
+										<td class="dt-center viewdetails" data-gameid="25991102"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>25991129</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">192 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681176181">April 11 1:23am</td>
+										<td class="dt-center">34 seconds</td>
+										<td class="dt-center">Dalaran Sewers</td>
+										<td class="dt-center viewdetails" data-gameid="25991129"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>25991138</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Loss</td>
+										<td class="dt-center">192 (<span class="history-loss">0</span>)</td>
+										<td class="dt-center" data-order="1681176296">April 11 1:24am</td>
+										<td class="dt-center">52 seconds</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="25991138"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26068604</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">240 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681527660">April 15 3:01am</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Ruins of Lordaeron</td>
+										<td class="dt-center viewdetails" data-gameid="26068604"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26068622</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">288 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681527885">April 15 3:04am</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Blade's Edge Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26068622"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26068631</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">336 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681528049">April 15 3:07am</td>
+										<td class="dt-center">3 minutes</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26068631"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26068652</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">384 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681528336">April 15 3:12am</td>
+										<td class="dt-center">4 minutes</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26068652"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26068697</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Loss</td>
+										<td class="dt-center">384 (<span class="history-loss">0</span>)</td>
+										<td class="dt-center" data-order="1681528706">April 15 3:18am</td>
+										<td class="dt-center">2 minutes</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26068697"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26068722</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">432 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681528956">April 15 3:22am</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26068722"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26068740</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">480 (<span class="history-win">+48</span>)</td>
+										<td class="dt-center" data-order="1681529166">April 15 3:26am</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Ruins of Lordaeron</td>
+										<td class="dt-center viewdetails" data-gameid="26068740"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095419</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">527 (<span class="history-win">+47</span>)</td>
+										<td class="dt-center" data-order="1681655355">April 16 2:29pm</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Dalaran Sewers</td>
+										<td class="dt-center viewdetails" data-gameid="26095419"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095473</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">574 (<span class="history-win">+47</span>)</td>
+										<td class="dt-center" data-order="1681655498">April 16 2:31pm</td>
+										<td class="dt-center">3 minutes</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26095473"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095565</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">621 (<span class="history-win">+47</span>)</td>
+										<td class="dt-center" data-order="1681655806">April 16 2:36pm</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26095565"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095631</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">668 (<span class="history-win">+47</span>)</td>
+										<td class="dt-center" data-order="1681656016">April 16 2:40pm</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26095631"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095684</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Loss</td>
+										<td class="dt-center">668 (<span class="history-loss">0</span>)</td>
+										<td class="dt-center" data-order="1681656147">April 16 2:42pm</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Ruins of Lordaeron</td>
+										<td class="dt-center viewdetails" data-gameid="26095684"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095752</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Loss</td>
+										<td class="dt-center">668 (<span class="history-loss">0</span>)</td>
+										<td class="dt-center" data-order="1681656427">April 16 2:47pm</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Ruins of Lordaeron</td>
+										<td class="dt-center viewdetails" data-gameid="26095752"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095805</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Loss</td>
+										<td class="dt-center">668 (<span class="history-loss">0</span>)</td>
+										<td class="dt-center" data-order="1681656562">April 16 2:49pm</td>
+										<td class="dt-center">2 minutes</td>
+										<td class="dt-center">Nagrand Arena</td>
+										<td class="dt-center viewdetails" data-gameid="26095805"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095866</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">715 (<span class="history-win">+47</span>)</td>
+										<td class="dt-center" data-order="1681656767">April 16 2:52pm</td>
+										<td class="dt-center">1 minute</td>
+										<td class="dt-center">Ruins of Lordaeron</td>
+										<td class="dt-center viewdetails" data-gameid="26095866"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+									<tr>
+										<td>26095920</td>
+										<td><a href="/team/Deleted/Blackrock/summary"><span style="color:#ff0000;">Solo Queue</span>
+												(5v5)</a></td>
+										<td class="dt-center">Victory</td>
+										<td class="dt-center">762 (<span class="history-win">+47</span>)</td>
+										<td class="dt-center" data-order="1681656927">April 16 2:55pm</td>
+										<td class="dt-center">11 minutes</td>
+										<td class="dt-center">Ruins of Lordaeron</td>
+										<td class="dt-center viewdetails" data-gameid="26095920"><a
+												href="javascript:;">Details</a></td>
+									</tr>
+								</tbody>
+							</table>
+							<script>
+								function matchDetails(row, data, gameid) {
+    var ret = "";
+    $.ajax({ 
+        type: 'POST', 
+        url: '/character/Dumpster/Blackrock/match-history', 
+        data: {matchinfo: gameid},
+        dataType: 'json',
+        success: function (result) {
+            if(result) {
+                ret += '<div class="content-inner wm-ui-generic-frame wm-ui-genericform wm-ui-content-fontstyle wm-ui-left-border wm-ui-top-border wm-ui-right-border wm-ui-bottom-border"><table style="width:100%;background-color:#1a1a1a;"><tr><th style="text-align:left;">Name</th><th style="text-align:left;">Team</th><th style="text-align:left;">Realm</th><th>Damage</th><th>Healing</th><th>KBs</th><th>Deaths</th><th>MMR</th><th>PRating</th></tr>';
+                $.each(result, function(index, value) {
+                    ret += '<tr>'+
+                    '<td><a class="wm-ui-hyper-custom-b" href="/character/' + value.charname + '/' + value.realm + '/summary">' +
+                        '<img style="vertical-align:middle;" width="14" height="14" src="/images/icons/races/' + value.race + '-' + value.gender + '.gif" />' +
+                        '<img style="vertical-align:middle;" width="14" height="14" src="/images/icons/classes/' + value.class + '.gif" /> &nbsp;' + 
+                        value.charname + 
+                    '</td>'+
+                    '<td>' + (value.teamname !== undefined ? '<a class="wm-ui-hyper-custom-b" href="/team/' + value.teamname + '/' + value.realm + '/summary">' + value.teamnamerich + '</a>' : '-' ) + '</td>'+
+                    '<td>' + value.realm + '</td>' +
+                    '<td style="text-align:center;">' + value.damageDone + '</td>'+
+                    '<td style="text-align:center;">' + value.healingDone + '</td>'+
+                    '<td style="text-align:center;">' + value.killingBlows + '</td>'+
+                    '<td style="text-align:center;">' + value.deaths + '</td>'+
+                    '<td style="text-align:center;">' + value.matchmaking_change + '</td>'+
+                    '<td style="text-align:center;">' + value.personal_change + '</td>'+
+                    '</tr>';
+                });
+                ret += '</table></div>';
+                row.child(ret).show();
+            }
         }
-      }
-      const matchSummary: MatchSummary = {
-        matchId,
-        team_name,
-        date,
-        bracket,
-        arena,
-        points_change,
-        outcome,
-        duration,
-      };
-
-      matchSummaries.push(matchSummary);
     });
-
-    return matchSummaries;
-  }
-
-  // Retrieves match summaries for specified character and realm
-  async getMatchSummaries(params: {
-    character: string;
-    realm: string;
-  }): Promise<MatchSummary[]> {
-    const html = await this.fetchMatchHistoryHTML(params);
-    const matchSummaries = this.extractMatchSummaries(html);
-    return matchSummaries;
-  }
-
-  // Fetches match data for given match ID, returns array of CharacterDetail objects
-  async fetchMatchData(matchId: string): Promise<CharacterDetail[]> {
-    const response = await axios.post(
-      "https://armory.warmane.com/character/Dumpster/Blackrock/match-history",
-      `matchinfo=${matchId}`,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36",
-        },
-      }
-    );
-
-    return response.data;
-  }
-
-  /**
-   * Fetches match details using match IDs of each given matchSummaries array,
-   * combines matchDetails objects with  corresponding matchSummary object,
-   * and restricts concurrent operations to 32.
-   */
-
-  async getMatchDetails(params: {
-    character: string;
-    realm: string;
-    matchSummaries: MatchSummary[];
-  }): Promise<MatchDetails[]> {
-    // extracts match IDs from 'matchSummaries' array
-    const matchIds = params.matchSummaries.map((summary) => summary.matchId);
-    const matchDetailsList: MatchDetails[] = [];
-
-    // initializes and implements new Bottleneck instance to control concurrency
-    const limiter = new Bottleneck({ maxConcurrent: 32 });
-    const limitedFetchMatchData = limiter.wrap(this.fetchMatchData.bind(this));
-
-    for (const matchId of matchIds) {
-      const characterDetails = await limitedFetchMatchData(matchId);
-
-      // formats JSON response (removes HTML, organizes data )
-      characterDetails.forEach((characterDetail: CharacterDetail) => {
-        characterDetail.teamnamerich = characterDetail.teamnamerich.replace(
-          /<[^>]+>/g,
-          ""
-        );
-
-        const overallRegex = /(-?\d{1,})(?=\s*\(<span)/;
-        const changeRegex = /((\+|-)\d+)(?=<\/span)/;
-
-        // formats matchmaking_change
-        if (characterDetail.matchmaking_change) {
-          const mmChangeMatch =
-            characterDetail.matchmaking_change.match(changeRegex);
-          const mmOverallMatch =
-            characterDetail.matchmaking_change.match(overallRegex);
-          if (mmChangeMatch && mmOverallMatch) {
-            characterDetail.matchmaking_change = `${mmChangeMatch[0]} (${mmOverallMatch[0]})`;
-          }
-        }
-
-        // formats personal_change
-        if (characterDetail.personal_change) {
-          const personalChangeMatch =
-            characterDetail.personal_change.match(changeRegex);
-          const personalOverallMatch =
-            characterDetail.personal_change.match(overallRegex);
-          if (personalChangeMatch && personalOverallMatch) {
-            characterDetail.personal_change = `${personalChangeMatch[0]} (${personalOverallMatch[0]})`;
-          }
-        }
-      });
-
-      // finds corresponding 'matchSummary' object
-      const matchSummary = params.matchSummaries.find(
-        (summary) => summary.matchId === matchId
-      );
-
-      // combines fetched match data w/ corresponding 'matchSummary' object
-      if (matchSummary) {
-        const matchDetails: MatchDetails = {
-          ...matchSummary,
-          character_details: characterDetails,
-        };
-
-        matchDetailsList.push(matchDetails);
-      }
-    }
-    return matchDetailsList;
-  }
+    return ret;
 }
+
+$.getScript('/themes/warmane/assets/datatables/js/jquery.dataTables.js').done(function() {
+    $.getScript('/themes/warmane/assets/datatables/js/dataTables.responsive.js').done(function() {
+        var history;
+        if ($('#data-table-history').length !== 0) {
+            history = $('#data-table-history').DataTable({
+                "bFilter": false,
+                "dom": '<"top">rt<"bottom"flp><"clear">',
+                "bLengthChange": false,
+                iDisplayLength: 100,
+                'oLanguage': {
+                    'sEmptyTable': 'Dumpster does not have any match history'
+                },
+                "order": [[ 4, "desc" ]],
+            });
+        }
+
+        $('#data-table-history tbody').on('click', 'td.viewdetails', function () {
+            var tr = $(this).closest('tr');
+            var row = history.row( tr );
+            var gameid = $(this).data('gameid');
+    
+            if ( row.child.isShown() ) {
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+    
+            else {
+                matchDetails(row, row.data(), gameid);
+                tr.addClass('shown');
+            }
+        });
+    });
+});
+							</script>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="clear"></div>
+			</div>
+		</div>
+		<div class="footer"></div>
+		<div class="frame-corners bl"></div>
+		<div class="frame-corners br"></div>
+	</div>
+
+	<div id="page-footer">
+		<a href="https://www.warmane.com/policies/terms">Terms of Service</a> &nbsp; <a
+			href="https://www.warmane.com/policies/privacy">Privacy Policy</a> &nbsp; <a
+			href="https://www.warmane.com/policies/refund"> Refund Policy </a> &nbsp; <a
+			href="http://forum.warmane.com/forumdisplay.php?132-Support-amp-Q-A">Contact Us</a><br>
+	Copyright &copy; Warmane&trade; 2022. All Rights Reserved.
+</div>
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-59798617-1', 'auto');
+  ga('send', 'pageview');
+		</script>
+
+		<script>
+			$(function() {
+    $.warmane({
+        currentBackground: -1
+    });
+});
+		</script>
+</body>
+
+</html>
