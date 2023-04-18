@@ -66,12 +66,12 @@ jobs:
 
       - name: terraform validate
         id: validate
-        run: terraform -chdir=infrastructure validate -no-color
+        run: terraform validate -no-color
 
       - name: terraform plan
         id: plan
-        run: terraform -chdir=infrastructure plan -no-color -input=false
+        run: terraform plan -no-color -input=false
 
       - name: terraform apply
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
-        run: terraform -chdir=infrastructure apply -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false
