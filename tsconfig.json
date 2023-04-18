@@ -7,7 +7,7 @@
   },
 
   "compilerOptions": {
-    "outDir": "infrastructure/build",
+    "outDir": "build",
     "lib": ["es2022"],
     "module": "commonjs",
     "target": "es2022",
