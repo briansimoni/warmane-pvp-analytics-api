@@ -35,15 +35,14 @@ jobs:
       - run: npm run build
       - run: npm install --production
       - run: cp -r node_modules build
-      - run: cd build/ && zip -r ../$(git symbolic-ref --short HEAD).zip .
+      - run: export ARTIFACT_NAME=$(git symbolic-ref --short HEAD).zip
+      - run: cd build/ && zip -r $ARTIFACT_NAME .
       - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - run: ls -a
-      - run: pwd
-      - run: aws s3 cp $(git symbolic-ref --short HEAD).zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY} --recursive
+      - run: aws s3 cp $ARTIFACT_NAME s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}
 
   deploy:
     needs: build
