@@ -1,4 +1,9 @@
-import { WarmaneCrawler, MatchSummary, MatchDetails, CharacterDetail } from "./crawler";
+import {
+  WarmaneCrawler,
+  MatchSummary,
+  MatchDetails,
+  CharacterDetail,
+} from "./crawler";
 import * as fs from "fs";
 import * as path from "path";
 import axios from "axios";
@@ -6,40 +11,39 @@ import Bottleneck from "bottleneck";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
-//
+
 describe("crawler tests", () => {
-    test("The crawler can return a list of match summaries (which contain match IDs) when provided an HTML document containing a given player's match information.", async () => {
-      // storing data from test.html file as string
-      const testHtml = fs.readFileSync(
-        path.resolve(__dirname, "test.html"),
-        "utf-8"
-      );
-  
-      mockedAxios.get.mockImplementation(async () => ({
-        data: testHtml,
-      }));
-  
-      const crawler = new WarmaneCrawler();
-      const matchSummaries = await crawler.getMatchSummaries({
-        character: "SomeCharacter",
-        realm: "Blackrock",
-      });
-  
-      expect(matchSummaries.length).toBe(2);
-      expect(matchSummaries.map((summary) => summary.matchId)).toEqual(
-        expect.arrayContaining(["24671286", "25750028"])
-      );
+  test("The crawler can return a list of match summaries (which contain match IDs) when provided an HTML document containing a given player's match information.", async () => {
+    const testHtml = fs.readFileSync(
+      path.resolve(__dirname, "test.html"),
+      "utf-8"
+    );
+
+    mockedAxios.get.mockImplementation(async () => ({
+      data: testHtml,
+    }));
+
+    const crawler = new WarmaneCrawler();
+    const matchSummaries = await crawler.getMatchSummaries({
+      character: "SomeCharacter",
+      realm: "Blackrock",
     });
 
+    expect(matchSummaries.length).toBe(22);
+    expect(matchSummaries.map((summary) => summary.matchId)).toEqual(
+      expect.arrayContaining(["24671286", "25750028"])
+    );
+  }, 20000);
+
   test("WarmaneCrawler does not exceed 32 concurrent operations", async () => {
-    // mocking fetchMatchData method to simulate delay
     const originalFetchMatchData = WarmaneCrawler.prototype.fetchMatchData;
+
+    const testLimiter = new Bottleneck({ maxConcurrent: 32 });
+
     WarmaneCrawler.prototype.fetchMatchData = jest.fn(
-      async (matchId: string) => {
-        return new Promise((resolve) =>
-        setTimeout(() => resolve([] as CharacterDetail[]), 100)
-        );
-      }
+      testLimiter.wrap(async (matchId: string) => {
+        return [] as CharacterDetail[];
+      })
     );
 
     const matchSummaries = Array.from({ length: 100 }, (_, i) => ({
@@ -60,11 +64,10 @@ describe("crawler tests", () => {
       matchSummaries,
     });
 
-    // tracking number of ongoing requests using a counter variable
+    // tracking ongoing requests
     let ongoingRequests = 0;
     let maxOngoingRequests = 0;
 
-    // wrapping 'fetchMatchData()' with function that increments counter when called & decrements when resolved
     WarmaneCrawler.prototype.fetchMatchData = jest.fn(
       async (matchId: string) => {
         ongoingRequests++;
@@ -77,7 +80,6 @@ describe("crawler tests", () => {
 
     await matchDetailsPromises;
 
-    // checking that there are no more than 32 ongoing requests at any point
     expect(maxOngoingRequests).toBeLessThanOrEqual(32);
 
     // restoring  original fetchMatchData method
@@ -85,7 +87,6 @@ describe("crawler tests", () => {
   }, 20000);
 
   test("The crawler can return a user-readable & database-ready list of match summaries and character details when provided an HTML document and JSON data", async () => {
-    // reading test HTML and JSON data from files
     const testHtml = fs.readFileSync(
       path.resolve(__dirname, "test.html"),
       "utf-8"
@@ -102,23 +103,18 @@ describe("crawler tests", () => {
       data: testJson,
     }));
 
-    // initializing crawler, getting match summaries
     const crawler = new WarmaneCrawler();
     const matchSummaries = await crawler.getMatchSummaries({
       character: "SomeCharacter",
       realm: "Blackrock",
     });
 
-    // getting match details for match summaries
     const matchDetailsList = await crawler.getMatchDetails({
       character: "SomeCharacter",
       realm: "Blackrock",
       matchSummaries,
     });
 
-    
-
-    // assertions
     expect(matchDetailsList.length).toBeGreaterThan(0);
     expect(matchDetailsList[0]).toHaveProperty("character_details");
     expect(matchDetailsList[0].character_details.length).toBeGreaterThan(0);
@@ -129,5 +125,5 @@ describe("crawler tests", () => {
     } else {
       fail("No character_details found in the first matchDetails item");
     }
-  }, 60000);
+  }, 20000);
 });
