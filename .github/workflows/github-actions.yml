@@ -43,7 +43,7 @@ jobs:
           aws-region: us-east-1
       - run: ls -a
       - run: pwd
-      - run: aws s3 cp ./$(git symbolic-ref --short HEAD).zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY} --recursive
+      - run: aws s3 cp $(git symbolic-ref --short HEAD).zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY} --recursive
 
   deploy:
     needs: build
