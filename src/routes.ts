@@ -31,6 +31,7 @@ router.get("/character", async (ctx) => {
     realm: "Blackrock",
   });
   ctx.body = {
+    hello: "world",
     ids,
     character,
     realm,
