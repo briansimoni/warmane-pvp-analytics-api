@@ -43,7 +43,7 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
   architectures = ["arm64"]
 
   s3_bucket = "simoni-enterprises-artifacts"
-  s3_key    = "briansimoni/warmane-pvp-analytics-api/v2.zip"
+  s3_key    = var.artifact_file
 
   # source_code_hash = filebase64sha256("v2.zip")
 
@@ -54,4 +54,9 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
   # source_code_hash = data.archive_file.main_lambda_code.output_base64sha256
 
   role = aws_iam_role.lambda_exec.arn
+}
+
+variable "artifact_file" {
+  type    = string
+  default = "briansimoni/warmane-pvp-analytics-api/v2.zip"
 }
