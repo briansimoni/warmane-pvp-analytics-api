@@ -74,7 +74,7 @@ jobs:
 
       - name: terraform plan
         id: plan
-        run: terraform plan -var="image_id=ami-abc123" -no-color -input=false
+        run: terraform plan -var="artifact_file=${{ env.artifact_file }}" -no-color -input=false
 
       - name: terraform apply
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
