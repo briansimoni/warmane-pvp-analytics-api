@@ -1,9 +1,4 @@
-import {
-  WarmaneCrawler,
-  MatchSummary,
-  MatchDetails,
-  CharacterDetail,
-} from "./crawler";
+import { WarmaneCrawler, CharacterDetail } from "./crawler";
 import * as fs from "fs";
 import * as path from "path";
 import axios from "axios";
@@ -41,7 +36,7 @@ describe("crawler tests", () => {
     const testLimiter = new Bottleneck({ maxConcurrent: 32 });
 
     WarmaneCrawler.prototype.fetchMatchData = jest.fn(
-      testLimiter.wrap(async (matchId: string) => {
+      testLimiter.wrap(async () => {
         return [] as CharacterDetail[];
       })
     );
