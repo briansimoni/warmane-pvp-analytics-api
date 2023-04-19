@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: 18
 
+      - run: echo "artifact_version=$(git symbolic-ref --short HEAD)" >> $GITHUB_ENV
       - run: sudo apt-get update && sudo apt-get install -y zip
       - run: npm install
       - run: npm run build
@@ -41,7 +42,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - run: aws s3 cp ./$(git symbolic-ref --short HEAD).zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/$(git symbolic-ref --short HEAD).zip
+      - run: aws s3 cp ./${{ env.artifact_version }}.zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/${{ env.artifact_version }}.zip
 
   deploy:
     needs: build
@@ -70,8 +71,8 @@ jobs:
 
       - name: terraform plan
         id: plan
-        run: terraform plan -no-color -input=false
+        run: terraform plan -var="image_id=ami-abc123" -no-color -input=false
 
       - name: terraform apply
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -var="image_id=ami-abc123" -auto-approve -input=false
