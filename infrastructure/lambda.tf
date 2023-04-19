@@ -45,7 +45,7 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
   # s3_bucket = "simoni-enterprises-artifacts"
   # s3_key    = var.artifact_file
 
-  s3_bucket         = data.aws_s3_object.lambda_bundle.id
+  s3_bucket         = "simoni-enterprises-artifacts"
   s3_key            = data.aws_s3_object.lambda_bundle.key
   s3_object_version = data.aws_s3_object.lambda_bundle.version_id
 
