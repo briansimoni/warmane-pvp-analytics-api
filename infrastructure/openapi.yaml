@@ -1,13 +1,65 @@
 openapi: 3.0.0
 info:
-  title: Example API
-  description: This is an example API
+  title: Warmane Analytics API
+  description: This API provides the interface into the data to find out how much of a dog a player might be
   version: 1.0.0
 paths:
-  /hello:
+  # /hello:
+  #   get:
+  #     x-amazon-apigateway-integration:
+  #       httpMethod: POST
+  #       payloadFormatVersion: "1.0"
+  #       type: "aws_proxy"
+  #       uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
+
+  /character:
     get:
+      description: This is more of an example function for now. Proxies to warmane's API
+      parameters:
+        - name: character
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: realm
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: good response
       x-amazon-apigateway-integration:
-        httpMethod: GET
+        httpMethod: POST
         payloadFormatVersion: "1.0"
         type: "aws_proxy"
         uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
+
+  /crawl:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                character:
+                  type: string
+                realm:
+                  type: string
+              required:
+                - character
+                - realm
+              additionalProperties: false
+      responses:
+        200:
+          description: crawl started
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        payloadFormatVersion: "1.0"
+        type: "aws_proxy"
+        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
+
+    # /crawl/status:
+    #   description: check the status of the crawler for a given character
+    #   get:

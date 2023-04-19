@@ -1,70 +1,77 @@
 name: Continuous Deployment
 on: [push]
 jobs:
-  build_and_deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-
         with:
           node-version: 18
-      - name: test
+
+      - name: install dependencies
         run: npm install
 
       - name: prettier
         run: npm run prettier
 
+      - name: eslint
+        run: npm run eslint
+
       - name: test
         run: npm test
 
-      - name: build
-        run: npm build
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-      - name: cache build output
-        uses: actions/cache@v2
-        env:
-          path: ./build
-          cache-name: build-output-cache
+      - run: sudo apt-get update && sudo apt-get install -y zip
+      - run: npm install
+      - run: npm run build
+      - run: npm install --production
+      - run: cp -r node_modules build
+      - run: cd build/ && zip -r ../$(git symbolic-ref --short HEAD).zip .
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - run: aws s3 cp ./$(git symbolic-ref --short HEAD).zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/$(git symbolic-ref --short HEAD).zip
 
-      - name: Setup Terraform
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup terraform
         uses: hashicorp/setup-terraform@v2
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-      - name: Terraform Format
+      - name: terraform format
         id: fmt
         run: terraform fmt -check
 
-      - name: Terraform Init
+      - name: terraform
         id: init
         run: terraform init
 
-      - name: Terraform Validate
+      - name: terraform validate
         id: validate
         run: terraform validate -no-color
 
-      - name: Terraform Plan
+      - name: terraform plan
         id: plan
         run: terraform plan -no-color -input=false
 
-      - name: Terraform Apply
+      - name: terraform apply
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
-
-  # deploy:
-  #   needs: terraform
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 18
-  #     - run: npm install
-  #     - run: npm run build
-  #     - uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: us-east-1
-  #     - run: aws s3 cp ./build s3://warmane.dog/ --recursive
