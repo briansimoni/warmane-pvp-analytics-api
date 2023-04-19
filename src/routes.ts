@@ -25,14 +25,8 @@ router.get("/character", async (ctx) => {
   }
   const { character, realm } = params.value;
 
-  const crawler = new WarmaneCrawler();
-  const ids = await crawler.getMatchIds({
-    character,
-    realm: "Blackrock",
-  });
   ctx.body = {
     hello: "world",
-    ids,
     character,
     realm,
   };
