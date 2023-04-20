@@ -212,6 +212,7 @@ export class WarmaneCrawler implements Crawler {
         matchDetailsList.push(matchDetails);
       }
     }
+    console.log(matchDetailsList[0])
     return matchDetailsList;
   }
 }

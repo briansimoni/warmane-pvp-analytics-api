@@ -1,4 +1,5 @@
 import Koa from "koa";
+import cors from "@koa/cors";
 import serverless from "aws-serverless-koa";
 import koaBunyanLogger from "koa-bunyan-logger";
 import bunyan from "bunyan";
@@ -8,6 +9,20 @@ import {
   errorHandlingMiddleware,
 } from "./middleware";
 import { router } from "./routes";
+
+const allowedOrigins = ["https://warmane.dog", "http://localhost:3000"];
+
+const corsOptions = {
+  origin: (ctx: Koa.Context) => {
+    const requestOrigin = ctx.request.header.origin;
+    if (allowedOrigins.includes(requestOrigin)) {
+      return requestOrigin;
+    }
+    return false;
+  },
+  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization"],
+};
 
 const appLogger = bunyan.createLogger({
   name: "warmane-pvp-analytics-api",
