@@ -42,20 +42,15 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
 
   architectures = ["arm64"]
 
-  # s3_bucket = "simoni-enterprises-artifacts"
-  # s3_key    = var.artifact_file
-
   s3_bucket         = "simoni-enterprises-artifacts"
   s3_key            = data.aws_s3_object.lambda_bundle.key
   s3_object_version = data.aws_s3_object.lambda_bundle.version_id
 
-  # source_code_hash = filebase64sha256("v2.zip")
+  source_code_hash = data.aws_s3_object.lambda_bundle.etag
 
   runtime = "nodejs18.x"
   timeout = 10
   handler = "main.handler"
-
-  # source_code_hash = data.archive_file.main_lambda_code.output_base64sha256
 
   role = aws_iam_role.lambda_exec.arn
 }
