@@ -1,8 +1,7 @@
 resource "aws_api_gateway_rest_api" "rest_api" {
-  name = "warmane_pvp_analytics_v2_api"
-  #body = yamlencode(local.openapi_spec)
-  body = data.template_file.openapi_template.rendered
-
+  name              = "warmane_pvp_analytics_v2_api"
+  body              = data.template_file.openapi_template.rendered
+  put_rest_api_mode = "merge"
 }
 
 resource "aws_api_gateway_deployment" "main_deployment" {
@@ -22,3 +21,4 @@ resource "aws_api_gateway_stage" "main_stage" {
   rest_api_id   = aws_api_gateway_rest_api.rest_api.id
   stage_name    = "main_stage"
 }
+
