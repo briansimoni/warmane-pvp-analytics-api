@@ -11,8 +11,8 @@ resource "aws_sqs_queue" "crawl_queue" {
   })
 }
 
-resource "aws_sqs_queue" "crawl_dead_letter" {
-  name = "terraform-example-deadletter-queue"
+resource "aws_sqs_queue" "warmane_crawler_queue_dlq" {
+  name = "warmane_crawler_queue_dlq"
 }
 
 resource "aws_sqs_queue_redrive_allow_policy" "crawl_queue" {
