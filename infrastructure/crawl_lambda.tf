@@ -28,7 +28,7 @@ resource "aws_iam_role_policy_attachment" "crawler_lambda_sqs_policy" {
   role       = aws_iam_role.crawler_lambda_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_policy" {
+resource "aws_iam_role_policy_attachment" "crawler_lambda_policyh" {
   role       = aws_iam_role.crawler_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
