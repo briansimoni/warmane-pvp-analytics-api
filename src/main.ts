@@ -8,6 +8,7 @@ import {
   errorHandlingMiddleware,
 } from "./middleware";
 import { router } from "./routes";
+import { Context, SQSEvent } from "aws-lambda";
 
 const appLogger = bunyan.createLogger({
   name: "warmane-pvp-analytics-api",
@@ -31,3 +32,9 @@ if (process.env.AWS_EXECUTION_ENV === undefined) {
 }
 
 export const handler = serverless(app);
+
+export function sqsHandler(event: SQSEvent, context: Context) {
+  console.log("sqsHandler");
+  console.log(event);
+  console.log(context);
+}
