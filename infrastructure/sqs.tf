@@ -6,7 +6,7 @@ resource "aws_sqs_queue" "crawl_queue" {
   visibility_timeout_seconds = 180
   sqs_managed_sse_enabled    = true
   redrive_policy = jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.crawl_dead_letter.arn
+    deadLetterTargetArn = aws_sqs_queue.warmane_crawler_queue_dlq.arn
     maxReceiveCount     = 4
   })
 }
