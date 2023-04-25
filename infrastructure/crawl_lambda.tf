@@ -28,6 +28,11 @@ resource "aws_iam_role_policy_attachment" "crawler_lambda_sqs_policy" {
   role       = aws_iam_role.crawler_lambda_role.name
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_policy" {
+  role       = aws_iam_role.crawler_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 resource "aws_lambda_event_source_mapping" "crawler_mapping" {
   event_source_arn = aws_sqs_queue.crawl_queue.arn
   function_name    = aws_lambda_function.warmane_analytics_api_v2_crawler_function.function_name
