@@ -19,15 +19,52 @@ export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 router.get("/character", async (ctx) => {
   ctx.log.info("this is an example of logging");
+
   const params = schema.validate(ctx.query);
   if (params.error) {
     throw createError.BadRequest(params.error.message);
   }
   const { character, realm } = params.value;
 
-  ctx.body = {
-    hello: "world",
-    character,
-    realm,
-  };
+  try {
+    const warmaneCrawler = new WarmaneCrawler();
+
+    //* fetching all match details
+    const matchDetailsList = await warmaneCrawler.fetchAllMatchDetails({
+      character,
+      realm,
+    });
+
+    ctx.body = matchDetailsList;
+    ctx.status = 200;
+  } catch (error) {
+    ctx.log.error("An error occurred while fetching data: ", error);
+
+    throw createError.InternalServerError(
+      "An error occurred while fetching data"
+    );
+  }
 });
+
+/*
+router.get('/character', async (ctx, next) => {
+  const character = ctx.query.character;
+  const realm = ctx.query.realm;
+
+  if (!character || !realm) {
+    ctx.status = 400;
+    ctx.body = { error: 'Missing required query parameters: character and realm' };
+    return;
+  }
+
+  try {
+    const warmaneCrawler = new WarmaneCrawler();
+    const data = await warmaneCrawler.getCharacterMatchHistory(character, realm);
+    ctx.body = data;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { error: 'An error occurred while fetching data' };
+  }
+});
+
+*/

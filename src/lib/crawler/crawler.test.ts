@@ -64,10 +64,10 @@ describe("crawler tests", () => {
     let maxOngoingRequests = 0;
 
     WarmaneCrawler.prototype.fetchMatchData = jest.fn(
-      async (matchId: string) => {
+      async (params: { matchId: string; character: string; realm: string }) => {
         ongoingRequests++;
         maxOngoingRequests = Math.max(maxOngoingRequests, ongoingRequests);
-        const result = await originalFetchMatchData.call(crawler, matchId);
+        const result = await originalFetchMatchData.call(crawler, params);
         ongoingRequests--;
         return result;
       }
