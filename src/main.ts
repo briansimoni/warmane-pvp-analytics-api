@@ -6,9 +6,10 @@ import {
   ApiGatewayContext,
   AwsMiddleware,
   errorHandlingMiddleware,
+  makeSqsHandlerMiddleware,
 } from "./middleware";
 import { router } from "./routes";
-import { Context, SQSEvent } from "aws-lambda";
+import { crawlerHandler } from "./lib/crawler/handler";
 
 const appLogger = bunyan.createLogger({
   name: "warmane-pvp-analytics-api",
@@ -16,25 +17,26 @@ const appLogger = bunyan.createLogger({
   serializers: bunyan.stdSerializers,
 });
 
-const app = new Koa<Koa.DefaultState, ApiGatewayContext>();
+export const api = new Koa<Koa.DefaultState, ApiGatewayContext>();
 
-app.use(errorHandlingMiddleware);
-app.use(koaBunyanLogger(appLogger));
-app.use(koaBunyanLogger.requestIdContext());
-app.use(koaBunyanLogger.requestLogger());
-app.use(AwsMiddleware({}));
-app.use(router.routes());
+api.use(errorHandlingMiddleware);
+api.use(koaBunyanLogger(appLogger));
+api.use(koaBunyanLogger.requestIdContext());
+api.use(koaBunyanLogger.requestLogger());
+api.use(AwsMiddleware({}));
+api.use(router.routes());
+
+const sqs = new Koa<Koa.DefaultState, Koa.DefaultContext>();
+sqs.use(makeSqsHandlerMiddleware(crawlerHandler));
 
 if (process.env.AWS_EXECUTION_ENV === undefined) {
-  app.listen(3000, () => {
+  api.listen(3000, () => {
     appLogger.info("server listening on 3000");
+  });
+
+  sqs.listen(3001, () => {
+    appLogger.info("server running on 3001");
   });
 }
 
-export const handler = serverless(app);
-
-export function sqsHandler(event: SQSEvent, context: Context) {
-  console.log("sqsHandler");
-  console.log(event);
-  console.log(context);
-}
+export const apiHandler = serverless(api);

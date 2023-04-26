@@ -1,4 +1,4 @@
-import { APIGatewayEvent, Context } from "aws-lambda";
+import { APIGatewayEvent, Context, SQSEvent } from "aws-lambda";
 import createError from "http-errors";
 import Koa, { DefaultContext } from "koa";
 
@@ -63,4 +63,27 @@ export const errorHandlingMiddleware: Koa.Middleware = async (ctx, next) => {
       throw error;
     }
   }
+};
+
+type SQSHandlerFunction = (event: SQSEvent, context: Context) => Promise<void>;
+
+/**
+ * makeSqsHandlerMiddleware gives you the ability to use an sqs/lambda handler
+ * function locally with a Koa server. It returns a Koa.Middleware
+ * @example app.use(makeSqsHandlerMiddleware(handler))
+ */
+export const makeSqsHandlerMiddleware = (
+  handler: SQSHandlerFunction
+): Koa.Middleware => {
+  return async (ctx: Koa.ParameterizedContext) => {
+    const record = {
+      body: ctx.request.body as string,
+    } as unknown as SQSEvent;
+
+    const event: SQSEvent = {
+      Records: [record],
+    } as unknown as SQSEvent;
+    const result = await handler(event, {} as Context);
+    ctx.body = result;
+  };
 };
