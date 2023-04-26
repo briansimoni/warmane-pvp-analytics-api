@@ -52,7 +52,7 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
 
   runtime = "nodejs18.x"
   timeout = 180
-  handler = "main.crawlerHandler"
+  handler = "handlers.crawlerHandler"
 
   role = aws_iam_role.crawler_lambda_role.arn
 }

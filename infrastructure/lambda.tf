@@ -50,7 +50,7 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
 
   runtime = "nodejs18.x"
   timeout = 10
-  handler = "main.handler"
+  handler = "handlers.apiHandler"
 
   role = aws_iam_role.lambda_exec.arn
 }
