@@ -52,4 +52,16 @@ describe("CORS tests", () => {
     expect(response.status).toBe(200);
     expect(response.headers["access-control-allow-origin"]).toBeUndefined();
   });
+
+  it("should allow requests from warmane.dog", async () => {
+    const response = await request
+      .get("/character")
+      .query({ character: "test", realm: "test" })
+      .set("Origin", "https://warmane.dog");
+
+    expect(response.status).toBe(200);
+    expect(response.headers["access-control-allow-origin"]).toBe(
+      "https://warmane.dog"
+    );
+  });
 });
