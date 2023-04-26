@@ -67,6 +67,7 @@ export class WarmaneCrawler implements Crawler {
     const response = await axios.get(
       `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`
     );
+
     return response.data;
   }
 
@@ -125,11 +126,15 @@ export class WarmaneCrawler implements Crawler {
     return matchSummaries;
   }
 
-  // Fetches match data for given match ID, returns array of CharacterDetail objects
-  async fetchMatchData(matchId: string): Promise<CharacterDetail[]> {
+  // Fetches match data for given match ID, character, and realm, returns array of CharacterDetail objects
+  async fetchMatchData(params: {
+    matchId: string;
+    character: string;
+    realm: string;
+  }): Promise<CharacterDetail[]> {
     const response = await axios.post(
-      "https://armory.warmane.com/character/Dumpster/Blackrock/match-history",
-      `matchinfo=${matchId}`,
+      `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`,
+      `matchinfo=${params.matchId}`,
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -162,7 +167,11 @@ export class WarmaneCrawler implements Crawler {
     const limitedFetchMatchData = limiter.wrap(this.fetchMatchData.bind(this));
 
     for (const matchId of matchIds) {
-      const characterDetails = await limitedFetchMatchData(matchId);
+      const characterDetails = await limitedFetchMatchData({
+        matchId,
+        character: params.character,
+        realm: params.realm,
+      });
 
       // formats JSON response (removes HTML, organizes data )
       characterDetails.forEach((characterDetail: CharacterDetail) => {
@@ -212,6 +221,20 @@ export class WarmaneCrawler implements Crawler {
         matchDetailsList.push(matchDetails);
       }
     }
+    return matchDetailsList;
+  }
+
+  // allows <routes.ts> to fetch entire dataset with 'character' and 'realm' as input
+  async fetchAllMatchDetails(params: {
+    character: string;
+    realm: string;
+  }): Promise<MatchDetails[]> {
+    const matchSummaries = await this.getMatchSummaries(params);
+    // console.log("Match summaries fetched: ", matchSummaries);
+    const matchDetailsList = await this.getMatchDetails({
+      ...params,
+      matchSummaries,
+    });
     return matchDetailsList;
   }
 }

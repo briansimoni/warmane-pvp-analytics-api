@@ -4,17 +4,10 @@ info:
   description: This API provides the interface into the data to find out how much of a dog a player might be
   version: 1.0.0
 paths:
-  # /hello:
-  #   get:
-  #     x-amazon-apigateway-integration:
-  #       httpMethod: POST
-  #       payloadFormatVersion: "1.0"
-  #       type: "aws_proxy"
-  #       uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
-
   /character:
     get:
-      description: This is more of an example function for now. Proxies to warmane's API
+      summary: Get Warmane character data
+      description: Proxies to Warmane's API and passes user search parameters to the Warmane Crawler.
       parameters:
         - name: character
           in: query
@@ -28,15 +21,35 @@ paths:
             type: string
       responses:
         200:
-          description: good response
+          description: Successfully retrieved character data
       x-amazon-apigateway-integration:
         httpMethod: POST
         payloadFormatVersion: "1.0"
         type: "aws_proxy"
         uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
-
+    options:
+      responses:
+        200:
+          description: CORS headers
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        payloadFormatVersion: "1.0"
+        type: "aws_proxy"
+        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
   /crawl:
     post:
+      summary: Start Warmane character data crawl
+      description: Initiates a crawl of Warmane character data based on the user search parameters provided.
       requestBody:
         content:
           application/json:
@@ -53,13 +66,28 @@ paths:
               additionalProperties: false
       responses:
         200:
-          description: crawl started
+          description: Crawl started successfully
       x-amazon-apigateway-integration:
         httpMethod: POST
         payloadFormatVersion: "1.0"
         type: "aws_proxy"
         uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
-
-    # /crawl/status:
-    #   description: check the status of the crawler for a given character
-    #   get:
+    options:
+      responses:
+        200:
+          description: CORS headers
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        payloadFormatVersion: "1.0"
+        type: "aws_proxy"
+        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
