@@ -45,26 +45,3 @@ router.get("/character", async (ctx) => {
     );
   }
 });
-
-/*
-router.get('/character', async (ctx, next) => {
-  const character = ctx.query.character;
-  const realm = ctx.query.realm;
-
-  if (!character || !realm) {
-    ctx.status = 400;
-    ctx.body = { error: 'Missing required query parameters: character and realm' };
-    return;
-  }
-
-  try {
-    const warmaneCrawler = new WarmaneCrawler();
-    const data = await warmaneCrawler.getCharacterMatchHistory(character, realm);
-    ctx.body = data;
-  } catch (error) {
-    ctx.status = 500;
-    ctx.body = { error: 'An error occurred while fetching data' };
-  }
-});
-
-*/

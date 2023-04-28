@@ -1,24 +1,23 @@
 import serverless from "aws-serverless-koa";
 import { configureApp } from "./appConfig";
-import { makeSqsHandlerMiddleware } from "./middleware";
-import { crawlerHandler } from "./lib/crawler/handler";
-
-import Koa from "koa";
+import { router } from "./routes";
+import crawlerApp from "./crawlerApp";
 
 const app = configureApp();
 const appLogger = app.context.log;
 
-const sqs = new Koa<Koa.DefaultState, Koa.DefaultContext>();
-sqs.use(makeSqsHandlerMiddleware(crawlerHandler));
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 if (process.env.AWS_EXECUTION_ENV === undefined) {
   app.listen(3000, () => {
     appLogger.info("server listening on 3000");
   });
 
-  sqs.listen(3001, () => {
+  crawlerApp.listen(3001, () => {
     appLogger.info("server running on 3001");
   });
 }
 
 export const apiHandler = serverless(app);
+export const crawlerHandler = serverless(crawlerApp);
