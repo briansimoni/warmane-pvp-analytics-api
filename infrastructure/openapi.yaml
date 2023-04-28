@@ -71,7 +71,7 @@ paths:
         httpMethod: POST
         payloadFormatVersion: "1.0"
         type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
+        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_crawler_function_arn}/invocations"
     options:
       responses:
         200:
@@ -90,4 +90,4 @@ paths:
         httpMethod: POST
         payloadFormatVersion: "1.0"
         type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
+        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_crawler_function_arn}/invocations"
