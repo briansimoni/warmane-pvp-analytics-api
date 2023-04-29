@@ -19,15 +19,29 @@ export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 router.get("/character", async (ctx) => {
   ctx.log.info("this is an example of logging");
+
   const params = schema.validate(ctx.query);
   if (params.error) {
     throw createError.BadRequest(params.error.message);
   }
   const { character, realm } = params.value;
 
-  ctx.body = {
-    hello: "world",
-    character,
-    realm,
-  };
+  try {
+    const warmaneCrawler = new WarmaneCrawler();
+
+    //* fetching all match details
+    const matchDetailsList = await warmaneCrawler.fetchAllMatchDetails({
+      character,
+      realm,
+    });
+
+    ctx.body = matchDetailsList;
+    ctx.status = 200;
+  } catch (error) {
+    ctx.log.error("An error occurred while fetching data: ", error);
+
+    throw createError.InternalServerError(
+      "An error occurred while fetching data"
+    );
+  }
 });

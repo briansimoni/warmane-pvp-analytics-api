@@ -29,7 +29,7 @@ export interface CharacterDetail {
   personal_change: string;
 }
 
-/**
+/*
  * MatchDetails is an aggregate of all data that the crawler collects
  * for a given matchId. These objects are intended to be stored
  * long-term in some kind of database for further use and analysis.
@@ -67,6 +67,7 @@ export class WarmaneCrawler implements Crawler {
     const response = await axios.get(
       `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`
     );
+
     return response.data;
   }
 
@@ -125,16 +126,24 @@ export class WarmaneCrawler implements Crawler {
     return matchSummaries;
   }
 
-  // Fetches match data for given match ID, returns array of CharacterDetail objects
-  async fetchMatchData(matchId: string): Promise<CharacterDetail[]> {
+  /*
+   * Fetches match data for given match ID, character, and realm
+   * Returns array of CharacterDetail objects (raw, unformatted JSON data)
+   */
+  async fetchMatchData(params: {
+    matchId: string;
+    character: string;
+    realm: string;
+  }): Promise<CharacterDetail[]> {
     const response = await axios.post(
-      "https://armory.warmane.com/character/Dumpster/Blackrock/match-history",
-      `matchinfo=${matchId}`,
+      `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`,
+      `matchinfo=${params.matchId}`,
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
+            " Chrome/103.0.5060.114 Safari/537.36",
         },
       }
     );
@@ -142,7 +151,7 @@ export class WarmaneCrawler implements Crawler {
     return response.data;
   }
 
-  /**
+  /*
    * Fetches match details using match IDs of each given matchSummaries array,
    * combines matchDetails objects with  corresponding matchSummary object,
    * and restricts concurrent operations to 32.
@@ -160,9 +169,16 @@ export class WarmaneCrawler implements Crawler {
     // initializes and implements new Bottleneck instance to control concurrency
     const limiter = new Bottleneck({ maxConcurrent: 32 });
     const limitedFetchMatchData = limiter.wrap(this.fetchMatchData.bind(this));
-
+    /*
+     * Each match ID generates an array with a 'characterDetail'
+     * object for each player in the associated match.
+     */
     for (const matchId of matchIds) {
-      const characterDetails = await limitedFetchMatchData(matchId);
+      const characterDetails = await limitedFetchMatchData({
+        matchId,
+        character: params.character,
+        realm: params.realm,
+      });
 
       // formats JSON response (removes HTML, organizes data )
       characterDetails.forEach((characterDetail: CharacterDetail) => {
@@ -212,6 +228,20 @@ export class WarmaneCrawler implements Crawler {
         matchDetailsList.push(matchDetails);
       }
     }
+    return matchDetailsList;
+  }
+
+  // allows <routes.ts> to fetch entire dataset with 'character' and 'realm' as input
+  async fetchAllMatchDetails(params: {
+    character: string;
+    realm: string;
+  }): Promise<MatchDetails[]> {
+    const matchSummaries = await this.getMatchSummaries(params);
+    // console.log("Match summaries fetched: ", matchSummaries);
+    const matchDetailsList = await this.getMatchDetails({
+      ...params,
+      matchSummaries,
+    });
     return matchDetailsList;
   }
 }
