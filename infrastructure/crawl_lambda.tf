@@ -5,7 +5,7 @@ resource "aws_cloudwatch_log_group" "crawler_log_group" {
 }
 
 resource "aws_iam_role" "crawler_lambda_role" {
-  name = "crawler_lambda_role"
+  name = "${terraform.workspace}_crawler_lambda_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -40,7 +40,7 @@ resource "aws_lambda_event_source_mapping" "crawler_mapping" {
 }
 
 resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
-  function_name = "warmane_analytics_api_v2_crawler_function"
+  function_name = "${terraform.workspace}_warmane_analytics_api_v2_crawler_function"
 
   architectures = ["arm64"]
 

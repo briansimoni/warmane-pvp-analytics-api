@@ -4,7 +4,7 @@ data "aws_route53_zone" "warmane_dot_dog" {
 }
 
 resource "aws_api_gateway_domain_name" "api" {
-  domain_name              = "api.warmane.dog"
+  domain_name              = var.domain_name[terraform.workspace]
   regional_certificate_arn = aws_acm_certificate.api.arn
   security_policy          = "TLS_1_2"
   depends_on               = [aws_acm_certificate_validation.api]

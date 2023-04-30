@@ -49,8 +49,6 @@ jobs:
       - run: aws s3 cp ./${{ env.artifact_version }}.zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/${{ env.artifact_version }}.zip
 
   deploy:
-    env:
-      TF_WORKSPACE: prod
     needs: build
     runs-on: ubuntu-latest
     defaults:
@@ -81,7 +79,17 @@ jobs:
       - name: terraform plan
         id: plan
         run: terraform plan -var="artifact_file=${{ env.artifact_file }}" -no-color -input=false
+        env:
+          TF_WORKSPACE: dev
 
-      - name: terraform apply
+      - name: terraform apply dev
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
+        env:
+          TF_WORKSPACE: dev
+
+      - name: terraform apply prod
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
         run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
+        env:
+          TF_WORKSPACE: prod
