@@ -1,7 +1,6 @@
 import Router from "@koa/router";
 import Koa from "koa";
 import { ApiGatewayContext } from "./middleware";
-import { WarmaneCrawler } from "./lib/crawler/crawler";
 import Joi from "joi";
 import createError from "http-errors";
 
@@ -26,22 +25,9 @@ router.get("/character", async (ctx) => {
   }
   const { character, realm } = params.value;
 
-  try {
-    const warmaneCrawler = new WarmaneCrawler();
-
-    //* fetching all match details
-    const matchDetailsList = await warmaneCrawler.fetchAllMatchDetails({
-      character,
-      realm,
-    });
-
-    ctx.body = matchDetailsList;
-    ctx.status = 200;
-  } catch (error) {
-    ctx.log.error("An error occurred while fetching data: ", error);
-
-    throw createError.InternalServerError(
-      "An error occurred while fetching data"
-    );
-  }
+  ctx.body = {
+    character,
+    realm,
+    hello: "world",
+  };
 });
