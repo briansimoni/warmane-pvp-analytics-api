@@ -49,6 +49,8 @@ jobs:
       - run: aws s3 cp ./${{ env.artifact_version }}.zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/${{ env.artifact_version }}.zip
 
   deploy:
+    env:
+      TF_WORKSPACE: prod
     needs: build
     runs-on: ubuntu-latest
     defaults:
@@ -68,7 +70,7 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
-      - name: terraform
+      - name: terraform init
         id: init
         run: terraform init
 
