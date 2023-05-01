@@ -54,6 +54,8 @@ jobs:
     defaults:
       run:
         working-directory: infrastructure
+    env:
+      TF_WORKSPACE: dev
     steps:
       - uses: actions/checkout@v3
       - name: setup terraform
@@ -79,14 +81,10 @@ jobs:
       - name: terraform plan
         id: plan
         run: terraform plan -var="artifact_file=${{ env.artifact_file }}" -no-color -input=false
-        env:
-          TF_WORKSPACE: dev
 
       - name: terraform apply dev
         if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
-        env:
-          TF_WORKSPACE: dev
 
       - name: terraform apply prod
         if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
