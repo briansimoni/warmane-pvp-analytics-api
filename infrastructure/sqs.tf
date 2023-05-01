@@ -1,5 +1,5 @@
 resource "aws_sqs_queue" "crawl_queue" {
-  name                       = "warmane_crawler_queue"
+  name                       = "${terraform.workspace}_warmane_crawler_queue"
   max_message_size           = 2048
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
@@ -12,7 +12,7 @@ resource "aws_sqs_queue" "crawl_queue" {
 }
 
 resource "aws_sqs_queue" "warmane_crawler_queue_dlq" {
-  name = "warmane_crawler_queue_dlq"
+  name = "${terraform.workspace}_warmane_crawler_queue_dlq"
 }
 
 resource "aws_sqs_queue_redrive_allow_policy" "crawl_queue" {

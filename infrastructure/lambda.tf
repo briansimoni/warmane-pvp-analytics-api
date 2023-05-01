@@ -5,7 +5,7 @@ resource "aws_cloudwatch_log_group" "hello_world" {
 }
 
 resource "aws_iam_role" "lambda_exec" {
-  name = "warmane_v2_lambda"
+  name = "${terraform.workspace}_warmane_v2_lambda"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -38,7 +38,7 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
-  function_name = "warmane_analytics_api_v2_main_function"
+  function_name = "${terraform.workspace}_warmane_analytics_api_v2_main_function"
 
   architectures = ["arm64"]
 
@@ -58,9 +58,4 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
 data "aws_s3_object" "lambda_bundle" {
   bucket = "simoni-enterprises-artifacts"
   key    = var.artifact_file
-}
-
-variable "artifact_file" {
-  type    = string
-  default = "briansimoni/warmane-pvp-analytics-api/v2.zip"
 }

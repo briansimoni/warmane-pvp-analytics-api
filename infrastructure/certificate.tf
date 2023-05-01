@@ -1,6 +1,6 @@
 
 resource "aws_acm_certificate" "api" {
-  domain_name       = "api.warmane.dog"
+  domain_name       = var.domain_name[terraform.workspace]
   validation_method = "DNS"
 }
 
