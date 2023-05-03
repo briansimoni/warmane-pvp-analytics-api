@@ -54,7 +54,7 @@ jobs:
           aws-region: us-east-1
       - run: aws s3 cp ./${{ env.artifact_version }}.zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/${{ env.artifact_version }}.zip
 
-  deploy:
+  deploy_dev:
     needs: build
     runs-on: ubuntu-latest
     defaults:
@@ -94,11 +94,28 @@ jobs:
         run: terraform plan -var="artifact_file=${{ env.artifact_file }}" -no-color -input=false
 
       - name: terraform apply dev
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        if: (github.ref == 'refs/heads/dev' || github.event_name == 'workflow_dispatch') && github.event_name == 'push'
         run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
 
+  deploy_prod:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: infrastructure
+    env:
+      TF_WORKSPACE: prod
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: terraform plan
+        id: plan
+        run: terraform plan -var="artifact_file=v2.zip" -no-color -input=false
+
       - name: terraform apply prod
-        if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
-        run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
-        env:
-          TF_WORKSPACE: prod
+        run: terraform apply -var="artifact_file=v2.zip" -auto-approve -input=false
