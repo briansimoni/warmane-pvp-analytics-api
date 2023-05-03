@@ -120,7 +120,7 @@ jobs:
 
       - name: terraform plan
         id: plan
-        run: terraform plan -var="artifact_file=v2.zip" -no-color -input=false
+        run: terraform plan -var="artifact_file=${GITHUB_REPOSITORY}/v2.zip" -no-color -input=false
 
       - name: terraform apply prod
-        run: terraform apply -var="artifact_file=v2.zip" -auto-approve -input=false
+        run: terraform apply -var="artifact_file=${GITHUB_REPOSITORY}/v2.zip" -auto-approve -input=false
