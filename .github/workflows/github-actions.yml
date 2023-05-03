@@ -32,6 +32,7 @@ jobs:
         run: npm test
 
   build:
+    if: github.event_name == 'push'
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -112,6 +113,10 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: terraform init
+        id: init
+        run: terraform init
 
       - name: terraform plan
         id: plan
