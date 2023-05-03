@@ -4,6 +4,12 @@ on:
   pull_request:
     branches:
       - v2
+  workflow_dispatch:
+    inputs:
+      branch:
+        required: true
+        description: specify the branch that you want deployed
+        default: v2
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -64,7 +70,7 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: get artifact file name
-        run: echo "artifact_file=${GITHUB_REPOSITORY}/$(git symbolic-ref --short HEAD).zip" >> $GITHUB_ENV
+        run: echo "artifact_file=${GITHUB_REPOSITORY}/${inputs.branch}.zip" >> $GITHUB_ENV
 
       - name: terraform format
         id: fmt
