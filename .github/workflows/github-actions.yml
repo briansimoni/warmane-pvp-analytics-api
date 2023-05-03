@@ -70,7 +70,7 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: get artifact file name
-        run: echo "artifact_file=${GITHUB_REPOSITORY}/${inputs.branch}.zip" >> $GITHUB_ENV
+        run: echo "artifact_file=${GITHUB_REPOSITORY}/${{ inputs.branch }}.zip" >> $GITHUB_ENV
 
       - name: terraform format
         id: fmt
