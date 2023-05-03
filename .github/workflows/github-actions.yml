@@ -70,7 +70,12 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: get artifact file name
-        run: echo "artifact_file=${GITHUB_REPOSITORY}/${{ inputs.branch }}.zip" >> $GITHUB_ENV
+        run: |
+          if [ "${{ inputs.branch }}" == "refs/heads/main" ]; then
+            echo "artifact_file=${GITHUB_REPOSITORY}/${{ inputs.branch }}.zip" >> $GITHUB_ENV
+          else
+            echo "artifact_file=${GITHUB_REPOSITORY}/$(git symbolic-ref --short HEAD).zip" >> $GITHUB_ENV
+          fi
 
       - name: terraform format
         id: fmt
