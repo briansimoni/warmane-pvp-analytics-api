@@ -71,7 +71,7 @@ jobs:
 
       - name: get artifact file name
         run: |
-          if [ "${{ inputs.branch }}" == "refs/heads/main" ]; then
+          if [ "${{ inputs.branch }}" ]; then
             echo "artifact_file=${GITHUB_REPOSITORY}/${{ inputs.branch }}.zip" >> $GITHUB_ENV
           else
             echo "artifact_file=${GITHUB_REPOSITORY}/$(git symbolic-ref --short HEAD).zip" >> $GITHUB_ENV
