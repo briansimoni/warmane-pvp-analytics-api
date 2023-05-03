@@ -56,7 +56,7 @@ jobs:
       - run: aws s3 cp ./${{ env.artifact_version }}.zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/${{ env.artifact_version }}.zip
 
   deploy_dev:
-    needs: build
+    if: (github.ref == 'refs/heads/v2' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -95,11 +95,10 @@ jobs:
         run: terraform plan -var="artifact_file=${{ env.artifact_file }}" -no-color -input=false
 
       - name: terraform apply dev
-        if: (github.ref == 'refs/heads/dev' || github.event_name == 'workflow_dispatch') && github.event_name == 'push'
         run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
 
   deploy_prod:
-    needs: build
+    needs: deploy_dev
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
     defaults:
