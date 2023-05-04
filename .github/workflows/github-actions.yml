@@ -1,9 +1,12 @@
 name: Continuous Deployment
 on:
   push:
-  pull_request:
-    branches:
-      - v2
+  workflow_dispatch:
+    inputs:
+      branch:
+        required: true
+        description: specify the branch that you want deployed
+        default: v2
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -48,8 +51,9 @@ jobs:
           aws-region: us-east-1
       - run: aws s3 cp ./${{ env.artifact_version }}.zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/${{ env.artifact_version }}.zip
 
-  deploy:
+  deploy_dev:
     needs: build
+    if: (github.ref == 'refs/heads/v2' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -64,7 +68,12 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: get artifact file name
-        run: echo "artifact_file=${GITHUB_REPOSITORY}/$(git symbolic-ref --short HEAD).zip" >> $GITHUB_ENV
+        run: |
+          if [ "${{ inputs.branch }}" ]; then
+            echo "artifact_file=${GITHUB_REPOSITORY}/${{ inputs.branch }}.zip" >> $GITHUB_ENV
+          else
+            echo "artifact_file=${GITHUB_REPOSITORY}/$(git symbolic-ref --short HEAD).zip" >> $GITHUB_ENV
+          fi
 
       - name: terraform format
         id: fmt
@@ -83,11 +92,31 @@ jobs:
         run: terraform plan -var="artifact_file=${{ env.artifact_file }}" -no-color -input=false
 
       - name: terraform apply dev
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
 
+  deploy_prod:
+    needs: deploy_dev
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: infrastructure
+    env:
+      TF_WORKSPACE: prod
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: terraform init
+        id: init
+        run: terraform init
+
+      - name: terraform plan
+        id: plan
+        run: terraform plan -var="artifact_file=${GITHUB_REPOSITORY}/v2.zip" -no-color -input=false
+
       - name: terraform apply prod
-        if: github.ref == 'refs/heads/v2' && github.event_name == 'push'
-        run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
-        env:
-          TF_WORKSPACE: prod
+        run: terraform apply -var="artifact_file=${GITHUB_REPOSITORY}/v2.zip" -auto-approve -input=false
