@@ -2,6 +2,9 @@ import serverless from "aws-serverless-koa";
 import { configureApp } from "./appConfig";
 import { router } from "./routes";
 import crawlerApp from "./crawlerApp";
+import { config } from "./config";
+
+console.log(config.crawlerSqsEndpoint);
 
 const app = configureApp();
 const appLogger = app.context.log;

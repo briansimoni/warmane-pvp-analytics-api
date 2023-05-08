@@ -28,7 +28,31 @@ resource "aws_iam_role_policy_attachment" "crawler_lambda_sqs_policy" {
   role       = aws_iam_role.crawler_lambda_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "crawler_lambda_policyh" {
+resource "aws_iam_policy" "crawler_sqs_policy" {
+  name = "crawler-lambda-sqs-policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sqs:ReadMessage",
+          "sqs:DeleteMessage",
+          "sqs:ChangeMessageVisibility",
+          "sqs:GetQueueUrl"
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_sqs_queue.crawl_queue.arn}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "crawler_lambda_sqs_policy_attachment" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.crawler_sqs_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "crawler_lambda_policy" {
   role       = aws_iam_role.crawler_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }

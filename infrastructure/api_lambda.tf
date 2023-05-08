@@ -26,6 +26,52 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+resource "aws_iam_policy" "api_lambda_resource_permissions_policy" {
+  name = "lambda-sqs-policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sqs:SendMessage"
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_sqs_queue.crawl_queue.arn}"
+      },
+      {
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem"
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_dynamodb_table.warmane_dynamo_table.arn}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "api_lambda_policy_attachment" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.api_lambda_resource_permissions_policy.arn
+}
+
+resource "aws_iam_policy" "dynamodb_policy" {
+  name = "dynamodb_policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem"
+        ]
+        Effect   = "Allow"
+        Resource = aws_dynamodb_table.example.arn
+      }
+    ]
+  })
+}
+
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
@@ -53,6 +99,12 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
   handler = "handlers.apiHandler"
 
   role = aws_iam_role.lambda_exec.arn
+
+  environment {
+    variables = {
+      CRAWLER_SQS_URL = "${aws_sqs_queue.crawl_queue.url}"
+    }
+  }
 }
 
 data "aws_s3_object" "lambda_bundle" {
