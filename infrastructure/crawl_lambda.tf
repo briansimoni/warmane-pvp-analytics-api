@@ -48,7 +48,7 @@ resource "aws_iam_policy" "crawler_sqs_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "crawler_lambda_sqs_policy_attachment" {
-  role       = aws_iam_role.lambda_exec.name
+  role       = aws_iam_role.crawler_lambda_role.name
   policy_arn = aws_iam_policy.crawler_sqs_policy.arn
 }
 
