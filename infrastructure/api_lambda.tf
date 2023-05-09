@@ -66,7 +66,7 @@ resource "aws_iam_policy" "dynamodb_policy" {
           "dynamodb:GetItem"
         ]
         Effect   = "Allow"
-        Resource = aws_dynamodb_table.example.arn
+        Resource = aws_dynamodb_table.warmane_dynamo_table.arn
       }
     ]
   })
