@@ -31,7 +31,6 @@ api.use(koaBunyanLogger(logger));
 api.use(koaBunyanLogger.requestIdContext());
 api.use(koaBunyanLogger.requestLogger());
 api.use(apiGatewayMiddleware({}));
-api.use(cors(corsOptions));
 api.use(router.routes());
 api.use(router.allowedMethods());
 
