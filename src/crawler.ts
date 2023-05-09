@@ -9,6 +9,12 @@ crawler.use(koaBunyanLogger(logger));
 crawler.use(koaBunyanLogger.requestIdContext());
 crawler.use(koaBunyanLogger.requestLogger());
 
+crawler.use((ctx) => {
+  logger.info(ctx);
+  logger.info(ctx.headers);
+  logger.info(ctx.body);
+});
+
 // crawler.use(makeSqsHandlerMiddleware(crawlerHandler));
 
 export { crawler };
