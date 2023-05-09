@@ -3,5 +3,9 @@
  * functions directly refer to by name. You can see this
  * in the terraform code.
  */
-export { apiHandler } from "./main";
-export { crawlerHandler } from "./lib/crawler/handler";
+import serverless from "aws-serverless-koa";
+import { api } from "./api";
+import { crawler } from "./crawler";
+
+export const apiHandler = serverless(api);
+export const crawlerHandler = serverless(crawler);

@@ -7,6 +7,10 @@ interface CrawlerInput {
   realm: string;
 }
 
+/**
+ * sends a message to the SQS queue used by the crawler lambda
+ * to collect character data from warmane asynchronously
+ */
 export async function requestCrawl(input: CrawlerInput) {
   if (process.env.AWS_EXECUTION_ENV !== undefined) {
     await sendSqsMessage(input);
@@ -18,12 +22,12 @@ export async function requestCrawl(input: CrawlerInput) {
 async function sendSqsMessage(message: object) {
   const client = new SQSClient({});
   const m = new SendMessageCommand({
-    QueueUrl: config.crawlerSqsEndpoint,
+    QueueUrl: config.crawlerSqsUrl,
     MessageBody: JSON.stringify(message),
   });
   await client.send(m);
 }
 
 async function sendLocalMessage(message: object) {
-  axios.post(config.crawlerSqsEndpoint, message);
+  axios.post(config.crawlerSqsUrl, message);
 }

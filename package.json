@@ -8,7 +8,7 @@
     "build": "tsc",
     "prettier": "prettier --check src/**/*.ts",
     "eslint": "eslint --max-warnings 1 src/**/*.ts",
-    "start": "node-dev --inspect --inspect-port=9229 --notify=false src/main.ts"
+    "start": "node-dev --inspect --inspect-port=9229 --notify=false src/localServer.ts"
   },
   "repository": {
     "type": "git",
