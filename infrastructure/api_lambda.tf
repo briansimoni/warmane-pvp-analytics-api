@@ -86,7 +86,7 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
   environment {
     variables = {
       CRAWLER_SQS_URL = "${aws_sqs_queue.crawl_queue.url}"
-      LOG_LEVEL       = var.domain_name[terraform.workspace]
+      LOG_LEVEL       = var.log_level[terraform.workspace]
       SERVICE_NAME    = "${terraform.workspace}_warmane_api"
     }
   }
