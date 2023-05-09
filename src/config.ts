@@ -1,3 +1,11 @@
+/**
+ * This file provides a standardized way to inject
+ * environment configuration into the application in a
+ * type-safe way. Locally, configuration can come from
+ * the .env file or system environment variables. In
+ * a lambda environment, it should generally always be
+ * environment variables.
+ */
 import * as dotenv from "dotenv";
 import Joi from "joi";
 import { logger } from "./lib/util/logger";
@@ -25,9 +33,11 @@ const vars = {
 const validationResult = configSchmea.validate(vars);
 if (validationResult.error) {
   logger.error("config error:", validationResult.error.message);
+  process.exit(1);
 }
 
 if (!validationResult.value) {
   logger.error("unable to provide configuration data");
+  process.exit(1);
 }
 export const config = validationResult.value;
