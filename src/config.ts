@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 import Joi from "joi";
+import { logger } from "./lib/util/logger";
 
 dotenv.config();
 
@@ -22,15 +23,11 @@ const vars = {
 };
 
 const validationResult = configSchmea.validate(vars);
-console.log(validationResult.value);
 if (validationResult.error) {
-  console.log("config error:", validationResult.error.message);
-  process.exit(1);
+  logger.error("config error:", validationResult.error.message);
 }
 
 if (!validationResult.value) {
-  console.log("unable to provide configuration data");
-  process.exit(1);
+  logger.error("unable to provide configuration data");
 }
 export const config = validationResult.value;
-console.log(config);
