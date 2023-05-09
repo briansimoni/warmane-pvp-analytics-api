@@ -7,3 +7,7 @@ variable "domain_name" {
   type        = map(string)
   description = "linked to the workspace e.g. (dev/prod) and can be used to prefix resources names"
 }
+
+variable "log_level" {
+  type = map(string)
+}

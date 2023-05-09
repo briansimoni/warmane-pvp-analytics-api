@@ -3,7 +3,6 @@ import Koa from "koa";
 import { router } from "../../routes";
 import cors, { Options } from "@koa/cors";
 import { allowedOrigins, configureApp } from "../../appConfig";
-import bunyan from "bunyan";
 
 const corsOptions: Options = {
   origin: (ctx: Koa.Context) => {
@@ -17,13 +16,7 @@ const corsOptions: Options = {
   allowHeaders: ["Content-Type", "Authorization"],
 };
 
-const testLogger = bunyan.createLogger({
-  name: "warmane-pvp-analytics-api-test",
-  level: "fatal",
-  serializers: bunyan.stdSerializers,
-});
-
-const app = configureApp(testLogger);
+const app = configureApp();
 app.use(cors(corsOptions));
 app.use(router.routes());
 

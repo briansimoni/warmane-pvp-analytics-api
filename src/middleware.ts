@@ -60,6 +60,7 @@ export const errorHandlingMiddleware: Koa.Middleware = async (ctx, next) => {
         },
       };
     } else {
+      ctx.log.error(error);
       throw error;
     }
   }

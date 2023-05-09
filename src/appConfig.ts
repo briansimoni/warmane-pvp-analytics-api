@@ -1,7 +1,7 @@
 import Koa from "koa";
 import cors, { Options } from "@koa/cors";
 import koaBunyanLogger from "koa-bunyan-logger";
-import bunyan from "bunyan";
+import { logger } from "./lib/util/logger";
 import {
   ApiGatewayContext,
   AwsMiddleware,
@@ -11,7 +11,7 @@ import { router } from "./routes";
 
 export const allowedOrigins = ["https://warmane.dog", "http://localhost:3000"];
 
-export function configureApp(logger?: bunyan) {
+export function configureApp() {
   const corsOptions: Options = {
     origin: (ctx: Koa.Context) => {
       const requestOrigin = ctx.request.header.origin;
@@ -24,20 +24,11 @@ export function configureApp(logger?: bunyan) {
     allowHeaders: ["Content-Type", "Authorization"],
   };
 
-  const appLogger =
-    logger ||
-    bunyan.createLogger({
-      name: "warmane-pvp-analytics-api",
-      level: "debug",
-      serializers: bunyan.stdSerializers,
-    });
-
   const app = new Koa<Koa.DefaultState, ApiGatewayContext>();
-  app.context.log = appLogger;
 
   app.use(errorHandlingMiddleware);
   app.use(cors(corsOptions));
-  app.use(koaBunyanLogger(appLogger));
+  app.use(koaBunyanLogger(logger));
   app.use(koaBunyanLogger.requestIdContext());
   app.use(koaBunyanLogger.requestLogger());
   app.use(AwsMiddleware({}));
