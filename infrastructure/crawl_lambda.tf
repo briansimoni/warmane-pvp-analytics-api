@@ -35,7 +35,7 @@ resource "aws_iam_policy" "crawler_sqs_policy" {
     Statement = [
       {
         Action = [
-          "sqs:ReadMessage",
+          "sqs:ReceiveMessage",
           "sqs:DeleteMessage",
           "sqs:ChangeMessageVisibility",
           "sqs:GetQueueUrl"
