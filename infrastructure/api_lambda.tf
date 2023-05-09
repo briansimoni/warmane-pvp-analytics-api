@@ -27,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 }
 
 resource "aws_iam_policy" "api_lambda_resource_permissions_policy" {
-  name = "lambda-sqs-policy"
+  name = "${terraform.workspace}_lambda-sqs-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -53,23 +53,6 @@ resource "aws_iam_policy" "api_lambda_resource_permissions_policy" {
 resource "aws_iam_role_policy_attachment" "api_lambda_policy_attachment" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = aws_iam_policy.api_lambda_resource_permissions_policy.arn
-}
-
-resource "aws_iam_policy" "dynamodb_policy" {
-  name = "dynamodb_policy"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "dynamodb:PutItem",
-          "dynamodb:GetItem"
-        ]
-        Effect   = "Allow"
-        Resource = aws_dynamodb_table.warmane_dynamo_table.arn
-      }
-    ]
-  })
 }
 
 resource "aws_lambda_permission" "apigw" {
