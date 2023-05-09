@@ -1,4 +1,5 @@
 import { Context, SQSEvent } from "aws-lambda";
+import { logger } from "../util/logger";
 //* import { WarmaneCrawler } from "./crawler";
 // import bodyParser from "koa-bodyparser";
 
@@ -7,9 +8,9 @@ export async function crawlerHandler(
   context: Context
   //* warmaneCrawler: WarmaneCrawler
 ) {
-  console.log("sqsHandler");
-  console.log(event);
-  console.log(context);
+  logger.info("sqsHandler");
+  logger.info(event);
+  logger.info(context);
 
   //*   const character = event.Records[0].messageAttributes.character.stringValue || "";
   //*   const realm = event.Records[0].messageAttributes.realm.stringValue || "";
