@@ -4,6 +4,6 @@ domain_name = {
 }
 
 log_level = {
-  dev = "debug"
+  dev  = "debug"
   prod = "info"
 }
