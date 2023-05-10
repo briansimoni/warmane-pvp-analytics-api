@@ -66,8 +66,6 @@ export const errorHandlingMiddleware: Koa.Middleware = async (ctx, next) => {
   }
 };
 
-type SQSHandlerFunction = (event: SQSEvent, context: Context) => Promise<void>;
-
 export interface SqsContext extends DefaultContext {
   sqs: {
     event: SQSEvent;
