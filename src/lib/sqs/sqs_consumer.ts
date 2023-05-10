@@ -1,33 +1,37 @@
-import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+import { SQSClient, ReceiveMessageCommand } from "@aws-sdk/client-sqs";
 import { config } from "../../config";
-import axios from "axios";
+import { logger } from "../util/logger";
 
-interface CrawlerInput {
+interface CrawlerRequest {
   character: string;
   realm: string;
 }
 
 /**
- * sends a message to the SQS queue used by the crawler lambda
- * to collect character data from warmane asynchronously
+ * reads request from the SQS queue. It will return
+ * a list of requests that have been made for the crawler
+ * to collect character data
  */
-export async function requestCrawl(input: CrawlerInput) {
-  if (process.env.AWS_EXECUTION_ENV !== undefined) {
-    await sendSqsMessage(input);
-  } else {
-    await sendLocalMessage(input);
-  }
+export async function readCrawlerRequests(): Promise<CrawlerRequest[]> {
+  return [];
 }
 
-async function sendSqsMessage(message: object) {
+export async function receiveSqsMessage(): Promise<CrawlerRequest[]> {
   const client = new SQSClient({});
-  const m = new SendMessageCommand({
+  const command = new ReceiveMessageCommand({
     QueueUrl: config.crawlerSqsUrl,
-    MessageBody: JSON.stringify(message),
   });
-  await client.send(m);
+  const result = await client.send(command);
+  if (result.Messages) {
+    return result.Messages.map((m) => {
+      if (!m.Body) {
+        logger.warn("message with empty body");
+        return;
+      }
+      return JSON.parse(m.Body);
+    }).filter(Boolean);
+  }
+  return [];
 }
 
-async function sendLocalMessage(message: object) {
-  axios.post(config.crawlerSqsUrl, message);
-}
+// async function receiveLocalMessage() {}
