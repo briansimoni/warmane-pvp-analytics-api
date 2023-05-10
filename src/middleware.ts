@@ -83,9 +83,11 @@ export const SqsMiddleware = (): Koa.Middleware<
 > => {
   return async (ctx: SqsContext, next) => {
     if (ctx.headers["x-apigateway-event"]) {
+      // I'm using the same koa-serverless middleware so they're
+      // not actully apigateway-events, that's just the name the middleware give them
       ctx.sqs = {
         event: JSON.parse(
-          decodeURIComponent(ctx.headers["x-apigateway-context"])
+          decodeURIComponent(ctx.headers["x-apigateway-event"])
         ),
         context: JSON.parse(
           decodeURIComponent(ctx.headers["x-apigateway-context"])
