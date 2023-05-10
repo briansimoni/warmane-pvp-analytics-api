@@ -17,6 +17,3 @@ if (process.env.AWS_EXECUTION_ENV === undefined) {
     logger.info("crawler lambda running on 4001");
   });
 }
-
-// export const apiHandler = serverless(app);
-// export const crawlerHandler = serverless(crawlerApp);
