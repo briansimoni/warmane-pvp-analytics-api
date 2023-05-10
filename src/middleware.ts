@@ -77,7 +77,7 @@ export interface SqsContext extends DefaultContext {
  * I made this to be more consistent with the API gateway
  * middleware.
  */
-export const SqsMiddleware = (): Koa.Middleware<
+export const sqsMiddleware = (): Koa.Middleware<
   Koa.DefaultState,
   SqsContext
 > => {

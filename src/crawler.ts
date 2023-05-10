@@ -1,7 +1,7 @@
 import Koa from "koa";
 import {
   SqsContext,
-  SqsMiddleware,
+  sqsMiddleware,
   errorHandlingMiddleware,
 } from "./middleware";
 import koaBunyanLogger from "koa-bunyan-logger";
@@ -19,7 +19,7 @@ crawler.use(errorHandlingMiddleware);
 crawler.use(koaBunyanLogger(logger));
 crawler.use(koaBunyanLogger.requestIdContext());
 crawler.use(bodyParser());
-crawler.use(SqsMiddleware());
+crawler.use(sqsMiddleware());
 
 crawler.use((ctx) => {
   logger.info(ctx);
