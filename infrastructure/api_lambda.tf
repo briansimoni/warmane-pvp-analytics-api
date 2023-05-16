@@ -63,7 +63,7 @@ resource "aws_lambda_permission" "apigw" {
 
   # The /*/* portion grants access from any method on any resource
   # within the API Gateway "REST API".
-  source_arn = "${aws_api_gateway_rest_api.rest_api.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_rest_api.warmane_api_gateway.execution_arn}/*/*"
 }
 
 resource "aws_lambda_function" "warmane_analytics_api_v2_main_function" {
