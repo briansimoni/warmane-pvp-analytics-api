@@ -31,9 +31,9 @@ resource "aws_api_gateway_deployment" "default_deployment" {
   rest_api_id = aws_api_gateway_rest_api.warmane_api_gateway.id
 }
 
-resource "aws_api_gateway_stage" "main_stage" {
+resource "aws_api_gateway_stage" "default_stage" {
   deployment_id = aws_api_gateway_deployment.default_deployment.id
-  rest_api_id   = aws_api_gateway_rest_api.rest_api.id
+  rest_api_id   = aws_api_gateway_rest_api.warmane_api_gateway.id
   stage_name    = terraform.workspace
 }
 
