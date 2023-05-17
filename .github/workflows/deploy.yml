@@ -1,0 +1,73 @@
+name: Deploy
+on:
+  workflow_call:
+    inputs:
+      artifiact_key:
+        required: true
+        type: string
+  workflow_dispatch:
+
+jobs:
+  deploy_dev:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure
+    env:
+      TF_WORKSPACE: dev
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: get artifact file name
+        run: |
+          echo "artifact_file=${GITHUB_REPOSITORY}/$(git symbolic-ref --short HEAD).zip" >> $GITHUB_ENV
+
+      - name: terraform format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: terraform init
+        id: init
+        run: terraform init
+
+      - name: terraform validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: terraform plan
+        id: plan
+        run: terraform plan -var="artifact_file=${{ env.artifact_file }}" -no-color -input=false
+
+      - name: terraform apply dev
+        run: terraform apply -var="artifact_file=${{ env.artifact_file }}" -auto-approve -input=false
+
+  deploy_prod:
+    needs: deploy_dev
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/v2'
+    defaults:
+      run:
+        working-directory: infrastructure
+    env:
+      TF_WORKSPACE: prod
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: terraform init
+        id: init
+        run: terraform init
+
+      - name: terraform plan
+        id: plan
+        run: terraform plan -var="artifact_file=${GITHUB_REPOSITORY}/v2.zip" -no-color -input=false
+
+      - name: terraform apply prod
+        run: terraform apply -var="artifact_file=${GITHUB_REPOSITORY}/v2.zip" -auto-approve -input=false
