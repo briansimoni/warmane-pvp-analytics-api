@@ -1,10 +1,6 @@
 name: Deploy
 on:
   workflow_call:
-    inputs:
-      artifiact_key:
-        required: true
-        type: string
   workflow_dispatch:
 
 jobs:

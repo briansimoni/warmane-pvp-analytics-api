@@ -1,7 +1,5 @@
 resource "aws_api_gateway_rest_api" "warmane_api_gateway" {
-  name              = "${terraform.workspace}_warmane_pvp_analytics_v2_api"
-  body              = data.template_file.openapi_template.rendered
-  put_rest_api_mode = "merge"
+  name = "${terraform.workspace}_warmane_pvp_analytics_v2_api"
 }
 
 resource "aws_api_gateway_resource" "proxy_resource" {

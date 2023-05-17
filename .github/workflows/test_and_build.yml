@@ -47,4 +47,5 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/v2'
-    uses: briansimoni/warmane-analytics-api/.github/workflows/deploy.yml@v2
+    # uses: octo-org/example-repo/.github/workflows/reusable-workflow.yml@main
+    uses: briansimoni/warmane-pvp-analytics-api/.github/workflows/deploy.yml@v2
