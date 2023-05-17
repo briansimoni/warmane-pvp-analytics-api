@@ -46,6 +46,9 @@ jobs:
       - run: aws s3 cp ./${{ env.artifact_version }}.zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/${{ env.artifact_version }}.zip
 
   deploy:
+    needs: build
     if: github.ref == 'refs/heads/v2'
     # uses: octo-org/example-repo/.github/workflows/reusable-workflow.yml@main
     uses: briansimoni/warmane-pvp-analytics-api/.github/workflows/deploy.yml@v2
+    secrets:
+      TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
