@@ -5,6 +5,16 @@
 `npm install`
 `npm start`
 
+It will run two local servers. One will simulate API Gateway and the corresponding Lambda. The other will simulate the Lambda listening for SQS events. If you want to simulate queuing up a message, send a request with an HTTP body. Middleware will take care of the transformation into the `SQSEvent` data type.
+
+Example:
+
+```
+curl localhost:4001 \
+-X POST \
+-d '{"character": "Dumpster", "realm": "Blackrock"}'
+```
+
 ### Useful
 
 `aws logs tail /aws/lambda/warmane_analytics_api_v2_main_function --follow`

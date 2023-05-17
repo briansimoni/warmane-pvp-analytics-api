@@ -28,7 +28,7 @@ resource "aws_route53_record" "api" {
 
 
 resource "aws_api_gateway_base_path_mapping" "api" {
-  api_id      = aws_api_gateway_rest_api.rest_api.id
+  api_id      = aws_api_gateway_rest_api.warmane_api_gateway.id
   domain_name = aws_api_gateway_domain_name.api.id
-  stage_name  = aws_api_gateway_stage.main_stage.stage_name
+  stage_name  = aws_api_gateway_stage.default_stage.stage_name
 }
