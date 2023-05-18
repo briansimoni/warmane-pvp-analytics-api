@@ -8,7 +8,7 @@
     "build": "tsc",
     "prettier": "prettier --check src/**/*.ts",
     "eslint": "eslint --max-warnings 1 src/**/*.ts",
-    "start": "node-dev --inspect --inspect-port=9229 --notify=false src/main.ts"
+    "start": "node-dev --inspect --inspect-port=9229 --notify=false src/localServer.ts"
   },
   "repository": {
     "type": "git",
@@ -45,6 +45,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.321.1",
     "@aws-sdk/lib-dynamodb": "^3.321.1",
+    "@aws-sdk/client-sqs": "^3.329.0",
     "@koa/cors": "^4.0.0",
     "@koa/router": "^12.0.0",
     "aws-serverless-koa": "^1.0.2",
@@ -52,6 +53,7 @@
     "bottleneck": "^2.19.5",
     "bunyan": "^1.8.15",
     "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.0.3",
     "http-errors": "^2.0.0",
     "joi": "^17.9.1",
     "koa": "^2.14.2",

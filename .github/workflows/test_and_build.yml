@@ -1,0 +1,54 @@
+name: Test And Build
+on:
+  push:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: install dependencies
+        run: npm install
+
+      - name: prettier
+        run: npm run prettier
+
+      - name: eslint
+        run: npm run eslint
+
+      - name: test
+        run: npm test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - run: echo "artifact_version=$(git symbolic-ref --short HEAD)" >> $GITHUB_ENV
+      - run: sudo apt-get update && sudo apt-get install -y zip
+      - run: npm install
+      - run: npm run build
+      - run: npm install --production
+      - run: cp -r node_modules build
+      - run: cd build/ && zip -r ../$(git symbolic-ref --short HEAD).zip .
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - run: aws s3 cp ./${{ env.artifact_version }}.zip s3://simoni-enterprises-artifacts/${GITHUB_REPOSITORY}/${{ env.artifact_version }}.zip
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/v2'
+    # uses: octo-org/example-repo/.github/workflows/reusable-workflow.yml@main
+    uses: briansimoni/warmane-pvp-analytics-api/.github/workflows/deploy.yml@v2
+    secrets:
+      TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
