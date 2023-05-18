@@ -1,15 +1,10 @@
 import { Context, SQSEvent } from "aws-lambda";
 import { WarmaneCrawler } from "./crawler";
-import DynamoService from "../../dynamoService";
+import { characterMatchesTable } from "../../db/documentStore";
 // import bodyParser from "koa-bodyparser";
 
-const dynamoService = new DynamoService("MatchData");
-
-export async function crawlerHandler(
-  event: SQSEvent,
-  context: Context,
-  warmaneCrawler: WarmaneCrawler
-) {
+export async function crawlerHandler(event: SQSEvent, context: Context) {
+  const warmaneCrawler = new WarmaneCrawler();
   console.log("sqsHandler");
   console.log(event);
   console.log(context);
@@ -31,7 +26,7 @@ export async function crawlerHandler(
 
   for (const matchDetails of matchDetailsList) {
     try {
-      await dynamoService.createItem(matchDetails);
+      await characterMatchesTable.update(matchDetails);
       console.log(
         `Successfully stored match details for ${character} on ${realm}`
       );
