@@ -6,10 +6,31 @@ info:
 paths:
   /character:
     get:
-      summary: Get Warmane character data
-      description: Proxies to Warmane's API and passes user search parameters to the Warmane Crawler.
+      summary: Get Warmane character metadata
       parameters:
-        - name: character
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: realm
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully retrieved character meta data. SCHEMA TBD
+
+  /character/crawl-status:
+    get:
+      summary: Get the crawler status
+      description: |
+        The crawler is highly constrained on how frequent it can be run. Clients will need
+        to know when the last time it ran is, and when it is finished so it can know when
+        to start downloading match history
+      parameters:
+        - name: name
           in: query
           required: true
           schema:
@@ -22,30 +43,39 @@ paths:
       responses:
         200:
           description: Successfully retrieved character data
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "1.0"
-        type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
-    options:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [idle, crawling]
+                last_started:
+                  type: string
+                  description: ISO 8601 string indicated when the crawler last started
+
+  /character/matches:
+    get:
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: realm
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: paginationToken
+          in: query
+          schema:
+            type: string
+          description: opaque string that tells the backend where to continue loading database data
       responses:
         200:
-          description: CORS headers
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "1.0"
-        type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
+          description: TBD. It will probably be an object that contains two properties, matches array, and continuation token if there is one
+
   /crawl:
     post:
       summary: Start Warmane character data crawl
@@ -56,38 +86,14 @@ paths:
             schema:
               type: object
               properties:
-                character:
+                name:
                   type: string
                 realm:
                   type: string
               required:
-                - character
+                - name
                 - realm
               additionalProperties: false
       responses:
         200:
           description: Crawl started successfully
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "1.0"
-        type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
-    options:
-      responses:
-        200:
-          description: CORS headers
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "1.0"
-        type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
