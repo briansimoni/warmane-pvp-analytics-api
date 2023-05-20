@@ -1,7 +1,7 @@
 import { ApiContext } from "../routes";
 import createError from "http-errors";
 import { getCharacterSchema } from "./validators";
-import { getCharacterProfile } from "../lib/warmane_client/client";
+// import { getCharacterProfile } from "../lib/warmane_client/client";
 import { characterMetadataTable } from "../db/documentStore";
 
 export default async function getCharacterMetadata(ctx: ApiContext) {

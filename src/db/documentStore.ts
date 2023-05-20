@@ -1,7 +1,5 @@
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import {
-  DynamoDBDocumentClient,
-  PutCommand,
   GetCommand,
   DeleteCommand,
   QueryCommand,
@@ -12,7 +10,15 @@ import { config } from "../config";
 
 type DocumentType = "match_details" | "character_meta" | "crawler_state";
 
-class DocumentStore<T extends Record<string, any>> {
+/**
+ * All table Items must have an id and document_type at minimum
+ */
+interface Item extends Record<string, any> {
+  id: string;
+  document_type: DocumentType;
+}
+
+class DocumentStore<T extends Item> {
   private tableName: string;
   private documentType: DocumentType;
   private docClient: DynamoDBDocument;
