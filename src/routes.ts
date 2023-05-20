@@ -3,6 +3,7 @@ import Koa from "koa";
 import { ApiGatewayContext } from "./middleware";
 import Joi from "joi";
 import createError from "http-errors";
+import { characterMatchesTable } from "./db/documentStore";
 
 interface GetCharacterRequestParams {
   character: string;
@@ -17,7 +18,7 @@ const schema = Joi.object<GetCharacterRequestParams>({
 export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 router.get("/character", async (ctx) => {
-  ctx.log.info("this is an example of logging");
+  ctx.log.info("Fetching character data");
 
   const params = schema.validate(ctx.query);
   if (params.error) {
@@ -25,9 +26,10 @@ router.get("/character", async (ctx) => {
   }
   const { character, realm } = params.value;
 
+  const data = await characterMatchesTable.get({ character, realm });
+
   ctx.body = {
-    character,
-    realm,
+    data: data || {},
     hello: "world",
   };
 });
