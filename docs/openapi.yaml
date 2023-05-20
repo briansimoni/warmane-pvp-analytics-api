@@ -7,6 +7,11 @@ paths:
   /character:
     get:
       summary: Get Warmane character metadata
+      description: |
+        Obtains an aggregate of character metadata from both warmane.dog and warmane.com.
+        Note that warmane.com tends to rate limit, so you may not always be able to count
+        on the warmane property in the response to be present. If there is some error in
+        retrieving that data from warmane.com, the error property will be populated.
       parameters:
         - name: name
           in: query
@@ -20,7 +25,95 @@ paths:
             type: string
       responses:
         200:
-          description: Successfully retrieved character meta data. SCHEMA TBD
+          description: Successfully retrieved character metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                  - realm
+                  - total_games_played
+                properties:
+                  name:
+                    type: string
+                  realm:
+                    type: string
+                  total_games_played:
+                    type: string
+                  last_crawled:
+                    type: string
+                  error:
+                    type: object
+                  warmane:
+                    type: object
+                    properties:
+                      online:
+                        type: boolean
+                      class:
+                        type: string
+                        enum:
+                          [
+                            Druid,
+                            Hunter,
+                            Mage,
+                            Paladin,
+                            Priest,
+                            Rogue,
+                            Shaman,
+                            Warlock,
+                            Warrior,
+                          ]
+                      race:
+                        type: string
+                        enum:
+                          [
+                            Dwarf,
+                            "Night Elf",
+                            Gnome,
+                            Human,
+                            Orc,
+                            Undead,
+                            Tauren,
+                            BloodElf,
+                            Draenei,
+                          ]
+                      gender:
+                        type: string
+                        enum: [Male, Female]
+                      talents:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            tree:
+                              type: string
+                            points:
+                              type: array
+                              items:
+                                type: number
+                      professions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            item:
+                              type: string
+                            transmog:
+                              type: string
+                      equipment:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            item:
+                              type: string
+                            transmog:
+                              type: string
 
   /character/crawl-status:
     get:
@@ -43,19 +136,26 @@ paths:
       responses:
         200:
           description: Successfully retrieved character data
-          application/json:
-            schema:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum: [idle, crawling]
-                last_started:
-                  type: string
-                  description: ISO 8601 string indicated when the crawler last started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [idle, crawling]
+                  last_ended:
+                    type: string
+                    description: ISO 8601 string indicating when the crawler last stopped
+                  last_started:
+                    type: string
+                    description: ISO 8601 string indicating when the crawler last started
 
   /character/matches:
     get:
+      description:
+        Get an object that contains an array of matches. If a continuation token is prsent,
+        this indicates that there are still more results to be fetched.
       parameters:
         - name: name
           in: query
@@ -67,7 +167,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: paginationToken
+        - name: continuation_token
           in: query
           schema:
             type: string
@@ -75,6 +175,57 @@ paths:
       responses:
         200:
           description: TBD. It will probably be an object that contains two properties, matches array, and continuation token if there is one
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  continuation_token:
+                    type: string
+                  matches:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        team_name:
+                          type: string
+                        date:
+                          type: string
+                        bracket:
+                          type: string
+                        arena:
+                          type: string
+                        points_change:
+                          type: string
+                        character_details:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              matchmaking_change:
+                                type: string
+                              healingDone:
+                                type: string
+                              race:
+                                type: string
+                              killingBlows:
+                                type: string
+                              teamnamerich:
+                                type: string
+                              realm:
+                                type: string
+                              damageDone:
+                                type: string
+                              charname:
+                                type: string
+                              class:
+                                type: string
+                              deaths:
+                                type: string
+                              personal_change:
+                                type: string
+                              teamname:
+                                type: string
 
   /crawl:
     post:
@@ -95,5 +246,5 @@ paths:
                 - realm
               additionalProperties: false
       responses:
-        200:
+        201:
           description: Crawl started successfully
