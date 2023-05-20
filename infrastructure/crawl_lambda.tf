@@ -69,7 +69,7 @@ resource "aws_iam_role_policy_attachment" "crawler_lambda_policy" {
 resource "aws_lambda_event_source_mapping" "crawler_mapping" {
   event_source_arn = aws_sqs_queue.crawl_queue.arn
   function_name    = aws_lambda_function.warmane_analytics_api_v2_crawler_function.function_name
-  batch_size       = 10
+  batch_size       = 1
 }
 
 resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
