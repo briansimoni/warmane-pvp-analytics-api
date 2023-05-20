@@ -69,7 +69,7 @@ resource "aws_iam_role_policy_attachment" "crawler_lambda_policy" {
 resource "aws_lambda_event_source_mapping" "crawler_mapping" {
   event_source_arn = aws_sqs_queue.crawl_queue.arn
   function_name    = aws_lambda_function.warmane_analytics_api_v2_crawler_function.function_name
-  batch_size       = 10
+  batch_size       = 1
 }
 
 resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
@@ -83,9 +83,10 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
 
   source_code_hash = data.aws_s3_object.lambda_bundle.etag
 
-  runtime = "nodejs18.x"
-  timeout = 180
-  handler = "handlers.crawlerHandler"
+  runtime                        = "nodejs18.x"
+  timeout                        = 180
+  reserved_concurrent_executions = 1
+  handler                        = "handlers.crawlerHandler"
 
   role = aws_iam_role.crawler_lambda_role.arn
 
