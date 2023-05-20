@@ -1,4 +1,4 @@
-import { WarmaneCrawler } from "./crawler";
+import { WarmaneCrawler } from "../lib/crawler/crawler";
 
 describe("crawler integration tests", () => {
   const character = "Dumpster";
