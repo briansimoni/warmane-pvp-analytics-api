@@ -7,7 +7,7 @@ resource "aws_dynamodb_table" "warmane_dynamo_table" {
     enabled = true
   }
   attribute {
-    name = "character"
+    name = "id"
     type = "S"
   }
   attribute {

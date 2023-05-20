@@ -5,52 +5,57 @@ import {
   GetCommand,
   DeleteCommand,
   QueryCommand,
+  DynamoDBDocument,
 } from "@aws-sdk/lib-dynamodb";
 import { MatchDetails } from "../lib/crawler/crawler";
-
-const dynamoDBClient = new DynamoDB({ region: "us-east-1" });
-const dynamoDBDocClient = DynamoDBDocumentClient.from(dynamoDBClient);
+import { config } from "../config";
 
 type DocumentType = "match_details" | "character_meta" | "crawler_state";
 
-class DocumentStore<T extends MatchDetails> {
-  private name: string;
+class DocumentStore<T extends Record<string, any>> {
+  private tableName: string;
   private documentType: DocumentType;
+  private docClient: DynamoDBDocument;
 
   constructor(tableName: string, documentType: DocumentType) {
-    this.name = tableName;
+    this.tableName = tableName;
     this.documentType = documentType;
+
+    const dynamoDBClient = new DynamoDB({ region: "us-east-1" });
+    this.docClient = DynamoDBDocument.from(dynamoDBClient);
   }
 
   // Create
   async update(item: T): Promise<T> {
-    const params = {
-      TableName: this.name,
-      Item: item,
-    };
-    await dynamoDBDocClient.send(new PutCommand(params));
+    this.docClient.put({
+      TableName: this.tableName,
+      Item: {
+        character: "testguy123@blackrock",
+        document_key: "character_meta",
+      },
+    });
     return item;
   }
 
   // Read
-  async get(key: Record<string, unknown>): Promise<T | undefined> {
+  async get(key: { primary: string }): Promise<T | undefined> {
     const params = {
-      TableName: this.name,
+      TableName: this.tableName,
       Key: key,
     };
 
-    const response = await dynamoDBDocClient.send(new GetCommand(params));
+    const response = await this.docClient.send(new GetCommand(params));
     return response.Item as T | undefined;
   }
 
   // Delete
   async delete(key: Record<string, unknown>): Promise<void> {
     const params = {
-      TableName: this.name,
+      TableName: this.tableName,
       Key: key,
     };
 
-    await dynamoDBDocClient.send(new DeleteCommand(params));
+    await this.docClient.send(new DeleteCommand(params));
   }
 
   // Query (with pagination)
@@ -62,12 +67,12 @@ class DocumentStore<T extends MatchDetails> {
     lastEvaluatedKey?: Record<string, unknown>;
   }> {
     const params = {
-      TableName: this.name,
+      TableName: this.tableName,
       ...query,
       ExclusiveStartKey: paginationToken,
     };
 
-    const response = await dynamoDBDocClient.send(new QueryCommand(params));
+    const response = await this.docClient.send(new QueryCommand(params));
     return {
       items: response.Items as T[],
       lastEvaluatedKey: response.LastEvaluatedKey,
@@ -76,6 +81,18 @@ class DocumentStore<T extends MatchDetails> {
 }
 
 export const characterMatchesTable = new DocumentStore<MatchDetails>(
-  "character_data",
+  config.characterTableName,
   "match_details"
+);
+
+interface DynamoCharacterMeta {
+  character: string;
+  name: string;
+  realm: string;
+  total_games_played: number;
+}
+
+export const characterMetadataTable = new DocumentStore<DynamoCharacterMeta>(
+  config.characterTableName,
+  "character_meta"
 );

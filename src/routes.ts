@@ -3,11 +3,24 @@ import Koa from "koa";
 import { ApiGatewayContext } from "./middleware";
 import Joi from "joi";
 import createError from "http-errors";
+import getCharacterMetadata from "./api/getCharacterMetadata";
 
 interface GetCharacterRequestParams {
   character: string;
   realm: string;
 }
+
+/**
+ * ApiContext can be used to type a ctx argument for a function
+ * designed to operate as a router handler
+ * @example async function getCharacterData(ctx: Context)
+ */
+export type ApiContext = Koa.ParameterizedContext<
+  Koa.DefaultState,
+  ApiGatewayContext &
+    Router.RouterParamContext<Koa.DefaultState, ApiGatewayContext>,
+  unknown
+>;
 
 const schema = Joi.object<GetCharacterRequestParams>({
   character: Joi.string().required(),
@@ -16,18 +29,4 @@ const schema = Joi.object<GetCharacterRequestParams>({
 
 export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
-router.get("/character", async (ctx) => {
-  ctx.log.info("this is an example of logging");
-
-  const params = schema.validate(ctx.query);
-  if (params.error) {
-    throw createError.BadRequest(params.error.message);
-  }
-  const { character, realm } = params.value;
-
-  ctx.body = {
-    character,
-    realm,
-    hello: "world",
-  };
-});
+router.get("/character", getCharacterMetadata);

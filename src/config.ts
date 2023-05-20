@@ -16,18 +16,21 @@ interface Config {
   crawlerSqsUrl: string;
   logLevel: "fatal" | "error" | "warn" | "info" | "debug" | "trace";
   serviceName: string;
+  characterTableName: string;
 }
 
 const configSchmea = Joi.object<Config>({
   crawlerSqsUrl: Joi.string().required(),
   logLevel: Joi.string().default("info").required(),
   serviceName: Joi.string().required(),
+  characterTableName: Joi.string().required(),
 });
 
 const vars = {
   crawlerSqsUrl: process.env.CRAWLER_SQS_URL,
   logLevel: process.env.LOG_LEVEL || "info",
   serviceName: process.env.SERVICE_NAME,
+  characterTableName: process.env.CHARACTER_TABLE_NAME,
 };
 
 const validationResult = configSchmea.validate(vars);
