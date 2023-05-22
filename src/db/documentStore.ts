@@ -13,26 +13,56 @@ type DocumentType = "match_details" | "character_meta" | "crawler_state";
 /**
  * All table Items must have an id and document_type at minimum
  */
-interface Item extends Record<string, any> {
-  id: string;
-  document_type: DocumentType;
+type Item = Record<string, any>;
+
+interface DocStoreParams<T> {
+  tableName: string;
+  partitionKey: string;
+  documentType: DocumentType;
+  partitionKeyMapper?: (item: T) => string;
 }
 
-class DocumentStore<T extends Item> {
+class DocumentStore<T extends Record<string, any>> {
   private tableName: string;
   private documentType: DocumentType;
+  private partitionKey: string;
   private docClient: DynamoDBDocument;
+  private partitionKeyMapper: (item: T) => string;
 
-  constructor(tableName: string, documentType: DocumentType) {
-    this.tableName = tableName;
-    this.documentType = documentType;
+  constructor(params: DocStoreParams<T>) {
+    this.tableName = params.tableName;
+    this.partitionKey = params.partitionKey;
+    this.documentType = params.documentType;
+
+    if (params.partitionKeyMapper) {
+      this.partitionKeyMapper = params.partitionKeyMapper;
+    } else {
+      this.partitionKeyMapper = (item) => item[params.partitionKey];
+    }
 
     const dynamoDBClient = new DynamoDB({ region: "us-east-1" });
     this.docClient = DynamoDBDocument.from(dynamoDBClient);
   }
 
+  private mapKeys(item: T) {
+    return {
+      [this.partitionKey]: this.partitionKeyMapper(item),
+      document_type: this.documentType,
+      ...item,
+    };
+  }
+
+  private removeKeys(item: T) {
+    const result = {
+      ...item,
+    };
+    delete result[this.partitionKey];
+    delete result[this.documentType];
+    return result;
+  }
+
   // Create
-  async update(item: T): Promise<T> {
+  async create(item: T): Promise<T> {
     this.docClient.put({
       TableName: this.tableName,
       Item: {
@@ -92,7 +122,8 @@ export const characterMatchesTable = new DocumentStore<MatchDetails>(
 );
 
 interface DynamoCharacterMeta {
-  character: string;
+  id: string;
+  document_type;
   name: string;
   realm: string;
   total_games_played: number;
