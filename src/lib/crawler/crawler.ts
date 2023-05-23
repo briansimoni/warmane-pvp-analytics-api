@@ -227,7 +227,7 @@ export class WarmaneCrawler implements Crawler {
       if (matchSummary) {
         const matchDetails: MatchDetails = {
           ...matchSummary,
-          id: "TBD please fix me",
+          id: `${params.character}@${params.realm}`, //TODO make a util function for this
           character_details: characterDetails,
         };
 
