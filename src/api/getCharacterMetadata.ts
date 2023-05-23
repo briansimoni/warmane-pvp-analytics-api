@@ -9,7 +9,7 @@ export default async function getCharacterMetadata(ctx: ApiContext) {
   if (params.error) {
     throw createError.BadRequest(params.error.message);
   }
-  const { name, realm } = params.value;
+  // const { name, realm } = params.value;
   await Promise.all([
     // getCharacterProfile({
     //   name,

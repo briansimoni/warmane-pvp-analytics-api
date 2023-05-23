@@ -1,23 +1,10 @@
 import supertest from "supertest";
 import Koa from "koa";
-import { allowedOrigins } from "../../api";
-import cors, { Options } from "@koa/cors";
+import { allowedOrigins, corsMiddleware } from "../../middleware";
 
 const api = new Koa();
 
-const corsOptions: Options = {
-  origin: (ctx: Koa.Context) => {
-    const requestOrigin = ctx.request.header.origin;
-    if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
-      return requestOrigin;
-    }
-    return "";
-  },
-  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowHeaders: ["Content-Type", "Authorization"],
-};
-
-api.use(cors(corsOptions));
+api.use(corsMiddleware);
 const request = supertest.agent(api.callback());
 
 describe("CORS tests", () => {
