@@ -2,6 +2,7 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import Bottleneck from "bottleneck";
 import { randomUserAgent } from "../random_user_agent";
+import { CharacterId, Realm } from "../types";
 
 export interface MatchSummary {
   matchId: string;
@@ -15,7 +16,7 @@ export interface MatchSummary {
 }
 
 export interface CharacterDetail {
-  realm: string;
+  realm: Realm;
   charname: string;
   class?: string;
   race?: string;
@@ -36,7 +37,7 @@ export interface CharacterDetail {
  * long-term in some kind of database for further use and analysis.
  */
 export interface MatchDetails {
-  id: string; // TODO: should id be required? What should the format be? This is the primary key in dynamo
+  id: CharacterId; // TODO: should id be required? What should the format be? This is the primary key in dynamo
   matchId: string;
   team_name: string;
   bracket: string;
@@ -51,11 +52,11 @@ export interface MatchDetails {
 export interface Crawler {
   getMatchSummaries(params: {
     character: string;
-    realm: string;
+    realm: Realm;
   }): Promise<MatchSummary[]>;
   getMatchDetails(params: {
     character: string;
-    realm: string;
+    realm: Realm;
     matchSummaries: MatchSummary[];
   }): Promise<MatchDetails[]>;
 }
@@ -164,7 +165,7 @@ export class WarmaneCrawler implements Crawler {
 
   async getMatchDetails(params: {
     character: string;
-    realm: string;
+    realm: Realm;
     matchSummaries: MatchSummary[];
   }): Promise<MatchDetails[]> {
     // extracts match IDs from 'matchSummaries' array
@@ -240,7 +241,7 @@ export class WarmaneCrawler implements Crawler {
   // allows <routes.ts> to fetch entire dataset with 'character' and 'realm' as input
   async fetchAllMatchDetails(params: {
     character: string;
-    realm: string;
+    realm: Realm;
   }): Promise<MatchDetails[]> {
     const matchSummaries = await this.getMatchSummaries(params);
     // console.log("Match summaries fetched: ", matchSummaries);

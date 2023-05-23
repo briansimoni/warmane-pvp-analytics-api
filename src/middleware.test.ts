@@ -1,6 +1,6 @@
 import supertest from "supertest";
 import Koa from "koa";
-import { allowedOrigins, corsMiddleware } from "../../middleware";
+import { allowedOrigins, corsMiddleware } from "./middleware";
 
 const api = new Koa();
 

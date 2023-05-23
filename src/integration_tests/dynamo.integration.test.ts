@@ -13,7 +13,7 @@ describe("dynamo integration tests", () => {
       duration: "897",
       arena: "Dalaran",
       character_details: [],
-      id: "testguy#testrealm",
+      id: "testguythatdoesnotexist@Blackrock",
     };
 
     await matchDetailsStore.put(matchDetails);

@@ -1,10 +1,8 @@
 /**
- * This file provides a standardized way to inject
- * environment configuration into the application in a
- * type-safe way. Locally, configuration can come from
- * the .env file or system environment variables. In
- * a lambda environment, it should generally always be
- * environment variables.
+ * This file provides a standardized way to inject environment configuration into
+ * the application in a type-safe way. Locally, configuration can come from
+ * the .env file or system environment variables. In a lambda environment, it
+ * should generally always be environment variables.
  */
 import * as dotenv from "dotenv";
 import Joi from "joi";

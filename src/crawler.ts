@@ -21,12 +21,18 @@ crawler.use(koaBunyanLogger.requestIdContext());
 crawler.use(bodyParser());
 crawler.use(sqsMiddleware());
 
+/**
+ * This is where we want to actually invoke the crawler. This code
+ * will run in response to receiving a message on the SQS queue.
+ * In other words the API has requested that the crawler be invoked.
+ */
 crawler.use((ctx) => {
   logger.info(ctx);
   logger.info(ctx.headers);
   logger.info(ctx.body);
-  ctx.sqs.event.Records.forEach((r) => {
-    logger.info("this is the event!", r.body);
+  ctx.sqs.event.Records.forEach((record) => {
+    logger.info("this is the event!", record.body); // delete this line
+    // TODO: use JOI to validate incoming parameters
   });
 });
 

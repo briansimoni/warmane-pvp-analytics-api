@@ -1,11 +1,12 @@
 import Joi from "joi";
+import { CharacterName, Realm } from "../lib/types";
 
 export interface GetCharacterRequestParams {
-  name: string;
-  realm: string;
+  name: CharacterName;
+  realm: Realm;
 }
 
 export const getCharacterSchema = Joi.object<GetCharacterRequestParams>({
-  name: Joi.string().required(),
-  realm: Joi.string().required(),
+  name: Joi.string().valid().required(),
+  realm: Joi.string().valid("Blackrock", "Icecrown").required(),
 });
