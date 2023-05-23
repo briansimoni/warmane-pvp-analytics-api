@@ -8,7 +8,6 @@
  */
 import * as dotenv from "dotenv";
 import Joi from "joi";
-import { logger } from "./lib/util/logger";
 
 dotenv.config();
 
@@ -33,14 +32,21 @@ const vars = {
   characterTableName: process.env.CHARACTER_TABLE_NAME,
 };
 
+/**
+ * Using console.log here because the logger depends on the config being present.
+ * If there is a config error, of course there can not be a logger.
+ */
 const validationResult = configSchmea.validate(vars);
 if (validationResult.error) {
-  logger.error("config error:", validationResult.error.message);
+  // eslint-disable-next-line no-console
+  console.error("config error:", validationResult.error.message);
   process.exit(1);
 }
 
 if (!validationResult.value) {
-  logger.error("unable to provide configuration data");
+  // eslint-disable-next-line no-console
+  console.error("unable to provide configuration data");
   process.exit(1);
 }
+
 export const config = validationResult.value;

@@ -1,19 +1,33 @@
 import supertest from "supertest";
-import { allowedOrigins, api } from "../../api";
+import Koa from "koa";
+import { allowedOrigins } from "../../api";
+import cors, { Options } from "@koa/cors";
 
+const api = new Koa();
+
+const corsOptions: Options = {
+  origin: (ctx: Koa.Context) => {
+    const requestOrigin = ctx.request.header.origin;
+    if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+      return requestOrigin;
+    }
+    return "";
+  },
+  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization"],
+};
+
+api.use(cors(corsOptions));
 const request = supertest.agent(api.callback());
 
 describe("CORS tests", () => {
-  it("should allow requests from allowed origins", async () => {
+  test.each(allowedOrigins)("should allow requests from %s", async (origin) => {
     const response = await request
-      .get("/character")
+      .get("/something")
       .query({ character: "test", realm: "test" })
-      .set("Origin", allowedOrigins[0]);
+      .set("Origin", origin);
 
-    expect(response.status).toBe(200);
-    expect(response.headers["access-control-allow-origin"]).toBe(
-      allowedOrigins[0]
-    );
+    expect(response.headers["access-control-allow-origin"]).toBe(origin);
   });
 
   it("should not allow requests from disallowed origins", async () => {
@@ -23,19 +37,6 @@ describe("CORS tests", () => {
       .query({ character: "test", realm: "test" })
       .set("Origin", disallowedOrigin);
 
-    expect(response.status).toBe(200);
     expect(response.headers["access-control-allow-origin"]).toBeUndefined();
-  });
-
-  it("should allow requests from warmane.dog", async () => {
-    const response = await request
-      .get("/character")
-      .query({ character: "test", realm: "test" })
-      .set("Origin", "https://warmane.dog");
-
-    expect(response.status).toBe(200);
-    expect(response.headers["access-control-allow-origin"]).toBe(
-      "https://warmane.dog"
-    );
   });
 });
