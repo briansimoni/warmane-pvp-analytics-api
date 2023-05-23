@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage --testPathIgnorePatterns integration",
+    "test": "jest --coverage",
     "test:integration": "jest --testMatch **/integration_tests/**/*.ts",
     "build": "tsc",
     "prettier": "prettier --check src/**/*.ts",
