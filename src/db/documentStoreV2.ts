@@ -6,8 +6,20 @@ import { config } from "../config";
 type DocumentType = "match_details" | "character_meta" | "crawler_state";
 
 interface DocumentStoreParams<T> {
+  /**
+   * Must be the exact table name in Dynamo
+   */
   tableName: string;
+  /**
+   * documentType makes up the first part of the sort key. A full sort key might look like
+   * match_details/456987
+   */
   documentType: DocumentType;
+  /**
+   * documentTypeSortKey corresponds to the second part of sort key attribute in dynamo.
+   * You must specify one of the properties of T to be the sort key. This should be
+   * a unique property per item. For instance: "matchId"
+   */
   documentTypeSortKey: keyof T;
 }
 
@@ -63,7 +75,7 @@ export class DocumentStore<T> {
   }
 
   /**
-   * WIP
+   * work in progress
    * @param id
    * @returns
    */
@@ -85,6 +97,7 @@ export class DocumentStore<T> {
     };
   }
 
+  // TODO: implement
   public async query() {
     throw new Error("not implemented");
   }
@@ -100,7 +113,8 @@ export class DocumentStore<T> {
   }
 }
 
-// partition key: character#realm
+// partition key: character#realm or character@realm
+// TODO: decide on the format for the id attribute
 // document_type: match_details/123456
 export const matchDetailsStore = new DocumentStore<MatchDetails>({
   tableName: config.characterTableName,

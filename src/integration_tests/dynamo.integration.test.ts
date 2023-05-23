@@ -1,8 +1,9 @@
 import { matchDetailsStore } from "../db/documentStoreV2";
+import { MatchDetails } from "../lib/crawler/crawler";
 
 describe("dynamo integration tests", () => {
-  test("create", async () => {
-    await matchDetailsStore.put({
+  test("CRUD", async () => {
+    const matchDetails: MatchDetails = {
       matchId: "1",
       team_name: "teamName",
       bracket: "2s",
@@ -13,10 +14,14 @@ describe("dynamo integration tests", () => {
       arena: "Dalaran",
       character_details: [],
       id: "testguy#testrealm",
-    });
-  });
+    };
 
-  test("delete", async () => {
+    await matchDetailsStore.put(matchDetails);
+
+    const match = await matchDetailsStore.get(matchDetails.id);
+    expect(match).toMatchObject(matchDetails);
+    expect(match).toHaveProperty("created_at");
+
     await matchDetailsStore.delete("1");
   });
 });
