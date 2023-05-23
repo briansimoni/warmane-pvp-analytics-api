@@ -29,7 +29,7 @@ export class DocumentStore<T> {
   private client: DynamoDBDocument;
 
   constructor(params: DocumentStoreParams<T>) {
-    //TODO: add region
+    //TODO: add region from config
     const client = new DynamoDBClient({});
     const ddbDocClient = DynamoDBDocument.from(client);
     this.tableName = params.tableName;

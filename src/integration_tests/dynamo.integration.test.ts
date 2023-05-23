@@ -15,4 +15,8 @@ describe("dynamo integration tests", () => {
       id: "testguy#testrealm",
     });
   });
+
+  test("delete", async () => {
+    await matchDetailsStore.delete("1");
+  });
 });
