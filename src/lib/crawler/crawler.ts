@@ -37,7 +37,7 @@ export interface CharacterDetail {
  * long-term in some kind of database for further use and analysis.
  */
 export interface MatchDetails {
-  id: CharacterId; // TODO: should id be required? What should the format be? This is the primary key in dynamo
+  id: CharacterId;
   matchId: string;
   team_name: string;
   bracket: string;

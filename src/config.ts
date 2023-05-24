@@ -14,6 +14,8 @@ interface Config {
   logLevel: "fatal" | "error" | "warn" | "info" | "debug" | "trace";
   serviceName: string;
   characterTableName: string;
+  /** aws region */
+  region: string;
 }
 
 const configSchmea = Joi.object<Config>({
@@ -21,6 +23,7 @@ const configSchmea = Joi.object<Config>({
   logLevel: Joi.string().default("info").required(),
   serviceName: Joi.string().required(),
   characterTableName: Joi.string().required(),
+  region: Joi.string().required(),
 });
 
 const vars = {
@@ -28,6 +31,7 @@ const vars = {
   logLevel: process.env.LOG_LEVEL || "info",
   serviceName: process.env.SERVICE_NAME,
   characterTableName: process.env.CHARACTER_TABLE_NAME,
+  region: process.env.REGION || "us-east-1",
 };
 
 /**
