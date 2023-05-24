@@ -4,6 +4,7 @@ import { MatchDetails } from "../lib/crawler/crawler";
 describe("dynamo integration tests", () => {
   test("CRUD", async () => {
     const id = "testguythatdoesnotexist@Blackrock";
+
     const matchDetails: MatchDetails = {
       matchId: "1",
       team_name: "teamName",
@@ -20,21 +21,24 @@ describe("dynamo integration tests", () => {
     const matchDetails2: MatchDetails = {
       matchId: "2",
       team_name: "teamName",
-      bracket: "2s",
-      outcome: "W",
-      points_change: "+5",
+      bracket: "3s",
+      outcome: "L",
+      points_change: "-5",
       date: "sometime",
-      duration: "897",
+      duration: "420",
       arena: "Nagrand",
       character_details: [],
       id,
     };
 
-    await matchDetailsStore.upsert(matchDetails);
-    await matchDetailsStore.upsert(matchDetails2);
+    // create
+    await Promise.all([
+      matchDetailsStore.upsert(matchDetails),
+      matchDetailsStore.upsert(matchDetails2),
+    ]);
 
-    const thing = await matchDetailsStore.list({ id });
-    console.log(thing);
+    // read a list
+    const list = await matchDetailsStore.list({ id });
 
     const match = await matchDetailsStore.get({
       id: matchDetails.id,
@@ -43,6 +47,14 @@ describe("dynamo integration tests", () => {
     expect(match).toMatchObject(matchDetails);
     expect(match).toHaveProperty("created_at");
 
-    // await matchDetailsStore.deletePermanently(id);
+    // delete
+    await Promise.all(
+      list.items.map((match) =>
+        matchDetailsStore.deletePermanently({
+          id: match.id,
+          documentKey: match.matchId,
+        })
+      )
+    );
   });
 });

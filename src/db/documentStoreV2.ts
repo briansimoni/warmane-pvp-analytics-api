@@ -175,7 +175,7 @@ export class DocumentStore<T> {
       TableName: this.tableName,
       Key: {
         id,
-        document_type: `${this.documentType}/${documentKey}`,
+        document_key: `${this.documentType}/${documentKey}`,
       },
     });
   }
