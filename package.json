@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage --testPathIgnorePatterns integration",
-    "test:integration": "jest --testMatch **/integration_tests/**/*.ts",
+    "test": "jest --coverage",
+    "test:integration": "jest -c jest.integration.test.config.js",
     "build": "tsc",
     "prettier": "prettier --check src/**/*.ts",
     "eslint": "eslint --max-warnings 1 src/**/*.ts",
