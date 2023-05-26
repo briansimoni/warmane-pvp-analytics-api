@@ -30,17 +30,9 @@ crawler.use(sqsMiddleware());
  * In other words the API has requested that the crawler be invoked.
  */
 crawler.use(async (ctx) => {
-  logger.info(ctx);
-  logger.info(ctx.headers);
-  logger.info(ctx.body);
-  // TODO: change this to Promise.all and map
-  ctx.sqs.event.Records.forEach(async (record) => {
-    logger.info("this is the event!", record.body); // delete this line
-    // TODO: use JOI to validate incoming parameters
-
-    // TODO: use the output from JOI as input to this:
-    await handleCrawlerRequests(JSON.parse(record.body));
-  });
+  // TODO: use JOI to validate request format and provide better typing
+  const requests = ctx.sqs.event.Records.map((r) => JSON.parse(r.body));
+  await handleCrawlerRequests(requests);
 });
 
 export async function handleCrawlerRequests(
