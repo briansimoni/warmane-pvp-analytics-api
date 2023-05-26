@@ -8,7 +8,6 @@ import koaBunyanLogger from "koa-bunyan-logger";
 import { logger } from "./lib/util/logger";
 import bodyParser from "koa-bodyparser";
 import { GetCharacterRequestParams } from "./api/validators";
-import { characterMatchesTable } from "./db/documentStore";
 import { matchDetailsStore } from "./db/documentStoreV2";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
 
