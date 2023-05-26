@@ -4,5 +4,6 @@
   "[terraform]": {
     "editor.defaultFormatter": "hashicorp.terraform"
   },
-  "cSpell.words": ["Warmane"]
+  "cSpell.words": ["Warmane"],
+  "jest.autoRun": "off"
 }

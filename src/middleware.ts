@@ -1,3 +1,4 @@
+import cors, { Options } from "@koa/cors";
 import { APIGatewayEvent, Context, SQSEvent } from "aws-lambda";
 import createError from "http-errors";
 import Koa, { DefaultContext } from "koa";
@@ -110,3 +111,19 @@ export const sqsMiddleware = (): Koa.Middleware<
     await next();
   };
 };
+
+export const allowedOrigins = ["https://warmane.dog", "http://localhost:3000"];
+
+const corsOptions: Options = {
+  origin: (ctx: Koa.Context) => {
+    const requestOrigin = ctx.request.header.origin;
+    if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+      return requestOrigin;
+    }
+    return "";
+  },
+  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization"],
+};
+
+export const corsMiddleware = cors(corsOptions);

@@ -1,6 +1,8 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import Bottleneck from "bottleneck";
+import { randomUserAgent } from "../random_user_agent";
+import { CharacterId, Realm } from "../types";
 
 export interface MatchSummary {
   matchId: string;
@@ -14,7 +16,7 @@ export interface MatchSummary {
 }
 
 export interface CharacterDetail {
-  realm: string;
+  realm: Realm;
   charname: string;
   class?: string;
   race?: string;
@@ -35,6 +37,7 @@ export interface CharacterDetail {
  * long-term in some kind of database for further use and analysis.
  */
 export interface MatchDetails {
+  id: CharacterId;
   matchId: string;
   team_name: string;
   bracket: string;
@@ -49,11 +52,11 @@ export interface MatchDetails {
 export interface Crawler {
   getMatchSummaries(params: {
     character: string;
-    realm: string;
+    realm: Realm;
   }): Promise<MatchSummary[]>;
   getMatchDetails(params: {
     character: string;
-    realm: string;
+    realm: Realm;
     matchSummaries: MatchSummary[];
   }): Promise<MatchDetails[]>;
 }
@@ -65,7 +68,12 @@ export class WarmaneCrawler implements Crawler {
     realm: string;
   }): Promise<string> {
     const response = await axios.get(
-      `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`
+      `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`,
+      {
+        headers: {
+          "User-Agent": randomUserAgent(),
+        },
+      }
     );
 
     return response.data;
@@ -141,9 +149,7 @@ export class WarmaneCrawler implements Crawler {
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
-            " Chrome/103.0.5060.114 Safari/537.36",
+          "User-Agent": randomUserAgent(),
         },
       }
     );
@@ -159,7 +165,7 @@ export class WarmaneCrawler implements Crawler {
 
   async getMatchDetails(params: {
     character: string;
-    realm: string;
+    realm: Realm;
     matchSummaries: MatchSummary[];
   }): Promise<MatchDetails[]> {
     // extracts match IDs from 'matchSummaries' array
@@ -222,6 +228,7 @@ export class WarmaneCrawler implements Crawler {
       if (matchSummary) {
         const matchDetails: MatchDetails = {
           ...matchSummary,
+          id: `${params.character}@${params.realm}`, //TODO make a util function for this
           character_details: characterDetails,
         };
 
@@ -234,7 +241,7 @@ export class WarmaneCrawler implements Crawler {
   // allows <routes.ts> to fetch entire dataset with 'character' and 'realm' as input
   async fetchAllMatchDetails(params: {
     character: string;
-    realm: string;
+    realm: Realm;
   }): Promise<MatchDetails[]> {
     const matchSummaries = await this.getMatchSummaries(params);
     // console.log("Match summaries fetched: ", matchSummaries);

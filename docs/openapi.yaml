@@ -6,10 +6,124 @@ info:
 paths:
   /character:
     get:
-      summary: Get Warmane character data
-      description: Proxies to Warmane's API and passes user search parameters to the Warmane Crawler.
+      summary: Get Warmane character metadata
+      description: |
+        Obtains an aggregate of character metadata from both warmane.dog and warmane.com.
+        Note that warmane.com tends to rate limit, so you may not always be able to count
+        on the warmane property in the response to be present. If there is some error in
+        retrieving that data from warmane.com, the error property will be populated.
       parameters:
-        - name: character
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: realm
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully retrieved character metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                  - realm
+                  - total_games_played
+                properties:
+                  name:
+                    type: string
+                  realm:
+                    type: string
+                  total_games_played:
+                    type: string
+                  last_crawled:
+                    type: string
+                  error:
+                    type: object
+                  warmane:
+                    type: object
+                    properties:
+                      online:
+                        type: boolean
+                      class:
+                        type: string
+                        enum:
+                          [
+                            Druid,
+                            Hunter,
+                            Mage,
+                            Paladin,
+                            Priest,
+                            Rogue,
+                            Shaman,
+                            Warlock,
+                            Warrior,
+                          ]
+                      race:
+                        type: string
+                        enum:
+                          [
+                            Dwarf,
+                            "Night Elf",
+                            Gnome,
+                            Human,
+                            Orc,
+                            Undead,
+                            Tauren,
+                            BloodElf,
+                            Draenei,
+                          ]
+                      gender:
+                        type: string
+                        enum: [Male, Female]
+                      talents:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            tree:
+                              type: string
+                            points:
+                              type: array
+                              items:
+                                type: number
+                      professions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            item:
+                              type: string
+                            transmog:
+                              type: string
+                      equipment:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            item:
+                              type: string
+                            transmog:
+                              type: string
+
+  /character/crawl-status:
+    get:
+      summary: Get the crawler status
+      description: |
+        The crawler is highly constrained on how frequent it can be run. Clients will need
+        to know when the last time it ran is, and when it is finished so it can know when
+        to start downloading match history
+      parameters:
+        - name: name
           in: query
           required: true
           schema:
@@ -22,30 +136,97 @@ paths:
       responses:
         200:
           description: Successfully retrieved character data
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "1.0"
-        type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
-    options:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [idle, crawling]
+                  last_ended:
+                    type: string
+                    description: ISO 8601 string indicating when the crawler last stopped
+                  last_started:
+                    type: string
+                    description: ISO 8601 string indicating when the crawler last started
+
+  /character/matches:
+    get:
+      description:
+        Get an object that contains an array of matches. If a continuation token is prsent,
+        this indicates that there are still more results to be fetched.
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: realm
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: continuation_token
+          in: query
+          schema:
+            type: string
+          description: opaque string that tells the backend where to continue loading database data
       responses:
         200:
-          description: CORS headers
-          headers:
-            Access-Control-Allow-Origin:
+          description: TBD. It will probably be an object that contains two properties, matches array, and continuation token if there is one
+          content:
+            application/json:
               schema:
-                type: string
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "1.0"
-        type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
+                type: object
+                properties:
+                  continuation_token:
+                    type: string
+                  matches:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        team_name:
+                          type: string
+                        date:
+                          type: string
+                        bracket:
+                          type: string
+                        arena:
+                          type: string
+                        points_change:
+                          type: string
+                        character_details:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              matchmaking_change:
+                                type: string
+                              healingDone:
+                                type: string
+                              race:
+                                type: string
+                              killingBlows:
+                                type: string
+                              teamnamerich:
+                                type: string
+                              realm:
+                                type: string
+                              damageDone:
+                                type: string
+                              charname:
+                                type: string
+                              class:
+                                type: string
+                              deaths:
+                                type: string
+                              personal_change:
+                                type: string
+                              teamname:
+                                type: string
+
   /crawl:
     post:
       summary: Start Warmane character data crawl
@@ -56,38 +237,14 @@ paths:
             schema:
               type: object
               properties:
-                character:
+                name:
                   type: string
                 realm:
                   type: string
               required:
-                - character
+                - name
                 - realm
               additionalProperties: false
       responses:
-        200:
+        201:
           description: Crawl started successfully
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "1.0"
-        type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
-    options:
-      responses:
-        200:
-          description: CORS headers
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-      x-amazon-apigateway-integration:
-        httpMethod: POST
-        payloadFormatVersion: "1.0"
-        type: "aws_proxy"
-        uri: "arn:aws:apigateway:${aws_region}:lambda:path/2015-03-31/functions/${warmane_analytics_api_v2_main_function_arn}/invocations"
