@@ -7,6 +7,10 @@ import {
 import koaBunyanLogger from "koa-bunyan-logger";
 import { logger } from "./lib/util/logger";
 import bodyParser from "koa-bodyparser";
+import { GetCharacterRequestParams } from "./api/validators";
+import { characterMatchesTable } from "./db/documentStore";
+import { matchDetailsStore } from "./db/documentStoreV2";
+import { WarmaneCrawler } from "./lib/crawler/crawler";
 
 /**
  * This is the Koa object used by the crawler lambda
@@ -26,14 +30,35 @@ crawler.use(sqsMiddleware());
  * will run in response to receiving a message on the SQS queue.
  * In other words the API has requested that the crawler be invoked.
  */
-crawler.use((ctx) => {
+crawler.use(async (ctx) => {
   logger.info(ctx);
   logger.info(ctx.headers);
   logger.info(ctx.body);
-  ctx.sqs.event.Records.forEach((record) => {
+  // TODO: change this to Promise.all and map
+  ctx.sqs.event.Records.forEach(async (record) => {
     logger.info("this is the event!", record.body); // delete this line
     // TODO: use JOI to validate incoming parameters
+
+    // TODO: use the output from JOI as input to this:
+    await handleCrawlerRequests(JSON.parse(record.body));
   });
 });
 
+export async function handleCrawlerRequests(
+  requests: GetCharacterRequestParams[]
+) {
+  const handleRequest = async function (req: GetCharacterRequestParams) {
+    const crawler = new WarmaneCrawler();
+    const matchDetails = await crawler.fetchAllMatchDetails({
+      character: req.name,
+      realm: req.realm,
+    });
+    const databaseWrites = matchDetails.map((match) =>
+      matchDetailsStore.upsert(match)
+    );
+    await Promise.all(databaseWrites);
+  };
+
+  await Promise.all(requests.map(handleRequest));
+}
 export { crawler };
