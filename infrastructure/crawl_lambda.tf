@@ -92,9 +92,10 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
 
   environment {
     variables = {
-      CRAWLER_SQS_URL = "${aws_sqs_queue.crawl_queue.url}"
-      LOG_LEVEL       = var.log_level[terraform.workspace]
-      SERVICE_NAME    = "${terraform.workspace}_warmane_api"
+      CRAWLER_SQS_URL      = "${aws_sqs_queue.crawl_queue.url}"
+      LOG_LEVEL            = var.log_level[terraform.workspace]
+      SERVICE_NAME         = "${terraform.workspace}_warmane_api"
+      CHARACTER_TABLE_NAME = aws_dynamodb_table.warmane_dynamo_table.name
     }
   }
 }
