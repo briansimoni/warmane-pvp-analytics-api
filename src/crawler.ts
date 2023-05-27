@@ -34,7 +34,6 @@ crawler.use(sqsMiddleware());
  * In other words the API has requested that the crawler be invoked.
  */
 crawler.use(async (ctx) => {
-  console.log(ctx.sqs.event.Records);
   const validatedRequests = ctx.sqs.event.Records.map((r) => {
     const validationResult = getCharacterSchema.validate(JSON.parse(r.body));
     if (validationResult.error) {

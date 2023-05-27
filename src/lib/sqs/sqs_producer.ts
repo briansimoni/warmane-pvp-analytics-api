@@ -3,7 +3,7 @@ import { config } from "../../config";
 import axios from "axios";
 
 interface CrawlerInput {
-  character: string;
+  name: string;
   realm: string;
 }
 
