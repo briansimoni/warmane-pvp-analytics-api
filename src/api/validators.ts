@@ -12,4 +12,4 @@ export const getCharacterSchema = Joi.object<GetCharacterRequestParams>({
   realm: Joi.string()
     .valid(...Realms)
     .required(),
-});
+}).required();

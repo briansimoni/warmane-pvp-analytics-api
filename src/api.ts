@@ -7,12 +7,14 @@ import {
   corsMiddleware,
   errorHandlingMiddleware,
 } from "./middleware";
+import bodyParser from "koa-bodyparser";
 import { router } from "./routes";
 
 const api = new Koa<Koa.DefaultState, ApiGatewayContext>();
 
 api.use(errorHandlingMiddleware);
 api.use(corsMiddleware);
+api.use(bodyParser());
 api.use(koaBunyanLogger(logger));
 api.use(koaBunyanLogger.requestIdContext());
 api.use(koaBunyanLogger.requestLogger());

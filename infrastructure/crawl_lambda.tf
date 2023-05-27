@@ -84,7 +84,7 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
   source_code_hash = data.aws_s3_object.lambda_bundle.etag
 
   runtime                        = "nodejs18.x"
-  timeout                        = 180
+  timeout                        = 300
   reserved_concurrent_executions = 1
   handler                        = "handlers.crawlerHandler"
 
@@ -92,9 +92,10 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
 
   environment {
     variables = {
-      CRAWLER_SQS_URL = "${aws_sqs_queue.crawl_queue.url}"
-      LOG_LEVEL       = var.log_level[terraform.workspace]
-      SERVICE_NAME    = "${terraform.workspace}_warmane_api"
+      CRAWLER_SQS_URL      = "${aws_sqs_queue.crawl_queue.url}"
+      LOG_LEVEL            = var.log_level[terraform.workspace]
+      SERVICE_NAME         = "${terraform.workspace}_warmane_api"
+      CHARACTER_TABLE_NAME = aws_dynamodb_table.warmane_dynamo_table.name
     }
   }
 }
