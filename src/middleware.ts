@@ -97,7 +97,7 @@ export const sqsMiddleware = (): Koa.Middleware<
     } else {
       // not running in lambda context, use request body
       const record = {
-        body: ctx.request.body as string,
+        body: JSON.stringify(ctx.request.body) as string,
       } as unknown as SQSEvent;
 
       const event: SQSEvent = {
