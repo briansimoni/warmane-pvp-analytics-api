@@ -1,7 +1,6 @@
 import Router from "@koa/router";
 import Koa from "koa";
 import { ApiGatewayContext } from "./middleware";
-import Joi from "joi";
 import createError from "http-errors";
 import getCharacterMetadata from "./api/getCharacterMetadata";
 import { getCharacterSchema } from "./api/validators";
@@ -22,7 +21,7 @@ export type ApiContext = Koa.ParameterizedContext<
 export const router = new Router<Koa.DefaultState, ApiGatewayContext>();
 
 async function crawl(ctx: ApiContext) {
-  const result = await getCharacterSchema.validate(ctx.request.body);
+  const result = getCharacterSchema.validate(ctx.request.body);
   if (result.error) {
     throw createError(400, result.error.message);
   }
