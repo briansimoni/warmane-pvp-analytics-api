@@ -20,7 +20,7 @@ export async function requestCrawl(input: CrawlerInput) {
 }
 
 async function sendSqsMessage(message: object) {
-  const client = new SQSClient({});
+  const client = new SQSClient({ region: config.region });
   const m = new SendMessageCommand({
     QueueUrl: config.crawlerSqsUrl,
     MessageBody: JSON.stringify(message),
