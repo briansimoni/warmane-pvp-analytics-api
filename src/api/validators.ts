@@ -13,3 +13,17 @@ export const getCharacterSchema = Joi.object<GetCharacterRequestParams>({
     .valid(...Realms)
     .required(),
 }).required();
+
+export interface getMatchesParams {
+  name: CharacterName;
+  realm: Realm;
+  continuation_token: string;
+}
+
+export const getMatchesSchema = Joi.object<getMatchesParams>({
+  name: Joi.string().valid().required(),
+  realm: Joi.string()
+    .valid(...Realms)
+    .required(),
+  continuation_token: Joi.string().optional(),
+}).required();

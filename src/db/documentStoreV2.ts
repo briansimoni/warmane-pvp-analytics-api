@@ -2,6 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { MatchDetails } from "../lib/crawler/crawler";
 import { config } from "../config";
+import { CharacterId, CharacterName, Realm } from "../lib/types";
 
 type DocumentType = "match_details" | "character_meta" | "crawler_state";
 
@@ -17,10 +18,12 @@ interface DocumentStoreParams<T> {
   documentType: DocumentType;
   /**
    * documentTypeSortKey corresponds to the second part of sort key attribute in dynamo.
-   * You must specify one of the properties of T to be the sort key. This should be
-   * a unique property per item. For instance: "matchId"
+   * In other words, this is the range key or sort key.
+   * You may specify one of the properties of T to be the sort key. This should be
+   * a unique property per item. For instance: "matchId". If it is not provided, it defaults
+   * to the id property of T. which will result in sort key values of "document_type/T[id]"
    */
-  documentTypeSortKey: keyof T;
+  documentTypeSortKey?: keyof T;
 }
 
 interface DocumentMeta {
@@ -42,7 +45,7 @@ interface RequiredWriteProperties {
  * of MatchDetails objects when you perform the various read actions. Likewise,
  * it will only accept MatchDetails objects for write operations.
  */
-export class DocumentStore<T> {
+export class DocumentStore<T extends RequiredWriteProperties> {
   private tableName: string;
   private documentType: DocumentType;
   private documentTypeSortKey: keyof T;
@@ -53,7 +56,9 @@ export class DocumentStore<T> {
     const ddbDocClient = DynamoDBDocument.from(dynamoClient);
     this.tableName = params.tableName;
     this.documentType = params.documentType;
-    this.documentTypeSortKey = params.documentTypeSortKey;
+    this.documentTypeSortKey = params.documentTypeSortKey
+      ? params.documentTypeSortKey
+      : "id";
     this.client = ddbDocClient;
   }
 
@@ -67,9 +72,12 @@ export class DocumentStore<T> {
    */
   public async get(params: {
     id: string;
-    documentKey: string;
+    documentKey?: string;
   }): Promise<(T & DocumentMeta) | undefined> {
-    const { id, documentKey } = params;
+    const { id, documentKey = id } = params;
+    // if (!documentKey) {
+    //   documentKey = id;
+    // }
     const result = await this.client.get({
       TableName: this.tableName,
       Key: {
@@ -85,9 +93,7 @@ export class DocumentStore<T> {
    * will overwrite an item if the primary key matches an item
    * that already exists.
    */
-  private async put<Item extends T & RequiredWriteProperties>(
-    item: Item
-  ): Promise<void> {
+  private async put(item: T): Promise<void> {
     const now = new Date().toISOString();
     await this.client.put({
       TableName: this.tableName,
@@ -104,7 +110,7 @@ export class DocumentStore<T> {
    * upsert will create a new object if it does not already exist.
    * Otherwise, it will overwrite the object and update the updated_at timestamp.
    */
-  public async upsert<Item extends T & RequiredWriteProperties>(item: Item) {
+  public async upsert(item: T) {
     const documentKey = item[this.documentTypeSortKey] as string;
     const existingItem = await this.get({
       id: item.id,
@@ -161,7 +167,7 @@ export class DocumentStore<T> {
   }
 
   // TODO: implement
-  // We want to allow the caller to ask for more granular queries than what list does
+  // We may want to allow the caller to ask for more granular queries than what list does
   public async query() {
     throw new Error("not implemented");
   }
@@ -181,6 +187,7 @@ export class DocumentStore<T> {
   }
 
   // TODO: implement soft delete
+  // or maybe we just don't need this
   public async delete(id: string) {
     throw new Error("not implemented " + id);
   }
@@ -212,4 +219,33 @@ export const matchDetailsStore = new DocumentStore<MatchDetails>({
   tableName: config.characterTableName,
   documentType: "match_details",
   documentTypeSortKey: "matchId",
+});
+
+export type CharacterMeta = {
+  id: CharacterName;
+  realm: Realm;
+  games_played?: number;
+};
+
+/**
+ * persist character meta information.
+ * Partition key example: Dumpster@Blackrock
+ * sort key example: character_meta/Dumpster@Blackrock
+ */
+export const characterMetaStore = new DocumentStore<CharacterMeta>({
+  tableName: config.characterTableName,
+  documentType: "character_meta",
+});
+
+export type CrawlerState = {
+  id: CharacterId;
+  state: "pending" | "running" | "idle" | "errored";
+  crawler_last_started?: string;
+  crawler_last_finished?: string;
+  crawler_errors?: string[];
+};
+
+export const crawlerStateStore = new DocumentStore<CrawlerState>({
+  tableName: config.characterTableName,
+  documentType: "crawler_state",
 });

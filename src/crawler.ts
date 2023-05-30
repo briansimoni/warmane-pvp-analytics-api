@@ -11,9 +11,14 @@ import {
   GetCharacterRequestParams,
   getCharacterSchema,
 } from "./api/validators";
-import { matchDetailsStore } from "./db/documentStoreV2";
+import {
+  CrawlerState,
+  crawlerStateStore,
+  matchDetailsStore,
+} from "./db/documentStoreV2";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
 import createError from "http-errors";
+import { CharacterId } from "./lib/types";
 
 /**
  * This is the Koa object used by the crawler lambda
@@ -51,20 +56,51 @@ export async function handleCrawlerRequests(
   requests: GetCharacterRequestParams[]
 ) {
   const handleRequest = async function (req: GetCharacterRequestParams) {
-    const crawler = new WarmaneCrawler();
-    logger.info(`crawling started for ${req.name} on ${req.realm}`);
-    const matchDetails = await crawler.fetchAllMatchDetails({
-      character: req.name,
-      realm: req.realm,
-    });
-    const databaseWrites = matchDetails.map((match) =>
-      matchDetailsStore.upsert(match)
-    );
-    logger.info(`crawling completed for ${req.name} on ${req.realm}`);
-    await Promise.all(databaseWrites);
-    logger.info(
-      `crawler results saved successfully for ${req.name} on ${req.realm}`
-    );
+    const { name, realm } = req;
+    const characterId: CharacterId = `${name}@${realm}`;
+
+    try {
+      const crawler = new WarmaneCrawler();
+
+      await crawlerStateStore.upsert({
+        id: characterId,
+        state: "running",
+        crawler_last_started: new Date().toISOString(),
+      });
+      logger.info(`crawling started for ${req.name} on ${req.realm}`);
+
+      const matchDetails = await crawler.fetchAllMatchDetails({
+        character: req.name,
+        realm: req.realm,
+      });
+
+      const databaseWrites = matchDetails.map((match) =>
+        matchDetailsStore.upsert(match)
+      );
+
+      logger.info(`crawling completed for ${req.name} on ${req.realm}`);
+      await Promise.all(databaseWrites);
+      logger.info(
+        `crawler results saved successfully for ${req.name} on ${req.realm}`
+      );
+
+      await crawlerStateStore.upsert({
+        id: characterId,
+        state: "idle",
+        crawler_last_finished: new Date().toISOString(),
+      });
+    } catch (error) {
+      const stateUpdate: CrawlerState = {
+        id: characterId,
+        state: "errored",
+      };
+
+      if (error instanceof Error) {
+        stateUpdate.crawler_errors = [error.message];
+      }
+
+      await crawlerStateStore.upsert(stateUpdate);
+    }
   };
 
   await Promise.all(requests.map(handleRequest));
