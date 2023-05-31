@@ -63,3 +63,25 @@ export async function getCharacterProfile(params: {
   );
   return response.data;
 }
+
+export async function checkCharacterExists(params: {
+  name: string;
+  realm: string;
+}): Promise<boolean> {
+  const { name, realm } = params;
+  const userAgent = randomUserAgent();
+  const response = await axios.get<string>(
+    `http://armory.warmane.com/character/${name}/${realm}/summary`,
+    {
+      headers: {
+        "User-Agent": userAgent,
+      },
+    }
+  );
+  if (
+    response.data.includes("The character you are looking for does not exist")
+  ) {
+    return false;
+  }
+  return true;
+}

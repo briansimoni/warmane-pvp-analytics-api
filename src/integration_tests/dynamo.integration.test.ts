@@ -1,4 +1,4 @@
-import { matchDetailsStore } from "../db/documentStoreV2";
+import { characterMetaStore, matchDetailsStore } from "../db/documentStoreV2";
 import { MatchDetails } from "../lib/crawler/crawler";
 
 describe("dynamo integration tests", () => {
@@ -56,5 +56,28 @@ describe("dynamo integration tests", () => {
         })
       )
     );
+  });
+
+  describe("CRUD on character meta table", () => {
+    test("it does the thing", async () => {
+      await characterMetaStore.upsert({
+        id: "testguy@Blackrock",
+        realm: "Blackrock",
+      });
+
+      const meta = await characterMetaStore.get({
+        id: "testguy@Blackrock",
+        // documentKey: "testguy@Blackrock",
+      });
+
+      expect(meta).toMatchObject({
+        id: "testguy@Blackrock",
+      });
+
+      await characterMetaStore.deletePermanently({
+        id: "testguy@Blackrock",
+        documentKey: "testguy@Blackrock",
+      });
+    });
   });
 });

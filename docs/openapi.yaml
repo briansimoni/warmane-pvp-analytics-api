@@ -4,6 +4,98 @@ info:
   description: This API provides the interface into the data to find out how much of a dog a player might be
   version: 1.0.0
 paths:
+  /character/profile:
+    get:
+      summary: Get warmane profile data
+      description: |
+        This is effectively just a passthrough to warmane.com's JSON API. It seems to have
+        pretty strict rate limits on it, so it may not always be reliable.
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: realm
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully retrieved profile from warmane.com
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  online:
+                    type: boolean
+                  class:
+                    type: string
+                    enum:
+                      [
+                        Druid,
+                        Hunter,
+                        Mage,
+                        Paladin,
+                        Priest,
+                        Rogue,
+                        Shaman,
+                        Warlock,
+                        Warrior,
+                      ]
+                  race:
+                    type: string
+                    enum:
+                      [
+                        Dwarf,
+                        "Night Elf",
+                        Gnome,
+                        Human,
+                        Orc,
+                        Undead,
+                        Tauren,
+                        BloodElf,
+                        Draenei,
+                      ]
+                  gender:
+                    type: string
+                    enum: [Male, Female]
+                  talents:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        tree:
+                          type: string
+                        points:
+                          type: array
+                          items:
+                            type: number
+                  professions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        item:
+                          type: string
+                        transmog:
+                          type: string
+                  equipment:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        item:
+                          type: string
+                        transmog:
+                          type: string
+
   /character:
     get:
       summary: Get Warmane character metadata
@@ -41,83 +133,10 @@ paths:
                     type: string
                   total_games_played:
                     type: string
-                  last_crawled:
-                    type: string
-                  error:
-                    type: object
-                  warmane:
-                    type: object
-                    properties:
-                      online:
-                        type: boolean
-                      class:
-                        type: string
-                        enum:
-                          [
-                            Druid,
-                            Hunter,
-                            Mage,
-                            Paladin,
-                            Priest,
-                            Rogue,
-                            Shaman,
-                            Warlock,
-                            Warrior,
-                          ]
-                      race:
-                        type: string
-                        enum:
-                          [
-                            Dwarf,
-                            "Night Elf",
-                            Gnome,
-                            Human,
-                            Orc,
-                            Undead,
-                            Tauren,
-                            BloodElf,
-                            Draenei,
-                          ]
-                      gender:
-                        type: string
-                        enum: [Male, Female]
-                      talents:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            tree:
-                              type: string
-                            points:
-                              type: array
-                              items:
-                                type: number
-                      professions:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                            item:
-                              type: string
-                            transmog:
-                              type: string
-                      equipment:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                            item:
-                              type: string
-                            transmog:
-                              type: string
 
-  /character/crawl-status:
+  /character/crawl-state:
     get:
-      summary: Get the crawler status
+      summary: Get the crawler state
       description: |
         The crawler is highly constrained on how frequent it can be run. Clients will need
         to know when the last time it ran is, and when it is finished so it can know when
