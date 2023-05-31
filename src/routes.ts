@@ -8,7 +8,11 @@ import {
   checkCharacterExists,
   getCharacterProfile,
 } from "./lib/warmane_client/client";
-import { characterMetaStore, crawlerStateStore } from "./db/documentStoreV2";
+import {
+  characterMetaStore,
+  crawlerStateStore,
+  matchDetailsStore,
+} from "./db/documentStoreV2";
 
 /**
  * ApiContext can be used to type a ctx argument for a function
@@ -59,9 +63,6 @@ async function crawl(ctx: ApiContext) {
   };
 }
 
-// TODO: I think these operations should be separate.
-// getting character profile data seems to be EXTREMELY rate limited
-// also I think i need to go with the original design and make the crawler status a separate type
 async function getCharacterMetadata(ctx: ApiContext) {
   const params = getCharacterSchema.validate(ctx.query);
   if (params.error) {
@@ -102,7 +103,7 @@ async function getMatches(ctx: ApiContext) {
   }
   const { name, realm } = params.value;
 
-  const matches = await characterMetaStore.list({
+  const matches = await matchDetailsStore.list({
     id: `${name}@${realm}`,
     continuationToken: params.value.continuation_token,
   });
