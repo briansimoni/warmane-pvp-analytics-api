@@ -100,10 +100,10 @@ paths:
     get:
       summary: Get Warmane character metadata
       description: |
-        Obtains an aggregate of character metadata from both warmane.dog and warmane.com.
-        Note that warmane.com tends to rate limit, so you may not always be able to count
-        on the warmane property in the response to be present. If there is some error in
-        retrieving that data from warmane.com, the error property will be populated.
+        A useful endpoint to quickly determine if a character exists. It will check
+        warmane.com to see if they exist and additionally write/update an entry to Dynamo.
+        It will return a 404 if the character is not found on Warmane. In the future
+        this endpoint may return additional data.
       parameters:
         - name: name
           in: query
@@ -123,16 +123,20 @@ paths:
               schema:
                 type: object
                 required:
+                  - id
                   - name
                   - realm
-                  - total_games_played
                 properties:
+                  id:
+                    type: string
                   name:
                     type: string
                   realm:
                     type: string
                   total_games_played:
-                    type: string
+                    type: number
+        404:
+          description: "character not found"
 
   /character/crawl-state:
     get:

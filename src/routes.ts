@@ -58,9 +58,7 @@ async function crawl(ctx: ApiContext) {
     realm,
   });
 
-  ctx.body = {
-    state: "pending",
-  };
+  ctx.status = 201;
 }
 
 async function getCharacterMetadata(ctx: ApiContext) {
@@ -70,15 +68,34 @@ async function getCharacterMetadata(ctx: ApiContext) {
   }
   const { name, realm } = params.value;
 
-  const metadata = await characterMetaStore.get({
-    id: `${name}@${realm}`,
-  });
+  const [exists, metadata] = await Promise.all([
+    checkCharacterExists({
+      name,
+      realm,
+    }),
+    characterMetaStore.get({
+      id: `${name}@${realm}`,
+    }),
+  ]);
 
-  if (!metadata) {
-    throw createError.NotFound("Character metadata not found");
+  if (metadata && !exists) {
+    characterMetaStore.deletePermanently({
+      id: `${name}@${realm}`,
+    });
+    throw createError.NotFound("Character not found");
   }
 
-  ctx.body = metadata;
+  if (!exists) {
+    throw createError.NotFound("Character not found");
+  }
+
+  const updatedMetadata = await characterMetaStore.upsert({
+    id: `${name}@${realm}`,
+    name,
+    realm,
+  });
+
+  ctx.body = updatedMetadata;
 }
 
 async function getCharacterProfileData(ctx: ApiContext) {

@@ -60,6 +60,18 @@ export const errorHandlingMiddleware: Koa.Middleware = async (ctx, next) => {
           message: error.message || "Internal Server Error",
         },
       };
+      // In local environments I want to make it easier to see the issues
+    } else if (!process.env.AWS_EXECUTION_ENV) {
+      if (error instanceof Error) {
+        ctx.log.error(error);
+        ctx.status = 500;
+        ctx.body = {
+          name: error.name,
+          message: error.message,
+          cause: error.cause,
+          stack: error.stack?.split("\n"),
+        };
+      }
     } else {
       ctx.log.error(error);
       throw error;

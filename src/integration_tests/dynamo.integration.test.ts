@@ -63,6 +63,7 @@ describe("dynamo integration tests", () => {
       await characterMetaStore.upsert({
         id: "testguy@Blackrock",
         realm: "Blackrock",
+        name: "testguy",
       });
 
       const meta = await characterMetaStore.get({
