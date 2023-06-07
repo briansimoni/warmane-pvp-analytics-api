@@ -75,9 +75,6 @@ export class DocumentStore<T extends RequiredWriteProperties> {
     documentKey?: string;
   }): Promise<(T & DocumentMeta) | undefined> {
     const { id, documentKey = id } = params;
-    // if (!documentKey) {
-    //   documentKey = id;
-    // }
     const result = await this.client.get({
       TableName: this.tableName,
       Key: {
@@ -93,42 +90,45 @@ export class DocumentStore<T extends RequiredWriteProperties> {
    * will overwrite an item if the primary key matches an item
    * that already exists.
    */
-  private async put(item: T): Promise<void> {
+  private async put(item: T): Promise<T> {
     const now = new Date().toISOString();
+    const Item = {
+      ...item,
+      document_key: `${this.documentType}/${item[this.documentTypeSortKey]}`,
+      created_at: now,
+      updated_at: now,
+    };
     await this.client.put({
       TableName: this.tableName,
-      Item: {
-        ...item,
-        document_key: `${this.documentType}/${item[this.documentTypeSortKey]}`,
-        created_at: now,
-        updated_at: now,
-      },
+      Item,
     });
+    return Item;
   }
 
   /**
    * upsert will create a new object if it does not already exist.
    * Otherwise, it will overwrite the object and update the updated_at timestamp.
    */
-  public async upsert(item: T) {
+  public async upsert(item: T): Promise<T> {
     const documentKey = item[this.documentTypeSortKey] as string;
     const existingItem = await this.get({
       id: item.id,
       documentKey,
     });
     if (existingItem) {
+      const Item = {
+        ...item,
+        document_key: `${this.documentType}/${documentKey}`,
+        updated_at: new Date().toISOString(),
+        created_at: existingItem.created_at,
+      };
       await this.client.put({
         TableName: this.tableName,
-        Item: {
-          ...item,
-          document_key: `${this.documentType}/${documentKey}`,
-          updated_at: new Date().toISOString(),
-          created_at: existingItem.created_at,
-        },
+        Item,
       });
-    } else {
-      await this.put(item);
+      return Item;
     }
+    return await this.put(item);
   }
 
   /**
@@ -174,9 +174,9 @@ export class DocumentStore<T extends RequiredWriteProperties> {
 
   public async deletePermanently(params: {
     id: string;
-    documentKey: string;
+    documentKey?: string;
   }): Promise<void> {
-    const { id, documentKey } = params;
+    const { id, documentKey = id } = params;
     await this.client.delete({
       TableName: this.tableName,
       Key: {
@@ -222,7 +222,8 @@ export const matchDetailsStore = new DocumentStore<MatchDetails>({
 });
 
 export type CharacterMeta = {
-  id: CharacterName;
+  id: CharacterId;
+  name: CharacterName;
   realm: Realm;
   games_played?: number;
 };
