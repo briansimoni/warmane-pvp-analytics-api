@@ -35,7 +35,7 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y zip
       - run: npm install
       - run: npm run build
-      - run: npm install --production
+      - run: npm install --omit=dev
       - run: cp -r node_modules build
       - run: cd build/ && zip -r ../$(git symbolic-ref --short HEAD).zip .
       - uses: aws-actions/configure-aws-credentials@v2
