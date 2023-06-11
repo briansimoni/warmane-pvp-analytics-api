@@ -3,6 +3,7 @@ import * as cheerio from "cheerio";
 import Bottleneck from "bottleneck";
 import { randomUserAgent } from "../random_user_agent";
 import { CharacterId, Realm } from "../types";
+import { logger } from "../util/logger";
 
 export interface MatchSummary {
   matchId: string;
@@ -142,19 +143,34 @@ export class WarmaneCrawler implements Crawler {
     matchId: string;
     character: string;
     realm: string;
-  }): Promise<CharacterDetail[]> {
-    const response = await axios.post(
-      `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`,
-      `matchinfo=${params.matchId}`,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "User-Agent": randomUserAgent(),
-        },
+  }): Promise<CharacterDetail[] | undefined> {
+    const { matchId, character, realm } = params;
+    const userAgent = randomUserAgent();
+    try {
+      if (matchId === "26819547") {
+        throw new Error("something stupid happened");
       }
-    );
-
-    return response.data;
+      const response = await axios.post(
+        `https://armory.warmane.com/character/${character}/${realm}/match-history`,
+        `matchinfo=${params.matchId}`,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "User-Agent": randomUserAgent(),
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error({
+          msg: `error getting ${matchId} for ${character} on ${realm}`,
+          userAgent,
+          error,
+        });
+      }
+      throw error;
+    }
   }
 
   /*
@@ -162,7 +178,6 @@ export class WarmaneCrawler implements Crawler {
    * combines matchDetails objects with  corresponding matchSummary object,
    * and restricts concurrent operations to 32.
    */
-
   async getMatchDetails(params: {
     character: string;
     realm: Realm;
@@ -185,6 +200,10 @@ export class WarmaneCrawler implements Crawler {
         character: params.character,
         realm: params.realm,
       });
+
+      if (characterDetails === undefined) {
+        continue;
+      }
 
       // formats JSON response (removes HTML, organizes data )
       characterDetails.forEach((characterDetail: CharacterDetail) => {
