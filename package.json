@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest",
     "test:integration": "jest -c jest.integration.test.config.js",
     "build": "tsc",
     "prettier": "prettier --check src/**/*.ts",

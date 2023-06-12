@@ -7,7 +7,7 @@ module.exports = {
       LOG_LEVEL: "fatal",
     },
   },
-  testPathIgnorePatterns: ["/node_modules/", "integration"],
+  testPathIgnorePatterns: ["/node_modules/"],
   transform: {
     "^.+\\.[jt]sx?$": "ts-jest",
   },
