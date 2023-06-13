@@ -218,7 +218,7 @@ export class WarmaneCrawler {
    * example log emitted:
    * "crawler rate limiter counts: { RECEIVED: 0, QUEUED: 6, RUNNING: 8, EXECUTING: 0 }"
    */
-  private async logConcurrencyStats(time: number = 100) {
+  private async logConcurrencyStats(time = 100) {
     return new Promise((resolve) => {
       const interval = setInterval(async () => {
         const counts = this.rateLimiter.counts();
