@@ -32,7 +32,7 @@ async function sendSqsMessage(message: object) {
 async function sendLocalMessage(message: object) {
   axios.post(config.crawlerSqsUrl, message).catch((error) => {
     if (error instanceof AxiosError) {
-      logger.error(error.message);
+      logger.debug("message probably sent successfully", error.message);
     } else {
       throw error;
     }
