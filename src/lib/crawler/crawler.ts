@@ -21,7 +21,7 @@ export class WarmaneCrawler {
 
   constructor(params: { maxConcurrent?: number; minTime?: number }) {
     // constructs the rate limited with default values if not specified
-    const { maxConcurrent = 8, minTime = 0 } = params;
+    const { maxConcurrent = 16, minTime = 0 } = params;
     this.rateLimiter = new Bottleneck({
       maxConcurrent,
       minTime,
