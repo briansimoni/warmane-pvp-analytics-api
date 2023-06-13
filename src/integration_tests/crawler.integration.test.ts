@@ -1,5 +1,4 @@
 import { WarmaneCrawler } from "../lib/crawler/crawler";
-import { WarmaneCrawlerV2 } from "../lib/crawler/crawlerV2";
 
 describe("crawler integration tests", () => {
   const character = "Dumpster";
@@ -9,12 +8,7 @@ describe("crawler integration tests", () => {
   jest.setTimeout(3000000);
 
   test("The crawler can fetch all match details given 'character' and 'realm' as input", async () => {
-    const crawler = new WarmaneCrawler();
-    const v2 = new WarmaneCrawlerV2();
-    // const matchDetailsList = await crawler.fetchAllMatchDetails({
-    //   character,
-    //   realm,
-    // });
+    const v2 = new WarmaneCrawler({});
 
     const matchDetailsList = await v2.crawl({
       character,

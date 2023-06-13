@@ -1,5 +1,5 @@
 import { characterMetaStore, matchDetailsStore } from "../db/documentStoreV2";
-import { MatchDetails } from "../lib/crawler/crawler";
+import { MatchDetails } from "../lib/types";
 
 describe("dynamo integration tests", () => {
   test("CRUD", async () => {

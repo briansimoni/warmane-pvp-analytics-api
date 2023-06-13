@@ -60,7 +60,7 @@ export async function handleCrawlerRequests(
     const characterId: CharacterId = `${name}@${realm}`;
 
     try {
-      const crawler = new WarmaneCrawler();
+      const crawler = new WarmaneCrawler({});
 
       await crawlerStateStore.upsert({
         id: characterId,
@@ -69,7 +69,7 @@ export async function handleCrawlerRequests(
       });
       logger.info(`crawling started for ${req.name} on ${req.realm}`);
 
-      const matchDetails = await crawler.fetchAllMatchDetails({
+      const matchDetails = await crawler.crawl({
         character: req.name,
         realm: req.realm,
       });

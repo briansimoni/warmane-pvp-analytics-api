@@ -1,73 +1,106 @@
-import axios from "axios";
-import * as cheerio from "cheerio";
 import Bottleneck from "bottleneck";
+import {
+  CharacterDetail,
+  CharacterId,
+  CharacterName,
+  MatchDetails,
+  MatchSummary,
+  Realm,
+} from "../types";
+import axios from "axios";
 import { randomUserAgent } from "../random_user_agent";
-import { CharacterId, Realm } from "../types";
+import * as cheerio from "cheerio";
 import { logger } from "../util/logger";
 
-export interface MatchSummary {
-  matchId: string;
-  team_name: string;
-  bracket: string;
-  outcome: string;
-  points_change: string;
-  date: string;
-  duration: string;
-  arena: string;
-}
-
-export interface CharacterDetail {
-  realm: Realm;
-  charname: string;
-  class?: string;
-  race?: string;
-  gender?: string;
-  teamname: string;
-  teamnamerich: string;
-  damageDone: string;
-  deaths: string;
-  healingDone: string;
-  killingBlows: string;
-  matchmaking_change?: string;
-  personal_change: string;
-}
-
-/*
- * MatchDetails is an aggregate of all data that the crawler collects
- * for a given matchId. These objects are intended to be stored
- * long-term in some kind of database for further use and analysis.
+/**
+ * WarmaneCrawlerV2 provides a slightly simpler API, supports partial results
+ * in the event of errors, allows the caller to specify concurrency options
  */
-export interface MatchDetails {
-  id: CharacterId;
-  matchId: string;
-  team_name: string;
-  bracket: string;
-  outcome: string;
-  points_change: string;
-  date: string;
-  duration: string;
-  arena: string;
-  character_details: CharacterDetail[];
-}
+export class WarmaneCrawler {
+  private rateLimiter: Bottleneck;
 
-export interface Crawler {
-  getMatchSummaries(params: {
-    character: string;
+  constructor(params: { maxConcurrent?: number; minTime?: number }) {
+    // constructs the rate limited with default values if not specified
+    const { maxConcurrent = 8, minTime = 0 } = params;
+    this.rateLimiter = new Bottleneck({
+      maxConcurrent,
+      minTime,
+    });
+  }
+
+  public async crawl(params: {
+    character: CharacterName;
     realm: Realm;
-  }): Promise<MatchSummary[]>;
-  getMatchDetails(params: {
-    character: string;
+  }): Promise<MatchDetails[]> {
+    const matchSummaryHtml = await this.getMatchSummaryHtml(params);
+    const matchSummaries = this.parseMatchSummaryResponse(
+      params,
+      matchSummaryHtml
+    );
+    return await this.getMatchDetailsConcurrently({
+      ...params,
+      matchSummaries: matchSummaries,
+    });
+  }
+
+  private async getMatchDetailsConcurrently(params: {
+    character: CharacterName;
     realm: Realm;
     matchSummaries: MatchSummary[];
-  }): Promise<MatchDetails[]>;
-}
+  }): Promise<MatchDetails[]> {
+    const matchDetailsPromises = params.matchSummaries.map((summary) =>
+      this.rateLimiter.schedule(() =>
+        this.getMatchDetails({
+          character: params.character,
+          realm: params.realm,
+          summary,
+        })
+      )
+    );
 
-export class WarmaneCrawler implements Crawler {
-  // Fetches match history HTML w/ GET request, returns as string
-  async fetchMatchHistoryHTML(params: {
-    character: string;
-    realm: string;
-  }): Promise<string> {
+    const matchDetails = await Promise.all([
+      ...matchDetailsPromises,
+      this.logConcurrencyStats(),
+    ]);
+
+    return matchDetails.filter(
+      (detail) => detail !== undefined
+    ) as MatchDetails[];
+  }
+
+  private async getMatchDetails(params: {
+    character: CharacterName;
+    realm: Realm;
+    summary: MatchSummary;
+  }): Promise<MatchDetails | undefined> {
+    const { character, realm, summary } = params;
+    const matchId = summary.matchId;
+    const characterDetails = await this.getCharacterDetails({
+      character,
+      realm,
+      matchId,
+    });
+
+    if (!characterDetails) {
+      return;
+    }
+
+    const matchDetails: MatchDetails = {
+      id: `${character}@${realm}`,
+      ...summary,
+      character_details: characterDetails,
+    };
+    return matchDetails;
+  }
+
+  /**
+   * Downloads the HTML document from the warmane armory that lists all of the games that
+   * a given character has played in the current arena season
+   */
+  private async getMatchSummaryHtml(params: {
+    character: CharacterName;
+    realm: Realm;
+  }) {
     const response = await axios.get(
       `https://armory.warmane.com/character/${params.character}/${params.realm}/match-history`,
       {
@@ -80,10 +113,56 @@ export class WarmaneCrawler implements Crawler {
     return response.data;
   }
 
-  // Extracts match summaries from match history HTML
-  extractMatchSummaries(html: string): MatchSummary[] {
+  /**
+   * Given a character name, realm, and matchId, get the details for each character for that match.
+   * If there is some error, it will return undefined
+   */
+  private async getCharacterDetails(params: {
+    character: CharacterName;
+    realm: Realm;
+    matchId: string;
+  }): Promise<CharacterDetail[] | undefined> {
+    const { character, realm, matchId } = params;
+    const userAgent = randomUserAgent();
+    try {
+      logger.info(`getting matchId ${matchId} for ${character} on ${realm}`);
+      const response = await axios.post<CharacterDetail[]>(
+        `https://armory.warmane.com/character/${character}/${realm}/match-history`,
+        `matchinfo=${matchId}`,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "User-Agent": randomUserAgent(),
+          },
+        }
+      );
+      const characterDetails = response.data;
+      this.parseCharacterDetailsResponse(characterDetails);
+      return characterDetails;
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error({
+          msg: `error getting ${matchId} for ${character} on ${realm}`,
+          matchId: matchId,
+          userAgent,
+          error,
+        });
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private parseMatchSummaryResponse(
+    params: { character: CharacterName; realm: Realm },
+    html: string
+  ): MatchSummary[] {
+    const id: CharacterId = `${params.character}@${params.realm}`;
     const $ = cheerio.load(html);
-    const matchSummaries: MatchSummary[] = [];
+    const matchSummaries: (MatchSummary & {
+      id: CharacterId;
+      character_details: CharacterDetail[];
+    })[] = [];
 
     $("table#data-table-history tbody tr").each((_index, element) => {
       const matchId = $(element).find("td:nth-child(1)").text().trim();
@@ -108,7 +187,11 @@ export class WarmaneCrawler implements Crawler {
           bracket = teamBracketMatch[2];
         }
       }
-      const matchSummary: MatchSummary = {
+
+      const matchSummary: MatchSummary & {
+        id: CharacterId;
+        character_details: CharacterDetail[];
+      } = {
         matchId,
         team_name,
         date,
@@ -117,6 +200,8 @@ export class WarmaneCrawler implements Crawler {
         points_change,
         outcome,
         duration,
+        id,
+        character_details: [],
       };
 
       matchSummaries.push(matchSummary);
@@ -125,149 +210,60 @@ export class WarmaneCrawler implements Crawler {
     return matchSummaries;
   }
 
-  // Retrieves match summaries for specified character and realm
-  async getMatchSummaries(params: {
-    character: string;
-    realm: string;
-  }): Promise<MatchSummary[]> {
-    const html = await this.fetchMatchHistoryHTML(params);
-    const matchSummaries = this.extractMatchSummaries(html);
-    return matchSummaries;
-  }
-
-  /*
-   * Fetches match data for given match ID, character, and realm
-   * Returns array of CharacterDetail objects (raw, unformatted JSON data)
+  /**
+   * logConcurrencyStats will emit logs that show the current job counts.
+   * This function will continue to log the counts at the specified interval (default 100 ms)
+   * until all of the jobs have completed
+   *
+   * example log emitted:
+   * "crawler rate limiter counts: { RECEIVED: 0, QUEUED: 6, RUNNING: 8, EXECUTING: 0 }"
    */
-  async fetchMatchData(params: {
-    matchId: string;
-    character: string;
-    realm: string;
-  }): Promise<CharacterDetail[] | undefined> {
-    const { matchId, character, realm } = params;
-    const userAgent = randomUserAgent();
-    try {
-      if (matchId === "26819547") {
-        throw new Error("something stupid happened");
-      }
-      const response = await axios.post(
-        `https://armory.warmane.com/character/${character}/${realm}/match-history`,
-        `matchinfo=${params.matchId}`,
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": randomUserAgent(),
-          },
+  private async logConcurrencyStats(time: number = 100) {
+    return new Promise((resolve) => {
+      const interval = setInterval(async () => {
+        const counts = this.rateLimiter.counts();
+        logger.info(`crawler rate limiter counts:`, counts);
+        const done = this.rateLimiter.empty();
+        if (done) {
+          logger.info("rate limiter finished processing requests");
+          clearInterval(interval);
+          resolve(undefined);
         }
-      );
-      return response.data;
-    } catch (error) {
-      if (error instanceof Error) {
-        logger.error({
-          msg: `error getting ${matchId} for ${character} on ${realm}`,
-          userAgent,
-          error,
-        });
-      }
-      throw error;
-    }
-  }
-
-  /*
-   * Fetches match details using match IDs of each given matchSummaries array,
-   * combines matchDetails objects with  corresponding matchSummary object,
-   * and restricts concurrent operations to 32.
-   */
-  async getMatchDetails(params: {
-    character: string;
-    realm: Realm;
-    matchSummaries: MatchSummary[];
-  }): Promise<MatchDetails[]> {
-    // extracts match IDs from 'matchSummaries' array
-    const matchIds = params.matchSummaries.map((summary) => summary.matchId);
-    const matchDetailsList: MatchDetails[] = [];
-
-    // initializes and implements new Bottleneck instance to control concurrency
-    const limiter = new Bottleneck({ maxConcurrent: 32 });
-    const limitedFetchMatchData = limiter.wrap(this.fetchMatchData.bind(this));
-    /*
-     * Each match ID generates an array with a 'characterDetail'
-     * object for each player in the associated match.
-     */
-    for (const matchId of matchIds) {
-      const characterDetails = await limitedFetchMatchData({
-        matchId,
-        character: params.character,
-        realm: params.realm,
-      });
-
-      if (characterDetails === undefined) {
-        continue;
-      }
-
-      // formats JSON response (removes HTML, organizes data )
-      characterDetails.forEach((characterDetail: CharacterDetail) => {
-        characterDetail.teamnamerich = characterDetail.teamnamerich.replace(
-          /<[^>]+>/g,
-          ""
-        );
-
-        const overallRegex = /(-?\d{1,})(?=\s*\(<span)/;
-        const changeRegex = /((\+|-)\d+)(?=<\/span)/;
-
-        // formats matchmaking_change
-        if (characterDetail.matchmaking_change) {
-          const mmChangeMatch =
-            characterDetail.matchmaking_change.match(changeRegex);
-          const mmOverallMatch =
-            characterDetail.matchmaking_change.match(overallRegex);
-          if (mmChangeMatch && mmOverallMatch) {
-            characterDetail.matchmaking_change = `${mmChangeMatch[0]} (${mmOverallMatch[0]})`;
-          }
-        }
-
-        // formats personal_change
-        if (characterDetail.personal_change) {
-          const personalChangeMatch =
-            characterDetail.personal_change.match(changeRegex);
-          const personalOverallMatch =
-            characterDetail.personal_change.match(overallRegex);
-          if (personalChangeMatch && personalOverallMatch) {
-            characterDetail.personal_change = `${personalChangeMatch[0]} (${personalOverallMatch[0]})`;
-          }
-        }
-      });
-
-      // finds corresponding 'matchSummary' object
-      const matchSummary = params.matchSummaries.find(
-        (summary) => summary.matchId === matchId
-      );
-
-      // combines fetched match data w/ corresponding 'matchSummary' object
-      if (matchSummary) {
-        const matchDetails: MatchDetails = {
-          ...matchSummary,
-          id: `${params.character}@${params.realm}`, //TODO make a util function for this
-          character_details: characterDetails,
-        };
-
-        matchDetailsList.push(matchDetails);
-      }
-    }
-    return matchDetailsList;
-  }
-
-  // allows <routes.ts> to fetch entire dataset with 'character' and 'realm' as input
-  async fetchAllMatchDetails(params: {
-    character: string;
-    realm: Realm;
-  }): Promise<MatchDetails[]> {
-    const matchSummaries = await this.getMatchSummaries(params);
-    // console.log("Match summaries fetched: ", matchSummaries);
-    const matchDetailsList = await this.getMatchDetails({
-      ...params,
-      matchSummaries,
+      }, time);
     });
-    return matchDetailsList;
+  }
+
+  private parseCharacterDetailsResponse(characterDetails: CharacterDetail[]) {
+    characterDetails.forEach((characterDetail: CharacterDetail) => {
+      characterDetail.teamnamerich = characterDetail.teamnamerich.replace(
+        /<[^>]+>/g,
+        ""
+      );
+
+      const overallRegex = /(-?\d{1,})(?=\s*\(<span)/;
+      const changeRegex = /((\+|-)\d+)(?=<\/span)/;
+
+      // formats matchmaking_change
+      if (characterDetail.matchmaking_change) {
+        const mmChangeMatch =
+          characterDetail.matchmaking_change.match(changeRegex);
+        const mmOverallMatch =
+          characterDetail.matchmaking_change.match(overallRegex);
+        if (mmChangeMatch && mmOverallMatch) {
+          characterDetail.matchmaking_change = `${mmChangeMatch[0]} (${mmOverallMatch[0]})`;
+        }
+      }
+
+      // formats personal_change
+      if (characterDetail.personal_change) {
+        const personalChangeMatch =
+          characterDetail.personal_change.match(changeRegex);
+        const personalOverallMatch =
+          characterDetail.personal_change.match(overallRegex);
+        if (personalChangeMatch && personalOverallMatch) {
+          characterDetail.personal_change = `${personalChangeMatch[0]} (${personalOverallMatch[0]})`;
+        }
+      }
+    });
   }
 }

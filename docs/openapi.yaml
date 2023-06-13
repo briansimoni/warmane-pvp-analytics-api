@@ -269,5 +269,5 @@ paths:
                 - realm
               additionalProperties: false
       responses:
-        201:
+        204:
           description: Crawl started successfully
