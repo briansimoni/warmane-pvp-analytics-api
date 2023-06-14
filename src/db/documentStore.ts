@@ -6,7 +6,7 @@ import {
   DeleteCommand,
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { MatchDetails } from "../lib/crawler/crawler";
+import { MatchDetails } from "../lib/types";
 
 const dynamoDBClient = new DynamoDB({ region: "us-east-1" });
 const dynamoDBDocClient = DynamoDBDocumentClient.from(dynamoDBClient);

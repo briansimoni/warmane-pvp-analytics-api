@@ -58,7 +58,7 @@ async function crawl(ctx: ApiContext) {
     realm,
   });
 
-  ctx.status = 201;
+  ctx.status = 204;
 }
 
 async function getCharacterMetadata(ctx: ApiContext) {

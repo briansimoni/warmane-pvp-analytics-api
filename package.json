@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage",
-    "test:integration": "jest -c jest.integration.test.config.js",
+    "test": "jest",
+    "test:integration": "jest -c jest.integration.test.config.ts",
     "build": "tsc",
     "prettier": "prettier --check src/**/*.ts",
     "eslint": "eslint --max-warnings 1 src/**/*.ts",
@@ -20,6 +20,11 @@
   "bugs": {
     "url": "https://github.com/briansimoni/warmane-pvp-analytics-api/issues"
   },
+  "engines": {
+    "node": ">=18",
+    "npm": ">=8.15"
+  },
+  "engineStrict": true,
   "homepage": "https://github.com/briansimoni/warmane-pvp-analytics-api#readme",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.111",

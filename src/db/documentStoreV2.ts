@@ -1,8 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
-import { MatchDetails } from "../lib/crawler/crawler";
 import { config } from "../config";
-import { CharacterId, CharacterName, Realm } from "../lib/types";
+import { CharacterId, CharacterName, MatchDetails, Realm } from "../lib/types";
 
 type DocumentType = "match_details" | "character_meta" | "crawler_state";
 

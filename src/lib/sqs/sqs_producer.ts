@@ -1,6 +1,7 @@
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { config } from "../../config";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { logger } from "../util/logger";
 
 interface CrawlerInput {
   name: string;
@@ -29,5 +30,11 @@ async function sendSqsMessage(message: object) {
 }
 
 async function sendLocalMessage(message: object) {
-  axios.post(config.crawlerSqsUrl, message);
+  axios.post(config.crawlerSqsUrl, message).catch((error) => {
+    if (error instanceof AxiosError) {
+      logger.debug("message probably sent successfully", error.message);
+    } else {
+      throw error;
+    }
+  });
 }

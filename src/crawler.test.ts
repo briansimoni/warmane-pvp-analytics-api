@@ -1,8 +1,8 @@
 import { GetCharacterRequestParams } from "./api/validators";
 import { handleCrawlerRequests } from "./crawler";
 import { crawlerStateStore, matchDetailsStore } from "./db/documentStoreV2";
-import { MatchDetails, WarmaneCrawler } from "./lib/crawler/crawler";
-import { Realm } from "./lib/types";
+import { WarmaneCrawler } from "./lib/crawler/crawler";
+import { MatchDetails, Realm } from "./lib/types";
 
 describe("crawler lambda handler tests", () => {
   /**
@@ -42,7 +42,7 @@ describe("crawler lambda handler tests", () => {
         },
       ]
     );
-    WarmaneCrawler.prototype.fetchAllMatchDetails = crawlerMock;
+    WarmaneCrawler.prototype.crawl = crawlerMock;
 
     const databaseMock = jest.fn();
     const crawlerStateStoreMock = jest.fn();
