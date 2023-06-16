@@ -1,13 +1,5 @@
-import {
-  DynamoDBClient,
-  PutItemCommand,
-  PutRequest,
-} from "@aws-sdk/client-dynamodb";
-import {
-  BatchWriteCommandInput,
-  DynamoDBDocument,
-  PutCommandInput,
-} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { config } from "../config";
 import { CharacterId, CharacterName, MatchDetails, Realm } from "../lib/types";
 
