@@ -74,12 +74,8 @@ export async function handleCrawlerRequests(
         realm: req.realm,
       });
 
-      const databaseWrites = matchDetails.map((match) =>
-        matchDetailsStore.upsert(match)
-      );
-
       logger.info(`crawling completed for ${req.name} on ${req.realm}`);
-      await Promise.all(databaseWrites);
+      await matchDetailsStore.batchWrite(matchDetails);
       logger.info(
         `crawler results saved successfully for ${req.name} on ${req.realm}`
       );

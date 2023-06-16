@@ -1,5 +1,13 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBClient,
+  PutItemCommand,
+  PutRequest,
+} from "@aws-sdk/client-dynamodb";
+import {
+  BatchWriteCommandInput,
+  DynamoDBDocument,
+  PutCommandInput,
+} from "@aws-sdk/lib-dynamodb";
 import { config } from "../config";
 import { CharacterId, CharacterName, MatchDetails, Realm } from "../lib/types";
 
@@ -128,6 +136,53 @@ export class DocumentStore<T extends RequiredWriteProperties> {
       return Item;
     }
     return await this.put(item);
+  }
+
+  /**
+   * batchWrite will take an array of items of arbitrary length,
+   * and write to dynamo in serial chunks of 25
+   */
+  public async batchWrite(items: T[]) {
+    interface Request {
+      PutRequest: {
+        Item: T & {
+          created_at: string;
+          updated_at: string;
+          document_key: string;
+        };
+      };
+    }
+
+    const now = new Date().toISOString();
+    const chunkedRequests = items
+      .map<Request>((item) => ({
+        PutRequest: {
+          Item: {
+            ...item,
+            document_key: `${this.documentType}/${
+              item[this.documentTypeSortKey]
+            }`,
+            created_at: now,
+            updated_at: now,
+          },
+        },
+      }))
+      .reduce<Array<Request[]>>((acc, request, index) => {
+        if (index % 25 === 0) {
+          acc.push([request]);
+        } else {
+          acc[acc.length - 1].push(request);
+        }
+        return acc;
+      }, []);
+
+    for (const chunk of chunkedRequests) {
+      await this.client.batchWrite({
+        RequestItems: {
+          [this.tableName]: chunk,
+        },
+      });
+    }
   }
 
   /**
