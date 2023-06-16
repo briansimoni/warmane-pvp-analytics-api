@@ -74,7 +74,9 @@ export async function handleCrawlerRequests(
         realm: req.realm,
       });
 
-      logger.info(`crawling completed for ${req.name} on ${req.realm}`);
+      logger.info(
+        `crawling completed for ${req.name} on ${req.realm}. ${matchDetails.length} games found`
+      );
       await matchDetailsStore.batchWrite(matchDetails);
       logger.info(
         `crawler results saved successfully for ${req.name} on ${req.realm}`

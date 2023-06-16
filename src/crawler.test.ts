@@ -44,9 +44,9 @@ describe("crawler lambda handler tests", () => {
     );
     WarmaneCrawler.prototype.crawl = crawlerMock;
 
-    const databaseMock = jest.fn();
+    const matchDetailsStoreMock = jest.fn();
     const crawlerStateStoreMock = jest.fn();
-    matchDetailsStore.upsert = databaseMock;
+    matchDetailsStore.batchWrite = matchDetailsStoreMock;
     crawlerStateStore.upsert = crawlerStateStoreMock;
 
     const requests: GetCharacterRequestParams[] = [
@@ -61,6 +61,6 @@ describe("crawler lambda handler tests", () => {
     ];
     await handleCrawlerRequests(requests);
     expect(crawlerMock).toHaveBeenCalledTimes(2);
-    expect(databaseMock).toHaveBeenCalledTimes(4);
+    expect(matchDetailsStoreMock).toHaveBeenCalledTimes(2);
   });
 });
