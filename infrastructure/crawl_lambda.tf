@@ -86,7 +86,7 @@ resource "aws_lambda_function" "warmane_analytics_api_v2_crawler_function" {
   runtime                        = "nodejs18.x"
   timeout                        = 300
   reserved_concurrent_executions = 1
-  handler                        = "handlers.crawlerHandler"
+  handler                        = "src/handlers.crawlerHandler"
 
   role = aws_iam_role.crawler_lambda_role.arn
 
