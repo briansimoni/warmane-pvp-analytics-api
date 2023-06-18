@@ -32,10 +32,7 @@ describe("dynamo integration tests", () => {
     };
 
     // create
-    await Promise.all([
-      matchDetailsStore.upsert(matchDetails),
-      matchDetailsStore.upsert(matchDetails2),
-    ]);
+    await matchDetailsStore.batchWrite([matchDetails, matchDetails2]);
 
     // read a list
     const list = await matchDetailsStore.list({ id });

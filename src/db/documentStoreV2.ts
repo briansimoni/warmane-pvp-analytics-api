@@ -131,6 +131,53 @@ export class DocumentStore<T extends RequiredWriteProperties> {
   }
 
   /**
+   * batchWrite will take an array of items of arbitrary length,
+   * and write to dynamo in serial chunks of 25
+   */
+  public async batchWrite(items: T[]) {
+    interface Request {
+      PutRequest: {
+        Item: T & {
+          created_at: string;
+          updated_at: string;
+          document_key: string;
+        };
+      };
+    }
+
+    const now = new Date().toISOString();
+    const chunkedRequests = items
+      .map<Request>((item) => ({
+        PutRequest: {
+          Item: {
+            ...item,
+            document_key: `${this.documentType}/${
+              item[this.documentTypeSortKey]
+            }`,
+            created_at: now,
+            updated_at: now,
+          },
+        },
+      }))
+      .reduce<Array<Request[]>>((acc, request, index) => {
+        if (index % 25 === 0) {
+          acc.push([request]);
+        } else {
+          acc[acc.length - 1].push(request);
+        }
+        return acc;
+      }, []);
+
+    for (const chunk of chunkedRequests) {
+      await this.client.batchWrite({
+        RequestItems: {
+          [this.tableName]: chunk,
+        },
+      });
+    }
+  }
+
+  /**
    * list will query for a page of results that match the given id.
    * For instance, if you want a page of match history, you might call
    * @example await list({ id: "Dumpster@Blackrock" }).
