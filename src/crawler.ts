@@ -13,6 +13,7 @@ import {
 } from "./api/validators";
 import {
   CrawlerState,
+  characterMetaStore,
   crawlerStateStore,
   matchDetailsStore,
 } from "./db/documentStoreV2";
@@ -82,11 +83,20 @@ export async function handleCrawlerRequests(
         `crawler results saved successfully for ${req.name} on ${req.realm}`
       );
 
-      await crawlerStateStore.upsert({
-        id: characterId,
-        state: "idle",
-        crawler_last_finished: new Date().toISOString(),
-      });
+      await Promise.all([
+        crawlerStateStore.upsert({
+          id: characterId,
+          state: "idle",
+          crawler_last_finished: new Date().toISOString(),
+        }),
+
+        characterMetaStore.upsert({
+          id: characterId,
+          games_played: matchDetails.length,
+          name,
+          realm,
+        }),
+      ]);
     } catch (error) {
       const stateUpdate: CrawlerState = {
         id: characterId,
