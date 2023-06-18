@@ -141,10 +141,40 @@ async function getCrawlerState(ctx: ApiContext) {
   ctx.body = crawlerState;
 }
 
+/**
+ * return some nice-looking API documentation. Note that this endpoint is hard-coded
+ * to github.com/briansimoni/warmane-pvp-analytics-api default branch.
+ */
+async function getDocs(ctx: ApiContext) {
+  const html = `
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <title>Elements in HTML</title>
+
+      <script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+      <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css">
+    </head>
+    <body>
+
+      <elements-api
+        apiDescriptionUrl="https://raw.githubusercontent.com/briansimoni/warmane-pvp-analytics-api/v2/docs/openapi.yaml"
+        router="hash"
+      />
+
+    </body>
+  </html>
+`;
+  ctx.body = html;
+}
+
 router.get("/character", getCharacterMetadata);
 router.get("/character/profile", getCharacterProfileData);
 router.get("/character/matches", getMatches);
 router.get("/character/crawl-state", getCrawlerState);
 router.post("/crawl", crawl);
+router.get("/docs", getDocs);
 
 export { router };
