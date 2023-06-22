@@ -1,5 +1,9 @@
 import { handleCrawlerRequests } from "./crawler";
-import { crawlerStateStore, matchDetailsStore } from "./db/documentStoreV2";
+import {
+  characterMetaStore,
+  crawlerStateStore,
+  matchDetailsStore,
+} from "./db/documentStoreV2";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
 import { CrawlerInput, MatchDetails, Realm } from "./lib/types";
 
