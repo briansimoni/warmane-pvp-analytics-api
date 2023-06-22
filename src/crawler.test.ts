@@ -1,8 +1,7 @@
-import { GetCharacterRequestParams } from "./api/validators";
 import { handleCrawlerRequests } from "./crawler";
 import { crawlerStateStore, matchDetailsStore } from "./db/documentStoreV2";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
-import { MatchDetails, Realm } from "./lib/types";
+import { CrawlerInput, MatchDetails, Realm } from "./lib/types";
 
 describe("crawler lambda handler tests", () => {
   /**
@@ -49,14 +48,16 @@ describe("crawler lambda handler tests", () => {
     matchDetailsStore.batchWrite = matchDetailsStoreMock;
     crawlerStateStore.upsert = crawlerStateStoreMock;
 
-    const requests: GetCharacterRequestParams[] = [
+    const requests: CrawlerInput[] = [
       {
         name: "Dumpster",
         realm: "Blackrock",
+        root: false,
       },
       {
         name: "Markevyn",
         realm: "Blackrock",
+        root: false,
       },
     ];
     await handleCrawlerRequests(requests);
