@@ -43,7 +43,7 @@ crawler.use(async (ctx) => {
     const validationResult = getCharacterSchema.validate(JSON.parse(r.body));
     if (validationResult.error) {
       logger.error(
-        `crawler recieved a bad request ${validationResult.error.message}`
+        `crawler received a bad request ${validationResult.error.message}`
       );
       throw createError.BadRequest(validationResult.error.message);
     }

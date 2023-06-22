@@ -50,3 +50,30 @@ export interface MatchDetails {
   arena: string;
   character_details: CharacterDetail[];
 }
+
+export interface ArenaStats {
+  "Arenas won"?: number;
+  "Arenas played"?: number;
+  "5v5 matches"?: number;
+  "5v5 victories"?: number;
+  "3v3 matches"?: number;
+  "3v3 victories"?: number;
+  "2v2 matches"?: number;
+  "2v2 victories"?: number;
+  "Circle of Blood matches"?: number;
+  "Circle of Blood victories"?: number;
+  "Dalaran Sewers matches"?: number;
+  "Dalaran Sewers victories"?: number;
+  "Ring of Trials matches"?: number;
+  "Ring of Trials victories"?: number;
+  "Ring of Valor matches"?: number;
+  "Ring of Valor victories"?: number;
+  "Ruins of Lordaeron matches"?: number;
+  "Ruins of Lordaeron victories"?: number;
+  "Highest 5 man personal rating"?: number;
+  "Highest 3 man personal rating"?: number;
+  "Highest 2 man personal rating"?: number;
+  "Highest 5 man team rating"?: number;
+  "Highest 3 man team rating"?: number;
+  "Highest 2 man team rating"?: number;
+}
