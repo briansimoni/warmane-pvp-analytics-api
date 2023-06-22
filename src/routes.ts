@@ -56,6 +56,7 @@ async function crawl(ctx: ApiContext) {
   await requestCrawl({
     name,
     realm,
+    root: true,
   });
 
   ctx.status = 204;

@@ -7,10 +7,7 @@ import {
 import koaBunyanLogger from "koa-bunyan-logger";
 import { logger } from "./lib/util/logger";
 import bodyParser from "koa-bodyparser";
-import {
-  GetCharacterRequestParams,
-  getCharacterSchema,
-} from "./api/validators";
+import { crawlerInputSchema } from "./api/validators";
 import {
   CrawlerState,
   characterMetaStore,
@@ -19,7 +16,9 @@ import {
 } from "./db/documentStoreV2";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
 import createError from "http-errors";
-import { CharacterId } from "./lib/types";
+import { CharacterId, CrawlerInput, MatchDetails, Realm } from "./lib/types";
+import { isMoreThan30DaysAgo } from "./lib/util/util";
+import { requestCrawl } from "./lib/sqs/sqs_producer";
 
 /**
  * This is the Koa object used by the crawler lambda
@@ -41,10 +40,10 @@ crawler.use(sqsMiddleware());
  */
 crawler.use(async (ctx) => {
   const validatedRequests = ctx.sqs.event.Records.map((r) => {
-    const validationResult = getCharacterSchema.validate(JSON.parse(r.body));
+    const validationResult = crawlerInputSchema.validate(JSON.parse(r.body));
     if (validationResult.error) {
       logger.error(
-        `crawler recieved a bad request ${validationResult.error.message}`
+        `crawler received a bad request ${validationResult.error.message}`
       );
       throw createError.BadRequest(validationResult.error.message);
     }
@@ -53,12 +52,35 @@ crawler.use(async (ctx) => {
   await handleCrawlerRequests(validatedRequests);
 });
 
-export async function handleCrawlerRequests(
-  requests: GetCharacterRequestParams[]
-) {
-  const handleRequest = async function (req: GetCharacterRequestParams) {
-    const { name, realm } = req;
+export async function handleCrawlerRequests(requests: CrawlerInput[]) {
+  const handleRequest = async function (req: CrawlerInput) {
+    const { name, realm, root } = req;
     const characterId: CharacterId = `${name}@${realm}`;
+
+    const exists = await characterMetaStore.get({ id: characterId });
+    if (!exists) {
+      return;
+    }
+
+    const beginningCrawlerState = await crawlerStateStore.get({
+      id: characterId,
+    });
+    if (
+      beginningCrawlerState?.state === "running" ||
+      beginningCrawlerState?.state === "pending"
+    ) {
+      return;
+    }
+
+    // This is an important base case. If this condition doesn't work
+    // I might put the crawler into an infinite loop.
+    if (
+      !root &&
+      beginningCrawlerState?.crawler_last_started &&
+      isMoreThan30DaysAgo(new Date(beginningCrawlerState.crawler_last_started))
+    ) {
+      return;
+    }
 
     try {
       const crawler = new WarmaneCrawler({});
@@ -97,6 +119,8 @@ export async function handleCrawlerRequests(
           realm,
         }),
       ]);
+
+      await massCrawl(matchDetails);
     } catch (error) {
       const stateUpdate: CrawlerState = {
         id: characterId,
@@ -112,5 +136,34 @@ export async function handleCrawlerRequests(
   };
 
   await Promise.all(requests.map(handleRequest));
+}
+
+/**
+ * Given a list of match details for a given user, recursively invoke the crawler
+ * for all of the teammates and opponents that the given player may have played against
+ */
+async function massCrawl(matchDetails: MatchDetails[]) {
+  const characters = matchDetails.reduce<CharacterId[]>((acc, current) => {
+    const chars = current.character_details.map(
+      (c) => `${c.charname}@${c.realm}` as CharacterId
+    );
+    acc = acc.concat(chars);
+    return acc;
+  }, []);
+
+  const uniqueCharacters = [...new Set(characters)];
+
+  const requests: CrawlerInput[] = uniqueCharacters.map((c) => {
+    const split = c.split("@");
+    const name = split[0];
+    const realm = split[1] as Realm;
+    return {
+      name,
+      realm,
+      root: false,
+    };
+  });
+
+  await Promise.all(requests.map((r) => requestCrawl(r)));
 }
 export { crawler };

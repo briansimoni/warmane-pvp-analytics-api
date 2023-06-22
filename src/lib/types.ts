@@ -19,7 +19,7 @@ export interface MatchSummary {
 
 export interface CharacterDetail {
   realm: Realm;
-  charname: string;
+  charname: CharacterName;
   class?: string;
   race?: string;
   gender?: string;
@@ -49,4 +49,11 @@ export interface MatchDetails {
   duration: string;
   arena: string;
   character_details: CharacterDetail[];
+}
+
+export interface CrawlerInput {
+  name: string;
+  realm: Realm;
+  /** root should indicate that this is coming from the API and not a recursive call */
+  root: boolean;
 }

@@ -2,11 +2,7 @@ import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { config } from "../../config";
 import axios, { AxiosError } from "axios";
 import { logger } from "../util/logger";
-
-interface CrawlerInput {
-  name: string;
-  realm: string;
-}
+import { CrawlerInput } from "../types";
 
 /**
  * sends a message to the SQS queue used by the crawler lambda

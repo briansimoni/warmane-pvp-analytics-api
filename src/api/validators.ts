@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { CharacterName, Realm } from "../lib/types";
+import { CharacterName, CrawlerInput, Realm } from "../lib/types";
 import { Realms } from "../lib/types";
 
 export interface GetCharacterRequestParams {
@@ -12,6 +12,14 @@ export const getCharacterSchema = Joi.object<GetCharacterRequestParams>({
   realm: Joi.string()
     .valid(...Realms)
     .required(),
+}).required();
+
+export const crawlerInputSchema = Joi.object<CrawlerInput>({
+  name: Joi.string().valid().required(),
+  realm: Joi.string()
+    .valid(...Realms)
+    .required(),
+  root: Joi.boolean().required(),
 }).required();
 
 export interface getMatchesParams {
