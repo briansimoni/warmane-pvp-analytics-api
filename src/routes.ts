@@ -6,6 +6,7 @@ import { getCharacterSchema, getMatchesSchema } from "./api/validators";
 import { requestCrawl } from "./lib/sqs/sqs_producer";
 import {
   checkCharacterExists,
+  getArenaStats,
   getCharacterProfile,
 } from "./lib/warmane_client/client";
 import {
@@ -141,6 +142,18 @@ async function getCrawlerState(ctx: ApiContext) {
   ctx.body = crawlerState;
 }
 
+async function getCharacterStats(ctx: ApiContext) {
+  const params = getCharacterSchema.validate(ctx.query);
+  if (params.error) {
+    throw createError.BadRequest(params.error.message);
+  }
+  const { name, realm } = params.value;
+  const characterStats = await getArenaStats({
+    name,
+    realm,
+  });
+  ctx.body = characterStats;
+}
 /**
  * return some nice-looking API documentation. Note that this endpoint is hard-coded
  * to github.com/briansimoni/warmane-pvp-analytics-api default branch.
@@ -172,6 +185,7 @@ async function getDocs(ctx: ApiContext) {
 
 router.get("/character", getCharacterMetadata);
 router.get("/character/profile", getCharacterProfileData);
+router.get("/character/stats", getCharacterStats);
 router.get("/character/matches", getMatches);
 router.get("/character/crawl-state", getCrawlerState);
 router.post("/crawl", crawl);
