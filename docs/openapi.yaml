@@ -134,14 +134,14 @@ paths:
                     total_games_played:
                       type: number
 
-  /character/:characterId:
+  /character/{id}:
     get:
       summary: Get character metadata
       description: |
         A useful endpoint to quickly determine if a character exists. It will check warmane.com to see if they exist and additionally write/update an entry to Dynamo.
         It will return a 404 if the character is not found on Warmane. In the future this endpoint may return additional data.
       parameters:
-        - name: characterId
+        - name: id
           in: path
           required: true
           example: Dumpster@Blackrock

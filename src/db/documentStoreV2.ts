@@ -214,22 +214,8 @@ export class DocumentStore<T extends RequiredWriteProperties> {
 
   // TODO: implement
   // We may want to allow the caller to ask for more granular queries than what list does
-  public async query(params: {
-    partialId: string;
-    continuationToken?: string;
-    limit?: number;
-  }) {
-    const { partialId, continuationToken, limit = 10 } = params;
-    const result = await this.client.query({
-      TableName: this.tableName,
-      KeyConditionExpression: "begins_with(id, :partialId)",
-      ExpressionAttributeValues: {
-        ":partialId": partialId,
-      },
-      ExclusiveStartKey: this.fromContinuationToken(continuationToken),
-      Limit: limit,
-    });
-    return result;
+  public async query() {
+    throw new Error("not implemented");
   }
 
   public async deletePermanently(params: {
