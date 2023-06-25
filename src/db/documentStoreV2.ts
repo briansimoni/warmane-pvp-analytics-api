@@ -45,10 +45,10 @@ interface RequiredWriteProperties {
  * it will only accept MatchDetails objects for write operations.
  */
 export class DocumentStore<T extends RequiredWriteProperties> {
-  private tableName: string;
+  protected tableName: string;
   private documentType: DocumentType;
   private documentTypeSortKey: keyof T;
-  private client: DynamoDBDocument;
+  protected client: DynamoDBDocument;
 
   constructor(params: DocumentStoreParams<T>) {
     const dynamoClient = new DynamoDBClient({ region: config.region });
@@ -214,8 +214,22 @@ export class DocumentStore<T extends RequiredWriteProperties> {
 
   // TODO: implement
   // We may want to allow the caller to ask for more granular queries than what list does
-  public async query() {
-    throw new Error("not implemented");
+  public async query(params: {
+    partialId: string;
+    continuationToken?: string;
+    limit?: number;
+  }) {
+    const { partialId, continuationToken, limit = 10 } = params;
+    const result = await this.client.query({
+      TableName: this.tableName,
+      KeyConditionExpression: "begins_with(id, :partialId)",
+      ExpressionAttributeValues: {
+        ":partialId": partialId,
+      },
+      ExclusiveStartKey: this.fromContinuationToken(continuationToken),
+      Limit: limit,
+    });
+    return result;
   }
 
   public async deletePermanently(params: {
@@ -274,16 +288,6 @@ export type CharacterMeta = {
   games_played?: number;
 };
 
-/**
- * persist character meta information.
- * Partition key example: Dumpster@Blackrock
- * sort key example: character_meta/Dumpster@Blackrock
- */
-export const characterMetaStore = new DocumentStore<CharacterMeta>({
-  tableName: config.characterTableName,
-  documentType: "character_meta",
-});
-
 export type CrawlerState = {
   id: CharacterId;
   state: "pending" | "running" | "idle" | "errored";
@@ -295,4 +299,34 @@ export type CrawlerState = {
 export const crawlerStateStore = new DocumentStore<CrawlerState>({
   tableName: config.characterTableName,
   documentType: "crawler_state",
+});
+
+class CharacterMetaStore extends DocumentStore<CharacterMeta> {
+  /**
+   * given a character name or even a partial name, scan the Dynamo CharacterName index
+   * for character metadata Items that begin_with the provided name. Results limited to
+   * 10 to try and reduce read capacity units consumed
+   */
+  public async scan(characterName: string) {
+    const result = await this.client.scan({
+      TableName: this.tableName,
+      IndexName: "CharacterNameIndex",
+      FilterExpression: "begins_with(id, :characterName)",
+      ExpressionAttributeValues: {
+        ":characterName": characterName,
+      },
+      Limit: 10,
+    });
+    return result.Items as CharacterMeta[];
+  }
+}
+
+/**
+ * persist character meta information.
+ * Partition key example: Dumpster@Blackrock
+ * sort key example: character_meta/Dumpster@Blackrock
+ */
+export const characterMetaStore = new CharacterMetaStore({
+  tableName: config.characterTableName,
+  documentType: "character_meta",
 });
