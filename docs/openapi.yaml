@@ -101,21 +101,50 @@ paths:
 
   /character:
     get:
-      summary: Get Warmane character metadata
+      summary: Query Warmane character metadata
       description: |
-        A useful endpoint to quickly determine if a character exists. It will check
-        warmane.com to see if they exist and additionally write/update an entry to Dynamo.
-        It will return a 404 if the character is not found on Warmane. In the future
-        this endpoint may return additional data.
+        Scans Dynamo for character metadata entries. It does not check warmane.com
+        This endpoint could be useful for building suggestions into a search box
+        as someone starts typing out a character name
+
       parameters:
         - name: name
           in: query
           required: true
           schema:
             type: string
-        - name: realm
-          in: query
+      responses:
+        200:
+          description: Successfully retrieved character metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - name
+                    - realm
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    total_games_played:
+                      type: number
+
+  /character/{id}:
+    get:
+      summary: Get character metadata
+      description: |
+        A useful endpoint to quickly determine if a character exists. It will check warmane.com to see if they exist and additionally write/update an entry to Dynamo.
+        It will return a 404 if the character is not found on Warmane. In the future this endpoint may return additional data.
+      parameters:
+        - name: id
+          in: path
           required: true
+          example: Dumpster@Blackrock
           schema:
             type: string
       responses:
@@ -134,12 +163,8 @@ paths:
                     type: string
                   name:
                     type: string
-                  realm:
-                    type: string
                   total_games_played:
                     type: number
-        404:
-          description: "character not found"
 
   /character/stats:
     get:

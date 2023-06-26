@@ -2,7 +2,12 @@ import Router from "@koa/router";
 import Koa from "koa";
 import { ApiGatewayContext } from "./middleware";
 import createError from "http-errors";
-import { getCharacterSchema, getMatchesSchema } from "./api/validators";
+import {
+  characterIdSchema,
+  getCharacterSchema,
+  getMatchesSchema,
+  queryCharacterSchema,
+} from "./api/validators";
 import { requestCrawl } from "./lib/sqs/sqs_producer";
 import {
   checkCharacterExists,
@@ -14,6 +19,7 @@ import {
   crawlerStateStore,
   matchDetailsStore,
 } from "./db/documentStoreV2";
+import { Realm } from "./lib/types";
 
 /**
  * ApiContext can be used to type a ctx argument for a function
@@ -62,12 +68,25 @@ async function crawl(ctx: ApiContext) {
   ctx.status = 204;
 }
 
-async function getCharacterMetadata(ctx: ApiContext) {
-  const params = getCharacterSchema.validate(ctx.query);
+async function queryCharacterMetadata(ctx: ApiContext) {
+  const params = queryCharacterSchema.validate(ctx.query);
   if (params.error) {
     throw createError.BadRequest(params.error.message);
   }
-  const { name, realm } = params.value;
+  const { name } = params.value;
+
+  const results = await characterMetaStore.scan(name);
+  ctx.body = results;
+}
+
+async function getCharacterMetadata(ctx: ApiContext) {
+  // id from path parameter
+  const params = characterIdSchema.validate(ctx.params.id);
+  if (params.error) {
+    throw createError.BadRequest(params.error.message);
+  }
+  const id = params.value;
+  const [name, realm] = id.split("@");
 
   const [exists, metadata] = await Promise.all([
     checkCharacterExists({
@@ -75,7 +94,7 @@ async function getCharacterMetadata(ctx: ApiContext) {
       realm,
     }),
     characterMetaStore.get({
-      id: `${name}@${realm}`,
+      id,
     }),
   ]);
 
@@ -91,9 +110,9 @@ async function getCharacterMetadata(ctx: ApiContext) {
   }
 
   const updatedMetadata = await characterMetaStore.upsert({
-    id: `${name}@${realm}`,
+    id,
     name,
-    realm,
+    realm: realm as Realm,
   });
 
   ctx.body = updatedMetadata;
@@ -183,7 +202,8 @@ async function getDocs(ctx: ApiContext) {
   ctx.body = html;
 }
 
-router.get("/character", getCharacterMetadata);
+router.get("/character", queryCharacterMetadata);
+router.get("/character/:id", getCharacterMetadata);
 router.get("/character/profile", getCharacterProfileData);
 router.get("/character/stats", getCharacterStats);
 router.get("/character/matches", getMatches);
