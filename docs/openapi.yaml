@@ -256,10 +256,10 @@ paths:
                   status:
                     type: string
                     enum: [pending, running, idle, errored]
-                  last_ended:
+                  crawler_last_finished:
                     type: string
                     description: ISO 8601 string indicating when the crawler last stopped
-                  last_started:
+                  crawler_last_started:
                     type: string
                     description: ISO 8601 string indicating when the crawler last started
 
