@@ -55,7 +55,7 @@ async function crawl(ctx: ApiContext) {
     throw createError(404, "Character not found");
   }
 
-  await crawlerStateStore.upsert({
+  await crawlerStateStore.upsertMerge({
     id: `${name}@${realm}`,
     state: "pending",
   });

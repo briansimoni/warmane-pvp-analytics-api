@@ -19,6 +19,7 @@ import createError from "http-errors";
 import { CharacterId, CrawlerInput, MatchDetails, Realm } from "./lib/types";
 import { isLessThan30DaysAgo } from "./lib/util/util";
 import { requestCrawl } from "./lib/sqs/sqs_producer";
+import { checkCharacterExists } from "./lib/warmane_client/client";
 
 /**
  * This is the Koa object used by the crawler lambda
@@ -50,6 +51,7 @@ crawler.use(async (ctx) => {
     return validationResult.value;
   });
   await handleCrawlerRequests(validatedRequests);
+  ctx.status = 200;
 });
 
 export async function handleCrawlerRequests(requests: CrawlerInput[]) {
@@ -57,7 +59,7 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
     const { name, realm, root } = req;
     const characterId: CharacterId = `${name}@${realm}`;
 
-    const exists = await characterMetaStore.get({ id: characterId });
+    const exists = await checkCharacterExists({ name, realm });
     if (!exists) {
       return;
     }
@@ -66,9 +68,11 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
       id: characterId,
     });
     if (
-      beginningCrawlerState?.state === "running" ||
-      beginningCrawlerState?.state === "pending"
+      !root &&
+      (beginningCrawlerState?.state === "running" ||
+        beginningCrawlerState?.state === "pending")
     ) {
+      logger.debug("crawler already running or pending");
       return;
     }
 
@@ -79,13 +83,16 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
       beginningCrawlerState?.crawler_last_started &&
       isLessThan30DaysAgo(new Date(beginningCrawlerState.crawler_last_started))
     ) {
+      logger.info(
+        `crawler already started for ${req.name} on ${req.realm}. Skipping`
+      );
       return;
     }
 
     try {
       const crawler = new WarmaneCrawler({});
 
-      await crawlerStateStore.upsert({
+      await crawlerStateStore.upsertMerge({
         id: characterId,
         state: "running",
         crawler_last_started: new Date().toISOString(),
@@ -106,7 +113,7 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
       );
 
       await Promise.all([
-        crawlerStateStore.upsert({
+        crawlerStateStore.upsertMerge({
           id: characterId,
           state: "idle",
           crawler_last_finished: new Date().toISOString(),
@@ -131,7 +138,7 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
         stateUpdate.crawler_errors = [error.message];
       }
 
-      await crawlerStateStore.upsert(stateUpdate);
+      await crawlerStateStore.upsertMerge(stateUpdate);
     }
   };
 

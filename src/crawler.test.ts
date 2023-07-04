@@ -50,7 +50,7 @@ describe("crawler lambda handler tests", () => {
     const matchDetailsStoreMock = jest.fn();
     const crawlerStateStoreMock = jest.fn();
     matchDetailsStore.batchWrite = matchDetailsStoreMock;
-    crawlerStateStore.upsert = crawlerStateStoreMock;
+    crawlerStateStore.upsertMerge = crawlerStateStoreMock;
     crawlerStateStore.get = jest.fn();
     characterMetaStore.get = jest.fn();
 
