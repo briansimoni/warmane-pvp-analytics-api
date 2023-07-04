@@ -17,7 +17,7 @@ import {
 import { WarmaneCrawler } from "./lib/crawler/crawler";
 import createError from "http-errors";
 import { CharacterId, CrawlerInput, MatchDetails, Realm } from "./lib/types";
-import { isMoreThan30DaysAgo } from "./lib/util/util";
+import { isLessThan30DaysAgo } from "./lib/util/util";
 import { requestCrawl } from "./lib/sqs/sqs_producer";
 
 /**
@@ -77,7 +77,7 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
     if (
       !root &&
       beginningCrawlerState?.crawler_last_started &&
-      isMoreThan30DaysAgo(new Date(beginningCrawlerState.crawler_last_started))
+      isLessThan30DaysAgo(new Date(beginningCrawlerState.crawler_last_started))
     ) {
       return;
     }
