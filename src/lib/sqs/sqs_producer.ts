@@ -3,7 +3,7 @@ import { config } from "../../config";
 import axios from "axios";
 import { logger } from "../util/logger";
 import { CrawlerInput } from "../types";
-// import { EventEmitter } from "events";
+import { EventEmitter } from "events";
 
 /**
  * sends a message to the SQS queue used by the crawler lambda
@@ -36,27 +36,36 @@ async function sendSqsMessage(message: object) {
  */
 const queue: object[] = [];
 
-if (process.env.AWS_EXECUTION_ENV === undefined) {
-  let done = true;
-  setInterval(async () => {
-    if (queue[0] && done) {
-      const message = queue.shift();
-      done = false;
-      try {
-        await axios.post(config.crawlerSqsUrl, message);
-        done = true;
-      } catch (error) {
-        if (error instanceof Error) {
-          logger.error(error.message);
-        } else {
-          throw error;
+// I used the event emitter so that this doesn't just start instantly when the module loads
+// this was leaving an "open handle" in the jest tests
+// could maybe refactor this to use just eventEmitter and not poll at all
+const emitter = new EventEmitter();
+let polling = false;
+emitter.on("startPolling", () => {
+  polling = true;
+  if (process.env.AWS_EXECUTION_ENV === undefined && polling) {
+    let done = true;
+    setInterval(async () => {
+      if (queue[0] && done) {
+        const message = queue.shift();
+        done = false;
+        try {
+          await axios.post(config.crawlerSqsUrl, message);
+          done = true;
+        } catch (error) {
+          if (error instanceof Error) {
+            logger.error(error.message);
+          } else {
+            throw error;
+          }
         }
       }
-    }
-  }, 100);
-}
+    }, 100);
+  }
+});
 
 async function sendLocalMessage(message: object) {
   logger.debug("queueing message", message);
   queue.push(message);
+  emitter.emit("startPolling");
 }

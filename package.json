@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "test:integration": "jest -c jest.integration.test.config.ts",
     "build": "tsc",
     "prettier": "prettier --check src/**/*.ts",
