@@ -1,6 +1,11 @@
 export type CharacterName = string;
 
-export const Realms = ["Blackrock", "Icecrown", "Lordaeron"] as const;
+export const Realms = [
+  "Blackrock",
+  "Icecrown",
+  "Lordaeron",
+  "Frostmourne",
+] as const;
 
 export type Realm = (typeof Realms)[number];
 

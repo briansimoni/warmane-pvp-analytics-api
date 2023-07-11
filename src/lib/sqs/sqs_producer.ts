@@ -1,8 +1,9 @@
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { config } from "../../config";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { logger } from "../util/logger";
 import { CrawlerInput } from "../types";
+// import { EventEmitter } from "events";
 
 /**
  * sends a message to the SQS queue used by the crawler lambda
@@ -34,29 +35,28 @@ async function sendSqsMessage(message: object) {
  * requests all at once.
  */
 const queue: object[] = [];
+
 if (process.env.AWS_EXECUTION_ENV === undefined) {
   let done = true;
-  setInterval(() => {
+  setInterval(async () => {
     if (queue[0] && done) {
       const message = queue.shift();
       done = false;
-      axios
-        .post(config.crawlerSqsUrl, message)
-        .then(() => {
-          done = true;
-        })
-        .catch((error) => {
-          if (error instanceof AxiosError) {
-            logger.info("message probably sent successfully", error.message);
-          } else {
-            throw error;
-          }
-        });
+      try {
+        await axios.post(config.crawlerSqsUrl, message);
+        done = true;
+      } catch (error) {
+        if (error instanceof Error) {
+          logger.error(error.message);
+        } else {
+          throw error;
+        }
+      }
     }
   }, 100);
 }
 
 async function sendLocalMessage(message: object) {
-  logger.info("queueing message", message);
+  logger.debug("queueing message", message);
   queue.push(message);
 }

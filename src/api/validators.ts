@@ -25,7 +25,7 @@ export const crawlerInputSchema = Joi.object<CrawlerInput>({
 
 export const characterIdSchema = Joi.string<CharacterId>()
   .trim()
-  .regex(/[a-zA-Z]+@(Blackrock|Icecrown|Lordaeron)/)
+  .regex(/[a-zA-Z]+@(Blackrock|Icecrown|Lordaeron|Frostmourne)/)
   .required();
 
 export const queryCharacterSchema = Joi.object<GetCharacterRequestParams>({

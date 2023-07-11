@@ -15,11 +15,17 @@ import {
   matchDetailsStore,
 } from "./db/documentStoreV2";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
-import createError from "http-errors";
 import { CharacterId, CrawlerInput, MatchDetails, Realm } from "./lib/types";
-import { isLessThan30DaysAgo } from "./lib/util/util";
+import { isLessThan180DaysAgo } from "./lib/util/util";
 import { requestCrawl } from "./lib/sqs/sqs_producer";
 import { checkCharacterExists } from "./lib/warmane_client/client";
+
+/**
+ * this Set acts as a cache for characters that have already been
+ * crawled for as part of massCrawl(). It sometimes saves us from having to make
+ * an extra read to Dynamo to see if it's already there.
+ */
+const alreadyCrawled = new Set<CharacterId>();
 
 /**
  * This is the Koa object used by the crawler lambda
@@ -34,22 +40,34 @@ crawler.use(koaBunyanLogger.requestIdContext());
 crawler.use(bodyParser());
 crawler.use(sqsMiddleware());
 
+crawler.use(async (_, next) => {
+  if (alreadyCrawled.size === 0) {
+    logger.info("no characters in cache");
+  }
+  await next();
+});
+
 /**
  * This is where we want to actually invoke the crawler. This code
  * will run in response to receiving a message on the SQS queue.
  * In other words the API has requested that the crawler be invoked.
  */
 crawler.use(async (ctx) => {
-  const validatedRequests = ctx.sqs.event.Records.map((r) => {
-    const validationResult = crawlerInputSchema.validate(JSON.parse(r.body));
+  const validatedRequests: CrawlerInput[] = [];
+  for (const record of ctx.sqs.event.Records) {
+    const validationResult = crawlerInputSchema.validate(
+      JSON.parse(record.body)
+    );
     if (validationResult.error) {
       logger.error(
-        `crawler received a bad request ${validationResult.error.message}`
+        `crawler received a bad request ${validationResult.error.message}. continuing anyways`,
+        record.body
       );
-      throw createError.BadRequest(validationResult.error.message);
+      continue;
     }
-    return validationResult.value;
-  });
+    validatedRequests.push(validationResult.value);
+  }
+
   await handleCrawlerRequests(validatedRequests);
   ctx.status = 200;
 });
@@ -59,14 +77,21 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
     const { name, realm, root } = req;
     const characterId: CharacterId = `${name}@${realm}`;
 
+    if (!root && alreadyCrawled.has(characterId)) {
+      logger.info(`${characterId} found in cache. Skipping`);
+      return;
+    }
+
     const exists = await checkCharacterExists({ name, realm });
     if (!exists) {
+      logger.debug(`${name}@${realm} does not exist`);
       return;
     }
 
     const beginningCrawlerState = await crawlerStateStore.get({
       id: characterId,
     });
+
     if (
       !root &&
       (beginningCrawlerState?.state === "running" ||
@@ -81,10 +106,11 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
     if (
       !root &&
       beginningCrawlerState?.crawler_last_started &&
-      isLessThan30DaysAgo(new Date(beginningCrawlerState.crawler_last_started))
+      isLessThan180DaysAgo(new Date(beginningCrawlerState.crawler_last_started))
     ) {
+      alreadyCrawled.add(characterId);
       logger.info(
-        `crawler already started for ${req.name} on ${req.realm}. Skipping`
+        `crawler ran for ${req.name}@${req.realm} less than 30 days ago. Skipping`
       );
       return;
     }
@@ -105,12 +131,14 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
       });
 
       logger.info(
-        `crawling completed for ${req.name} on ${req.realm}. ${matchDetails.length} games found`
+        `crawling completed for ${req.name}@${req.realm}. ${matchDetails.length} games found`
       );
       await matchDetailsStore.batchWrite(matchDetails);
       logger.info(
         `crawler results saved successfully for ${req.name} on ${req.realm}`
       );
+
+      alreadyCrawled.add(characterId);
 
       await Promise.all([
         crawlerStateStore.upsertMerge({
@@ -127,6 +155,7 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
         }),
       ]);
 
+      // let it rip
       await massCrawl(matchDetails);
     } catch (error) {
       const stateUpdate: CrawlerState = {
@@ -150,27 +179,61 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
  * for all of the teammates and opponents that the given player may have played against
  */
 async function massCrawl(matchDetails: MatchDetails[]) {
-  const characters = matchDetails.reduce<CharacterId[]>((acc, current) => {
-    const chars = current.character_details.map(
-      (c) => `${c.charname}@${c.realm}` as CharacterId
-    );
-    acc = acc.concat(chars);
-    return acc;
-  }, []);
+  // get all the characters from all the matches that someone has played
+  const characters: CharacterId[] = matchDetails.reduce<CharacterId[]>(
+    (acc, current) => {
+      const chars = current.character_details.map(
+        (c) => `${c.charname}@${c.realm}` as CharacterId
+      );
+      acc = acc.concat(chars);
+      return acc;
+    },
+    []
+  );
 
-  const uniqueCharacters = [...new Set(characters)];
+  let cacheHits = 0;
+  // get all unique characters that have not been crawled yet
+  const uniqueCharacters = [...new Set(characters)].filter((c) => {
+    if (alreadyCrawled.has(c)) {
+      cacheHits++;
+      return false;
+    }
+    return true;
+  });
 
-  const requests: CrawlerInput[] = uniqueCharacters.map((c) => {
-    const split = c.split("@");
+  logger.info(
+    `massCrawl cache hits: ${cacheHits}. Think of the money you're saving!`
+  );
+
+  let dynamoHits = 0;
+  const requests: CrawlerInput[] = [];
+  for (const character of uniqueCharacters) {
+    const crawlerState = await crawlerStateStore.get({ id: character });
+    if (
+      crawlerState?.crawler_last_started &&
+      isLessThan180DaysAgo(new Date(crawlerState.crawler_last_started))
+    ) {
+      alreadyCrawled.add(character);
+      dynamoHits++;
+      continue;
+    }
+    const split = character.split("@");
     const name = split[0];
     const realm = split[1] as Realm;
-    return {
+    requests.push({
       name,
       realm,
       root: false,
-    };
-  });
+    });
+  }
 
-  await Promise.all(requests.map((r) => requestCrawl(r)));
+  logger.info(`Found ${dynamoHits} characters already crawled in Dynamo`);
+  logger.info(`Submitting ${requests.length} crawler requests`);
+
+  await Promise.all(
+    requests.map((r) => {
+      return requestCrawl(r);
+    })
+  );
 }
 export { crawler };
