@@ -25,6 +25,7 @@ import { checkCharacterExists } from "./lib/warmane_client/client";
  * crawled for as part of massCrawl(). It sometimes saves us from having to make
  * an extra read to Dynamo to see if it's already there.
  */
+logger.info("reinitialized the cache");
 const alreadyCrawled = new Set<CharacterId>();
 
 /**
