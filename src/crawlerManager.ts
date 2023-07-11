@@ -168,7 +168,10 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
       };
 
       if (error instanceof Error) {
+        logger.error(error.message);
         stateUpdate.crawler_errors = [error.message];
+      } else {
+        logger.error("some unknown error", error);
       }
 
       await crawlerStateStore.upsertMerge(stateUpdate);
