@@ -23,7 +23,13 @@ import { checkCharacterExists } from "./lib/warmane_client/client";
 /**
  * this Set acts as a cache for characters that have already been
  * crawled for as part of massCrawl(). It sometimes saves us from having to make
- * an extra read to Dynamo to see if it's already there.
+ * an extra read to Dynamo to see if it's already there. This is pretty cool
+ * because it takes advantage of the reused Lambda execution environment.
+ * It doesn't rely on it, but it helps improve performance without me having to pay
+ * for elasticache, memcached, Dynamo DAX or whatever. If the memory usage ever becomes too much
+ * I expect the lambda execution to fail or timeout which I think will give us a new execution
+ * environment and an empty cache which is fine. The message that it failed on will also go back
+ * into the queue to get retried.
  */
 logger.info("reinitialized the cache");
 const alreadyCrawled = new Set<CharacterId>();
@@ -158,7 +164,7 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
 
       // let it rip
       logger.info(
-        `staring mass crawl based on ${matchDetails.length} games played by ${req.name}@${req.realm}`
+        `starting mass crawl based on ${matchDetails.length} games played by ${req.name}@${req.realm}`
       );
       await massCrawl(matchDetails);
     } catch (error) {
@@ -198,23 +204,17 @@ async function massCrawl(matchDetails: MatchDetails[]) {
     []
   );
 
-  let cacheHits = 0;
-  // get all unique characters that have not been crawled yet
-  const uniqueCharacters = [...new Set(characters)].filter((c) => {
-    if (alreadyCrawled.has(c)) {
-      cacheHits++;
-      return false;
-    }
-    return true;
-  });
+  // get all unique characters
+  const uniqueCharacters = [...new Set(characters)];
 
-  logger.info(
-    `massCrawl cache hits: ${cacheHits}. Think of the money you're saving!`
+  // all unique characters that have not been crawled yet
+  const filteredUniqueCharacters = uniqueCharacters.filter(
+    (c) => !alreadyCrawled.has(c)
   );
 
   let dynamoHits = 0;
   const requests: CrawlerInput[] = [];
-  for (const character of uniqueCharacters) {
+  for (const character of filteredUniqueCharacters) {
     const crawlerState = await crawlerStateStore.get({ id: character });
     if (
       crawlerState?.crawler_last_started &&
@@ -234,8 +234,14 @@ async function massCrawl(matchDetails: MatchDetails[]) {
     });
   }
 
-  logger.info(`Found ${dynamoHits} characters already crawled in Dynamo`);
-  logger.info(`Submitting ${requests.length} crawler requests`);
+  logger.info({
+    cacheHits: uniqueCharacters.length - filteredUniqueCharacters.length,
+    cacheSize: alreadyCrawled.size,
+    dynamoHits,
+    matchDetailsArrayLength: matchDetails.length,
+    charactersNotInCache: filteredUniqueCharacters.length,
+    crawlerRequests: requests.length,
+  });
 
   await Promise.all(
     requests.map((r) => {
