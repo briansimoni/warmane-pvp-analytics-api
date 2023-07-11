@@ -1,5 +1,5 @@
 import { api } from "./api";
-import { crawler } from "./crawler";
+import { crawler } from "./crawlerManager";
 import { logger } from "./lib/util/logger";
 
 /**

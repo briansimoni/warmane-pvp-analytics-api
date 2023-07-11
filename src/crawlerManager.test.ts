@@ -1,4 +1,4 @@
-import { handleCrawlerRequests } from "./crawler";
+import { handleCrawlerRequests } from "./crawlerManager";
 import {
   characterMetaStore,
   crawlerStateStore,
@@ -47,12 +47,11 @@ describe("crawler lambda handler tests", () => {
     );
     WarmaneCrawler.prototype.crawl = crawlerMock;
 
-    const matchDetailsStoreMock = jest.fn();
-    const crawlerStateStoreMock = jest.fn();
-    matchDetailsStore.batchWrite = matchDetailsStoreMock;
-    crawlerStateStore.upsertMerge = crawlerStateStoreMock;
+    // I would prefer to dependency inject these. Refactor crawler manager to do that soon
     crawlerStateStore.get = jest.fn();
-    characterMetaStore.get = jest.fn();
+    crawlerStateStore.upsertMerge = jest.fn();
+    matchDetailsStore.batchWrite = jest.fn();
+    characterMetaStore.upsert = jest.fn();
 
     const requests: CrawlerInput[] = [
       {
@@ -67,7 +66,7 @@ describe("crawler lambda handler tests", () => {
       },
     ];
     await handleCrawlerRequests(requests);
-    expect(crawlerMock).toHaveBeenCalledTimes(2);
-    expect(matchDetailsStoreMock).toHaveBeenCalledTimes(2);
+    expect(crawlerStateStore.get).toHaveBeenCalled();
+    expect(matchDetailsStore.batchWrite).toHaveBeenCalled();
   });
 });

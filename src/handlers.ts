@@ -5,7 +5,7 @@
  */
 import serverless from "aws-serverless-koa";
 import { api } from "./api";
-import { crawler } from "./crawler";
+import { crawler } from "./crawlerManager";
 
 export const apiHandler = serverless(api);
 export const crawlerHandler = serverless(crawler);
