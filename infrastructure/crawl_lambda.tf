@@ -46,6 +46,7 @@ resource "aws_iam_policy" "crawler_resources_policy" {
       {
         Action = [
           "dynamodb:PutItem",
+          "dynamodb:BatchWriteItem",
           "dynamodb:GetItem",
           "dynamodb:DeleteItem"
         ]
