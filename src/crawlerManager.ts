@@ -156,6 +156,9 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
       ]);
 
       // let it rip
+      logger.info(
+        `staring mass crawl based on ${matchDetails.length} games played by ${req.name}@${req.realm}`
+      );
       await massCrawl(matchDetails);
     } catch (error) {
       const stateUpdate: CrawlerState = {

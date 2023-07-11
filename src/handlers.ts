@@ -6,6 +6,16 @@
 import serverless from "aws-serverless-koa";
 import { api } from "./api";
 import { crawler } from "./crawlerManager";
+import { logger } from "./lib/util/logger";
+
+let testCache = 0;
 
 export const apiHandler = serverless(api);
-export const crawlerHandler = serverless(crawler);
+// export const crawlerHandler = serverless(crawler);
+export const crawlerHandler = makeCrawlerHandler();
+
+function makeCrawlerHandler() {
+  testCache++;
+  logger.info(`testCache: ${testCache}`);
+  return serverless(crawler);
+}
