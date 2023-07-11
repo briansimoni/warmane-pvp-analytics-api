@@ -67,5 +67,7 @@ emitter.on("startPolling", () => {
 async function sendLocalMessage(message: object) {
   logger.debug("queueing message", message);
   queue.push(message);
-  emitter.emit("startPolling");
+  if (!polling) {
+    emitter.emit("startPolling");
+  }
 }
