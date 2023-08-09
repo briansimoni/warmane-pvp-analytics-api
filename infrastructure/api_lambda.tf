@@ -39,9 +39,11 @@ resource "aws_iam_policy" "api_lambda_resource_permissions_policy" {
         Resource = "${aws_sqs_queue.crawl_queue.arn}"
       },
       {
+        // query, scan, and write
         Action = [
           "dynamodb:PutItem",
-          "dynamodb:GetItem"
+          "dynamodb:GetItem",
+          "dynamodb:Scan"
         ]
         Effect   = "Allow"
         Resource = "${aws_dynamodb_table.warmane_dynamo_table.arn}"

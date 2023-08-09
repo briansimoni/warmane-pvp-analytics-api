@@ -25,13 +25,4 @@ resource "aws_dynamodb_table" "warmane_dynamo_table" {
     name = "realm"
     type = "S"
   }
-
-
-
-  global_secondary_index {
-    name            = "CharacterNameIndex"
-    hash_key        = "name"
-    range_key       = "realm"
-    projection_type = "ALL"
-  }
 }
