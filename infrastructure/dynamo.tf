@@ -14,15 +14,4 @@ resource "aws_dynamodb_table" "warmane_dynamo_table" {
     name = "document_key"
     type = "S"
   }
-
-  attribute {
-    name = "name"
-    type = "S"
-  }
-
-
-  attribute {
-    name = "realm"
-    type = "S"
-  }
 }
