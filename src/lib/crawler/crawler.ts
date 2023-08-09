@@ -125,7 +125,7 @@ export class WarmaneCrawler {
     const { character, realm, matchId } = params;
     const userAgent = randomUserAgent();
     try {
-      logger.info(`getting matchId ${matchId} for ${character} on ${realm}`);
+      logger.debug(`getting matchId ${matchId} for ${character} on ${realm}`);
       const response = await axios.post<CharacterDetail[]>(
         `https://armory.warmane.com/character/${character}/${realm}/match-history`,
         `matchinfo=${matchId}`,
@@ -222,10 +222,10 @@ export class WarmaneCrawler {
     return new Promise((resolve) => {
       const interval = setInterval(async () => {
         const counts = this.rateLimiter.counts();
-        logger.info(`crawler rate limiter counts:`, counts);
+        logger.debug(`crawler rate limiter counts:`, counts);
         const done = this.rateLimiter.empty();
         if (done) {
-          logger.info("rate limiter finished processing requests");
+          logger.debug("rate limiter finished processing requests");
           clearInterval(interval);
           resolve(undefined);
         }

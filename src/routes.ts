@@ -55,7 +55,7 @@ async function crawl(ctx: ApiContext) {
     throw createError(404, "Character not found");
   }
 
-  await crawlerStateStore.upsert({
+  await crawlerStateStore.upsertMerge({
     id: `${name}@${realm}`,
     state: "pending",
   });
@@ -63,6 +63,7 @@ async function crawl(ctx: ApiContext) {
   await requestCrawl({
     name,
     realm,
+    root: true,
   });
 
   ctx.status = 204;
@@ -73,10 +74,14 @@ async function queryCharacterMetadata(ctx: ApiContext) {
   if (params.error) {
     throw createError.BadRequest(params.error.message);
   }
-  const { name } = params.value;
+  // const { name } = params.value;
+  // const results = await characterMetaStore.scan(name);
 
-  const results = await characterMetaStore.scan(name);
-  ctx.body = results;
+  ctx.status = 501;
+  ctx.body = {
+    message:
+      "This endpoint has been temporarily disabled to prevent expensive database scans.",
+  };
 }
 
 async function getCharacterMetadata(ctx: ApiContext) {

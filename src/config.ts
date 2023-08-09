@@ -28,7 +28,7 @@ const configSchmea = Joi.object<Config>({
 
 const vars = {
   crawlerSqsUrl: process.env.CRAWLER_SQS_URL,
-  logLevel: process.env.LOG_LEVEL || "info",
+  logLevel: process.env.LOG_LEVEL || "debug",
   serviceName: process.env.SERVICE_NAME,
   characterTableName: process.env.CHARACTER_TABLE_NAME,
   region: process.env.REGION || "us-east-1",

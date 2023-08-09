@@ -4,6 +4,6 @@ domain_name = {
 }
 
 log_level = {
-  dev  = "debug"
+  dev  = "info" # the crawler can produce a ton of logs. I'm scared this will cost me money
   prod = "info"
 }

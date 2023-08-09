@@ -1,6 +1,11 @@
 export type CharacterName = string;
 
-export const Realms = ["Blackrock", "Icecrown", "Lordaeron"] as const;
+export const Realms = [
+  "Blackrock",
+  "Icecrown",
+  "Lordaeron",
+  "Frostmourne",
+] as const;
 
 export type Realm = (typeof Realms)[number];
 
@@ -19,7 +24,7 @@ export interface MatchSummary {
 
 export interface CharacterDetail {
   realm: Realm;
-  charname: string;
+  charname: CharacterName;
   class?: string;
   race?: string;
   gender?: string;
@@ -51,6 +56,12 @@ export interface MatchDetails {
   character_details: CharacterDetail[];
 }
 
+export interface CrawlerInput {
+  name: string;
+  realm: Realm;
+  /** root should indicate that this is coming from the API and not a recursive call */
+  root: boolean;
+}
 export interface ArenaStats {
   "Arenas won"?: number;
   "Arenas played"?: number;

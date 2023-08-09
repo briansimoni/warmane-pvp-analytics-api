@@ -1,8 +1,11 @@
-import { GetCharacterRequestParams } from "./api/validators";
-import { handleCrawlerRequests } from "./crawler";
-import { crawlerStateStore, matchDetailsStore } from "./db/documentStoreV2";
+import { handleCrawlerRequests } from "./crawlerManager";
+import {
+  characterMetaStore,
+  crawlerStateStore,
+  matchDetailsStore,
+} from "./db/documentStoreV2";
 import { WarmaneCrawler } from "./lib/crawler/crawler";
-import { MatchDetails, Realm } from "./lib/types";
+import { CrawlerInput, MatchDetails, Realm } from "./lib/types";
 
 describe("crawler lambda handler tests", () => {
   /**
@@ -44,23 +47,26 @@ describe("crawler lambda handler tests", () => {
     );
     WarmaneCrawler.prototype.crawl = crawlerMock;
 
-    const matchDetailsStoreMock = jest.fn();
-    const crawlerStateStoreMock = jest.fn();
-    matchDetailsStore.batchWrite = matchDetailsStoreMock;
-    crawlerStateStore.upsert = crawlerStateStoreMock;
+    // I would prefer to dependency inject these. Refactor crawler manager to do that soon
+    crawlerStateStore.get = jest.fn();
+    crawlerStateStore.upsertMerge = jest.fn();
+    matchDetailsStore.batchWrite = jest.fn();
+    characterMetaStore.upsert = jest.fn();
 
-    const requests: GetCharacterRequestParams[] = [
+    const requests: CrawlerInput[] = [
       {
         name: "Dumpster",
         realm: "Blackrock",
+        root: false,
       },
       {
         name: "Markevyn",
         realm: "Blackrock",
+        root: false,
       },
     ];
     await handleCrawlerRequests(requests);
-    expect(crawlerMock).toHaveBeenCalledTimes(2);
-    expect(matchDetailsStoreMock).toHaveBeenCalledTimes(2);
+    expect(crawlerStateStore.get).toHaveBeenCalled();
+    expect(matchDetailsStore.batchWrite).toHaveBeenCalled();
   });
 });

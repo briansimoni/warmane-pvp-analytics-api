@@ -131,6 +131,34 @@ export class DocumentStore<T extends RequiredWriteProperties> {
   }
 
   /**
+   * upsertMerge will create a new object if it does not already exist.
+   * Otherwise, it will merge the properties you are writing to the existing object
+   * with the write properties taking priority over the existing object properties.
+   */
+  public async upsertMerge(item: T): Promise<T> {
+    const documentKey = item[this.documentTypeSortKey] as string;
+    const existingItem = await this.get({
+      id: item.id,
+      documentKey,
+    });
+    if (existingItem) {
+      const Item = {
+        ...existingItem,
+        ...item,
+        document_key: `${this.documentType}/${documentKey}`,
+        updated_at: new Date().toISOString(),
+        created_at: existingItem.created_at,
+      };
+      await this.client.put({
+        TableName: this.tableName,
+        Item,
+      });
+      return Item;
+    }
+    return await this.put(item);
+  }
+
+  /**
    * batchWrite will take an array of items of arbitrary length,
    * and write to dynamo in serial chunks of 25
    */
