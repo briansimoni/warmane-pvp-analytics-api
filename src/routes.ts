@@ -145,12 +145,15 @@ async function getMatches(ctx: ApiContext) {
   }
   const { name, realm } = params.value;
 
-  const matches = await matchDetailsStore.list({
+  const result = await matchDetailsStore.list({
     id: `${name}@${realm}`,
     continuationToken: params.value.continuation_token,
   });
 
-  ctx.body = matches;
+  ctx.body = {
+    matches: result.items,
+    continuation_token: result.continuationToken,
+  };
 }
 
 async function getCrawlerState(ctx: ApiContext) {
@@ -208,11 +211,11 @@ async function getDocs(ctx: ApiContext) {
 }
 
 router.get("/character", queryCharacterMetadata);
-router.get("/character/:id", getCharacterMetadata);
 router.get("/character/profile", getCharacterProfileData);
 router.get("/character/stats", getCharacterStats);
 router.get("/character/matches", getMatches);
 router.get("/character/crawl-state", getCrawlerState);
+router.get("/character/:id", getCharacterMetadata);
 router.post("/crawl", crawl);
 router.get("/docs", getDocs);
 
