@@ -42,8 +42,10 @@ resource "aws_iam_policy" "api_lambda_resource_permissions_policy" {
         // query, scan, and write
         Action = [
           "dynamodb:PutItem",
+          "dynamodb:BatchWriteItem",
           "dynamodb:GetItem",
-          "dynamodb:Scan"
+          "dynamodb:DeleteItem",
+          "dynamodb:Query"
         ]
         Effect   = "Allow"
         Resource = "${aws_dynamodb_table.warmane_dynamo_table.arn}"
