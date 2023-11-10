@@ -48,7 +48,8 @@ resource "aws_iam_policy" "crawler_resources_policy" {
           "dynamodb:PutItem",
           "dynamodb:BatchWriteItem",
           "dynamodb:GetItem",
-          "dynamodb:DeleteItem"
+          "dynamodb:DeleteItem",
+          "dynamodb:Query"
         ]
         Effect   = "Allow"
         Resource = "${aws_dynamodb_table.warmane_dynamo_table.arn}"
