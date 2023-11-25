@@ -162,11 +162,13 @@ export async function handleCrawlerRequests(requests: CrawlerInput[]) {
         }),
       ]);
 
-      // let it rip
-      logger.info(
-        `starting mass crawl based on ${matchDetails.length} games played by ${req.name}@${req.realm}`
-      );
-      await massCrawl(matchDetails);
+      if (process.env.MASS_CRAWL_ENABLED) {
+        // let it rip
+        logger.info(
+          `starting mass crawl based on ${matchDetails.length} games played by ${req.name}@${req.realm}`
+        );
+        await massCrawl(matchDetails);
+      }
     } catch (error) {
       const stateUpdate: CrawlerState = {
         id: characterId,
